@@ -13,15 +13,13 @@ import {
   FileText,
   Wand2,
   CheckCircle2,
-  HelpCircle,
   Coins,
   Cpu,
-  Layers,
-  ChevronRight,
-  ChevronDown,
-  Activity,
-  Play
+  MousePointer,
+  ChevronDown
 } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import AuthModal from "@/components/auth/AuthModal";
 import BeforeAfterSlider from "@/components/home/BeforeAfterSlider";
 import SavingsCalculator from "@/components/home/SavingsCalculator";
@@ -142,111 +140,83 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
-      {/* Top Marketing Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-800 bg-clip-text text-transparent">
-                AI Studio
-              </span>
-              <span className="ml-2 text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70">
-                v0.1
-              </span>
-            </div>
-          </Link>
+      
+      {/* 1. Pro Invideo-Style Navbar */}
+      <Navbar onOpenAuth={openAuth} />
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-            <a href="#showcase" className="hover:text-indigo-600 transition-colors">
-              Gallery
-            </a>
-            <a href="#modalities" className="hover:text-indigo-600 transition-colors">
-              Modalities
-            </a>
-            <a href="#matrix" className="hover:text-indigo-600 transition-colors">
-              Models
-            </a>
-            <a href="#calculator" className="hover:text-indigo-600 transition-colors">
-              Savings Calculator
-            </a>
-            <a href="#pricing" className="hover:text-indigo-600 transition-colors">
-              Pricing
-            </a>
-            <a href="#faq" className="hover:text-indigo-600 transition-colors">
-              FAQ
-            </a>
-          </nav>
+      {/* 2. Hero Section with Graph Grid & Floating Cursor Tags */}
+      <section className="relative pt-20 pb-24 md:pt-28 md:pb-32 overflow-hidden bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] border-b border-slate-200/70">
+        
+        {/* Floating Collaborator Cursor Tags (Inspired by Invideo Hero) */}
+        <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden hidden md:block">
+          {/* Cursor Tag: "You" (Indigo) */}
+          <div className="absolute top-12 left-16 flex items-center gap-1 animate-bounce duration-1000">
+            <MousePointer className="w-4 h-4 text-indigo-600 fill-indigo-600" />
+            <span className="bg-indigo-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+              You
+            </span>
+          </div>
 
-          {/* Action CTAs */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => openAuth("login")}
-              className="text-sm font-bold text-slate-700 hover:text-indigo-600 px-3 py-2 transition-colors"
-            >
-              Sign In
-            </button>
-            <Link
-              href="/studio"
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors"
-            >
-              Launch Studio
-            </Link>
-            <button
-              onClick={() => openAuth("register")}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-md shadow-indigo-500/25 transition-all"
-            >
-              <span>Get 100 Free Credits</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+          {/* Cursor Tag: "Andrew" (Green) */}
+          <div className="absolute top-16 right-24 flex items-center gap-1">
+            <MousePointer className="w-4 h-4 text-emerald-500 fill-emerald-500" />
+            <span className="bg-emerald-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+              Andrew
+            </span>
+          </div>
+
+          {/* Cursor Tag: "Anna" (Orange) */}
+          <div className="absolute bottom-16 left-28 flex items-center gap-1">
+            <MousePointer className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span className="bg-amber-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+              Anna
+            </span>
+          </div>
+
+          {/* Cursor Tag: "Agent Two" (Purple) */}
+          <div className="absolute bottom-20 right-32 flex items-center gap-1">
+            <MousePointer className="w-4 h-4 text-purple-600 fill-purple-600" />
+            <span className="bg-purple-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+              Agent Two
+            </span>
           </div>
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50 border-b border-slate-200/60">
-        <div className="max-w-6xl mx-auto px-6 text-center space-y-6">
+        <div className="relative max-w-5xl mx-auto px-6 text-center space-y-7 z-10">
+          
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/70 text-indigo-700 text-xs font-bold shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Unified Multi-Model Creative Platform</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-            <span className="text-slate-600 font-medium">100 Free Credits on Signup</span>
+            <span>The Unified Multi-Model AI Studio</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            <span className="text-indigo-600 font-extrabold">100 Free Credits on Signup</span>
           </div>
 
-          {/* Main Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-[1.1]">
-            One studio for{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Image, Video, Voice & Text
-            </span>{" "}
-            generation.
+          {/* Editorial / Serif Hero Headline (Invideo Style) */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 max-w-4xl mx-auto leading-[1.08] font-serif">
+            The AI generation platform for serious creatives
           </h1>
 
           {/* Subhead */}
-          <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Stop paying 5 separate subscriptions. Harness Google Imagen 3, Veo, FLUX.1, Kokoro TTS, and Gemini 2.0 from a single, transparent credit pool.
+          <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-sans">
+            Don't waste time on fragmented AI tools you have to babysit. Do what you love while AI Studio's multi-model agents handle the rest.
           </p>
 
-          {/* Dual CTAs */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+          {/* Primary High-Contrast Centered CTA (Invideo Style) */}
+          <div className="pt-2 flex flex-col items-center justify-center gap-3">
             <button
               onClick={() => openAuth("register")}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-sm bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-xl shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
+              className="px-8 py-4 rounded-full font-bold text-sm bg-slate-950 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/10 transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
             >
-              <span>Start Creating Free (100 Credits)</span>
+              <span>Start Creating</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <Link
               href="/studio"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-2xl font-bold text-sm bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-sm transition-all flex items-center justify-center gap-2"
+              className="text-xs font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-1 transition-colors"
             >
-              <span>Explore Interactive Studio</span>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <span>Or start with your 100 free credits in Studio</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
@@ -332,7 +302,7 @@ export default function HomePage() {
               </div>
               <Link
                 href="/studio"
-                className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs bg-slate-950 hover:bg-slate-800 text-white shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <span>Launch Generation in Studio</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -370,7 +340,7 @@ export default function HomePage() {
           <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
             Inspiration Gallery
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-serif">
             Created with AI Studio Multi-Models
           </h2>
           <p className="text-sm text-slate-600">
@@ -394,7 +364,7 @@ export default function HomePage() {
           <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
             Creative Arsenal
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-serif">
             Every Generative Modality in One Workspace
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
@@ -466,7 +436,7 @@ export default function HomePage() {
             <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               The Smarter Way
             </span>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight font-serif">
               Why Creators are Switching to AI Studio
             </h2>
             <p className="text-sm text-slate-600">
@@ -508,7 +478,7 @@ export default function HomePage() {
           <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
             Transparent Pricing
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-serif">
             Simple Credit Packages. Zero Subscriptions.
           </h2>
           <p className="text-sm text-slate-600">
@@ -525,7 +495,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-slate-900">$0</span>
                 <span className="text-xs text-slate-500">on signup</span>
               </div>
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4" />
                 <span>100 Platform Credits</span>
               </div>
@@ -546,7 +516,7 @@ export default function HomePage() {
             </div>
             <button
               onClick={() => openAuth("register")}
-              className="mt-6 w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors"
+              className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors cursor-pointer"
             >
               Get Free 100 Credits
             </button>
@@ -560,7 +530,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-slate-900">$5</span>
                 <span className="text-xs text-slate-500">one-time</span>
               </div>
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4" />
                 <span>500 Platform Credits</span>
               </div>
@@ -581,7 +551,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/credits"
-              className="mt-6 w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors text-center block"
+              className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors text-center block"
             >
               Purchase $5 Pack
             </Link>
@@ -598,7 +568,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-indigo-600">$20</span>
                 <span className="text-xs text-slate-500">one-time</span>
               </div>
-              <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4 text-indigo-600" />
                 <span>2,500 Platform Credits</span>
               </div>
@@ -623,7 +593,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/credits"
-              className="mt-6 w-full py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all text-center block"
+              className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-slate-950 hover:bg-slate-800 text-white shadow-md transition-all text-center block"
             >
               Get Pro Pack ($20)
             </Link>
@@ -637,7 +607,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-slate-900">$70</span>
                 <span className="text-xs text-slate-500">one-time</span>
               </div>
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4" />
                 <span>10,000 Platform Credits</span>
               </div>
@@ -658,7 +628,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/credits"
-              className="mt-6 w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors text-center block"
+              className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors text-center block"
             >
               Purchase $70 Pack
             </Link>
@@ -670,7 +640,7 @@ export default function HomePage() {
       <section id="faq" className="py-20 bg-slate-50 border-t border-slate-200/70">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-12 space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-serif">
               Frequently Asked Questions
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
@@ -688,7 +658,7 @@ export default function HomePage() {
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full p-5 text-left flex items-center justify-between text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors"
+                    className="w-full p-5 text-left flex items-center justify-between text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors cursor-pointer"
                   >
                     <span>{faq.q}</span>
                     <ChevronDown
@@ -710,32 +680,32 @@ export default function HomePage() {
       </section>
 
       {/* Bottom Conversion CTA Banner */}
-      <section className="py-20 bg-gradient-to-tr from-indigo-900 via-indigo-950 to-slate-950 text-white text-center relative overflow-hidden">
+      <section className="py-20 bg-slate-950 text-white text-center relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 space-y-6 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/10 backdrop-blur-md text-indigo-300 text-xs font-bold border border-white/10">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Start Creating in 30 Seconds</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight font-serif">
             Ready to Unify Your Creative AI Workflow?
           </h2>
 
-          <p className="text-sm sm:text-base text-indigo-200 max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
             Join today and receive 100 free platform credits. No credit card required, no recurring charges.
           </p>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => openAuth("register")}
-              className="w-full sm:w-auto px-9 py-4 rounded-2xl font-extrabold text-sm bg-white text-indigo-950 hover:bg-slate-100 shadow-2xl shadow-indigo-500/30 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-9 py-4 rounded-full font-extrabold text-sm bg-white text-slate-950 hover:bg-slate-100 shadow-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Claim Your 100 Free Credits</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <Link
               href="/studio"
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-md transition-all text-center"
+              className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-md transition-all text-center"
             >
               Open Studio Workspace
             </Link>
@@ -743,37 +713,11 @@ export default function HomePage() {
         </div>
 
         {/* Ambient Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
       </section>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <span className="font-bold text-base text-slate-900">AI Studio</span>
-            <span className="text-xs text-slate-400">&bull; Localhost Port 3100 &bull; API Port 8100</span>
-          </div>
-
-          <div className="flex items-center gap-6 text-xs font-semibold text-slate-500">
-            <Link href="/studio" className="hover:text-indigo-600">
-              Studio Workspace
-            </Link>
-            <Link href="/credits" className="hover:text-indigo-600">
-              Credits Ledger
-            </Link>
-            <Link href="/admin" className="hover:text-indigo-600">
-              Admin Telemetry
-            </Link>
-          </div>
-
-          <div className="text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} AI Studio. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      {/* 3. Pro Invideo-Style Mega Footer */}
+      <Footer />
 
       {/* Auth Modal */}
       <AuthModal
