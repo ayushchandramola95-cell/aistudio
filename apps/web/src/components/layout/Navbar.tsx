@@ -569,6 +569,25 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
                       </div>
 
                       <Link
+                        href="/developers"
+                        onClick={() => setActiveDropdown(null)}
+                        className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-neutral-50 transition-colors"
+                      >
+                        <div className="p-2 rounded-lg bg-neutral-950 text-white mt-0.5 shadow-sm">
+                          <Terminal className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-neutral-900 group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
+                            <span>Developer API & SDKs</span>
+                            <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.2 rounded font-extrabold">v1 REST</span>
+                          </div>
+                          <div className="text-[11px] text-neutral-500 font-normal">
+                            REST endpoints, secret keys & code snippets (Python/TS)
+                          </div>
+                        </div>
+                      </Link>
+
+                      <Link
                         href="/credits"
                         onClick={() => setActiveDropdown(null)}
                         className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-neutral-50 transition-colors"

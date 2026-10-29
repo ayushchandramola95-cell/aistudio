@@ -156,6 +156,7 @@ export default function Footer() {
                 Support
               </div>
               <ul className="space-y-2 text-neutral-600 font-medium">
+                <li><Link href="/developers" className="hover:text-neutral-950 text-neutral-900 font-bold transition-colors flex items-center gap-1.5"><span>Developer API & Keys</span><span className="text-[9px] bg-blue-100 text-blue-700 px-1 py-0.2 rounded font-extrabold">v1</span></Link></li>
                 <li><a href="mailto:support@aistudio.com" className="hover:text-neutral-950 transition-colors">Email Us</a></li>
                 <li><a href="#showcase" className="hover:text-neutral-950 transition-colors">Tutorials & Guides</a></li>
                 <li><Link href="/admin" className="hover:text-neutral-950 transition-colors">System Telemetry</Link></li>

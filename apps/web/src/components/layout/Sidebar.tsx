@@ -13,7 +13,8 @@ import {
   Coins,
   ShieldAlert,
   Home,
-  Sparkles
+  Sparkles,
+  Terminal
 } from "lucide-react";
 
 const navigationItems = [
@@ -43,6 +44,7 @@ const navigationItems = [
   {
     category: "System",
     items: [
+      { name: "Developer API", href: "/developers", icon: Terminal, badge: "REST" },
       { name: "Admin Dashboard", href: "/admin", icon: ShieldAlert },
     ],
   },
