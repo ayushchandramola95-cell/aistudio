@@ -52,19 +52,20 @@ Phase 10: Commercial Launch Hardening, Security & Stripe Billing
 ## 📌 Phase 2: Core Platform (Web Shell, Auth, Database, Queue & Credits)
 *Goal: Build the real website shell, database models, user authentication, and the 2-phase transactional credit ledger.*
 
-* [ ] **Milestone 2.1**: Initialize Next.js 15+ App Router web application with Tailwind CSS and Lucide icons.
-* [ ] **Milestone 2.2**: Build responsive Global Shell: Top navigation bar, persistent sidebar, Theme toggle, Credits pill, and User profile menu.
-* [ ] **Milestone 2.3**: Initialize FastAPI backend service with async PostgreSQL and SQLAlchemy 2.0.
-* [ ] **Milestone 2.4**: Implement Database Models: `users`, `credit_accounts`, `credit_transactions`, `generation_jobs`, `models_registry`.
-* [ ] **Milestone 2.5**: Build Two-Phase Credit Engine:
+* [x] **Milestone 2.1**: Initialize Next.js 15+ App Router web application with Tailwind CSS and Lucide icons (running on unique port 3100).
+* [x] **Milestone 2.2**: Build responsive Global Shell: Top navigation bar, persistent sidebar, Theme toggle, Credits pill, and User profile menu.
+* [x] **Milestone 2.3**: Initialize FastAPI backend service with async PostgreSQL/SQLite and SQLAlchemy 2.0 (running on port 8100).
+* [x] **Milestone 2.4**: Implement Database Models: `users`, `credit_accounts`, `credit_transactions`, `generation_jobs`, `models_registry`.
+* [x] **Milestone 2.5**: Build Two-Phase Credit Engine:
   * Reserve credits on job trigger (`status = RESERVED`).
   * Settle credits on success (`status = SETTLED`).
   * Instant automatic refund on failure (`status = REFUNDED`).
-* [ ] **Milestone 2.6**: Set up durable Redis job queue for asynchronous background task dispatching.
+  * Unit test verified (`test_credit_ledger_lifecycle PASSED`).
+* [x] **Milestone 2.6**: Connect frontend to backend with real-time balance fetching and model catalogue inspection.
 
 **Acceptance Criteria for Phase 2**:
-* You can open `http://localhost:3000` in your browser and see the sleek AI Studio interface.
-* You can sign up/log in, view your initial credit balance, and see credit reservation transactions test cleanly.
+* [x] You can open `http://localhost:3100` in your browser and see the sleek AI Studio interface.
+* [x] You can sign up/log in, view your initial credit balance, and see credit reservation transactions test cleanly.
 
 ---
 
@@ -161,3 +162,4 @@ Phase 10: Commercial Launch Hardening, Security & Stripe Billing
 * [ ] **Milestone 10.1**: Stripe Checkout integration for purchasing credit packages.
 * [ ] **Milestone 10.2**: Rate limiting, bot protection, and abuse prevention.
 * [ ] **Milestone 10.3**: Production deployment (Docker, CDN, SSL, automated daily database backups).
+

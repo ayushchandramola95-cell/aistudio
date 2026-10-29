@@ -80,3 +80,4 @@ aistudio/
 * **Job Submission**: REST endpoint `POST /api/v1/jobs` returns a `202 Accepted` with a unique `job_id` and initial `RESERVED` status.
 * **Live Job Status**: SSE (Server-Sent Events) or WebSocket connection for low-latency live progress updates to client browsers without aggressive polling.
 * **Worker Execution**: Workers pull serialized jobs from Redis, execute inference, upload artifacts directly to object storage, write status to PostgreSQL, and emit a completion event.
+

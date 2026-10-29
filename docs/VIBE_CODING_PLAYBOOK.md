@@ -31,7 +31,7 @@ Whenever you ask for a feature:
 4. I report back in plain English: what was built, what screen to open, and what to try.
 
 ### 3. You Test in Your Browser & Give Feedback
-* You open `http://localhost:3000` (or the URL I provide).
+* You open `http://localhost:3100` (or the URL I provide).
 * You click around, test the inputs, and see how it feels.
 * You tell me: *"I love the layout, but the style buttons are too small on my screen"* or *"When I generated an image, it was super fast! Let's now add 4x upscaling."*
 
@@ -59,3 +59,4 @@ You can use these plain-English commands anytime:
 * **"Let's move to Phase [X]"**: I will start building the next phase step by step.
 * **"I want to change the design/vibe of [Page]"**: Tell me your aesthetic vision, and I'll restyle it.
 * **"Explain how [Feature] works"**: I will give you a plain-English, non-technical explanation.
+

@@ -1,0 +1,13 @@
+{
+  "name": "aistudio-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "web:dev": "npm run dev --workspace=@aistudio/web",
+    "web:build": "npm run build --workspace=@aistudio/web"
+  }
+}

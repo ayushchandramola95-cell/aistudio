@@ -45,3 +45,4 @@ $$\text{Cost}_{\text{gpu}} = (\text{Inference Seconds} \times \frac{\$1.30}{3600
 2. **Row-Level Locking**: Atomic credit mutations use `SELECT ... FOR UPDATE` to prevent race conditions during rapid concurrent requests.
 3. **Idempotency Keys**: All reservation and billing transactions require an idempotency key (UUID hash of `user_id + job_id + timestamp_bucket`) to prevent duplicate deductions during network retries.
 4. **Transparent Audit Trail**: Transactions are strictly additive; historical ledger rows are never deleted or modified.
+

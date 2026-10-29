@@ -38,3 +38,4 @@ All core knowledge, site plans, and architecture are organized in the `docs/` fo
   * *Path A (Hosted Cloud)*: Google Cloud Vertex AI / Gemini / Imagen / Veo APIs.
   * *Path B (Rented GPU)*: On-demand GPU workers (e.g. Blackwell / RTX Pro 6000 96GB VRAM) running Diffusers, ComfyUI, vLLM.
 * **Storage**: Cloudflare R2 / Google Cloud Storage for generated media; private signed URLs.
+

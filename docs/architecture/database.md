@@ -124,3 +124,4 @@ erDiagram
 | `duration_seconds`| NUMERIC(8, 2)| NULL | Video / audio duration in seconds |
 | `thumbnail_key` | VARCHAR(512) | NULL | Object storage key for thumbnail |
 | `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Creation timestamp |
+

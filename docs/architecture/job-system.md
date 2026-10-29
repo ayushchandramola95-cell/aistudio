@@ -55,3 +55,4 @@ stateDiagram-v2
 6. **Settlement or Refund**:
    * **Success (`COMPLETED`)**: Decrement `reserved -= RequiredCredits`, decrement `balance -= RequiredCredits`, increment `lifetime_spent += RequiredCredits`. Log `type='SETTLE'`.
    * **Failure (`FAILED`)**: Decrement `reserved -= RequiredCredits` (balance remains untouched). Log `type='REFUND'`. Client notified immediately.
+

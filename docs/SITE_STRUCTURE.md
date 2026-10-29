@@ -120,3 +120,4 @@ Restricted to users with `is_admin = True`.
 * **Tab B: Model Registry**: Master table of all models. Toggle availability (`Active`, `Maintenance`, `Disabled`), edit credit price formulas, inspect license records.
 * **Tab C: GPU Lifecycle**: Live status of rented GPU nodes. One-click manual start/stop, idle timeout settings, real-time hourly cost tracker.
 * **Tab D: Jobs & Audit Log**: Real-time stream of all platform generation jobs, provider latencies, and transaction audits.
+
