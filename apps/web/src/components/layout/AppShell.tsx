@@ -8,9 +8,10 @@ import Sidebar from "@/components/layout/Sidebar";
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMarketingHome = pathname === "/";
+  const isDedicatedConsole = pathname?.startsWith("/developers") || pathname?.startsWith("/admin");
 
-  if (isMarketingHome) {
-    return <main className="min-h-screen bg-white text-neutral-950">{children}</main>;
+  if (isMarketingHome || isDedicatedConsole) {
+    return <main className="min-h-screen bg-[#FBFBFD] text-neutral-950">{children}</main>;
   }
 
   return (
