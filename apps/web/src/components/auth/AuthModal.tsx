@@ -198,3 +198,4 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = "r
     </div>
   );
 }
+

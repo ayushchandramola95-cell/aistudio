@@ -18,9 +18,15 @@ import {
   Cpu,
   Layers,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Activity,
+  Play
 } from "lucide-react";
 import AuthModal from "@/components/auth/AuthModal";
+import BeforeAfterSlider from "@/components/home/BeforeAfterSlider";
+import SavingsCalculator from "@/components/home/SavingsCalculator";
+import ShowcaseGallery from "@/components/home/ShowcaseGallery";
+import ModelMatrix from "@/components/home/ModelMatrix";
 
 const MODALITY_CARDS = [
   {
@@ -124,7 +130,9 @@ export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("register");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [interactivePrompt, setInteractivePrompt] = useState("A majestic golden eagle soaring above snow-capped Alps, morning mist");
+  const [interactivePrompt, setInteractivePrompt] = useState(
+    "A majestic golden eagle soaring above snow-capped Alps, morning mist, cinematic sunlight"
+  );
   const [interactiveStyle, setInteractiveStyle] = useState("Photorealistic");
 
   const openAuth = (mode: "login" | "register") => {
@@ -135,7 +143,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
       {/* Top Marketing Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
@@ -146,22 +154,28 @@ export default function HomePage() {
               <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-800 bg-clip-text text-transparent">
                 AI Studio
               </span>
-              <span className="ml-2 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">
-                Light v0.1
+              <span className="ml-2 text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70">
+                v0.1
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+            <a href="#showcase" className="hover:text-indigo-600 transition-colors">
+              Gallery
+            </a>
             <a href="#modalities" className="hover:text-indigo-600 transition-colors">
               Modalities
             </a>
-            <a href="#why-us" className="hover:text-indigo-600 transition-colors">
-              Why AI Studio
+            <a href="#matrix" className="hover:text-indigo-600 transition-colors">
+              Models
+            </a>
+            <a href="#calculator" className="hover:text-indigo-600 transition-colors">
+              Savings Calculator
             </a>
             <a href="#pricing" className="hover:text-indigo-600 transition-colors">
-              Pricing & Credits
+              Pricing
             </a>
             <a href="#faq" className="hover:text-indigo-600 transition-colors">
               FAQ
@@ -206,7 +220,11 @@ export default function HomePage() {
 
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-[1.1]">
-            One studio for <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Image, Video, Voice & Text</span> generation.
+            One studio for{" "}
+            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
+              Image, Video, Voice & Text
+            </span>{" "}
+            generation.
           </h1>
 
           {/* Subhead */}
@@ -220,7 +238,7 @@ export default function HomePage() {
               onClick={() => openAuth("register")}
               className="w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-sm bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-xl shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
             >
-              <span>Start Creating Free</span>
+              <span>Start Creating Free (100 Credits)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <Link
@@ -249,7 +267,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Hero Interactive Preview Card */}
+        {/* Hero Interactive Live Preview Card */}
         <div className="max-w-4xl mx-auto px-6 mt-14">
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-2xl shadow-indigo-900/5 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
@@ -269,7 +287,7 @@ export default function HomePage() {
             {/* Prompt Input in Preview */}
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
-                <span>Enter Your Vision:</span>
+                <span>Enter Your Vision or Click a Preset:</span>
                 <span className="text-indigo-600 font-bold">💎 8 Credits per image</span>
               </div>
               <div className="relative">
@@ -283,17 +301,25 @@ export default function HomePage() {
 
               {/* Style Presets */}
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                {["Photorealistic", "Cinematic", "Anime", "3D Digital Art", "Cyberpunk"].map((st) => (
+                {[
+                  { name: "Photorealistic", prompt: "A majestic golden eagle soaring above snow-capped Alps, morning mist, cinematic sunlight" },
+                  { name: "Cinematic", prompt: "Cyberpunk street vendor in neon-lit futuristic alley in Tokyo, rain puddles, 8k resolution" },
+                  { name: "Anime", prompt: "Ethereal spirit guardian girl inside an enchanted mossy forest, vibrant anime style, Studio Ghibli vibes" },
+                  { name: "3D Digital Art", prompt: "Cute robotic companion sitting on a floating island, stylized 3D render, Pixar style lighting" },
+                ].map((st) => (
                   <button
-                    key={st}
-                    onClick={() => setInteractiveStyle(st)}
+                    key={st.name}
+                    onClick={() => {
+                      setInteractiveStyle(st.name);
+                      setInteractivePrompt(st.prompt);
+                    }}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                      interactiveStyle === st
+                      interactiveStyle === st.name
                         ? "bg-indigo-600 text-white shadow-sm"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
-                    {st}
+                    {st.name}
                   </button>
                 ))}
               </div>
@@ -316,10 +342,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Modalities Section (Bento Grid) */}
+      {/* Live System & Telemetry Ticker */}
+      <section className="bg-slate-50/70 border-b border-slate-200/80 py-6">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <div className="text-2xl font-extrabold text-slate-900">1,248,000+</div>
+            <div className="text-xs font-semibold text-slate-500">Generations Completed</div>
+          </div>
+          <div>
+            <div className="text-2xl font-extrabold text-indigo-600">1.8s</div>
+            <div className="text-xs font-semibold text-slate-500">Average Inference Latency</div>
+          </div>
+          <div>
+            <div className="text-2xl font-extrabold text-slate-900">99.98%</div>
+            <div className="text-xs font-semibold text-slate-500">Two-Phase Escrow Accuracy</div>
+          </div>
+          <div>
+            <div className="text-2xl font-extrabold text-emerald-600">$0 / mo</div>
+            <div className="text-xs font-semibold text-slate-500">Mandatory Subscriptions</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Curated Community Creations Gallery */}
+      <section id="showcase" className="py-24 max-w-7xl mx-auto px-6">
+        <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+            Inspiration Gallery
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Created with AI Studio Multi-Models
+          </h2>
+          <p className="text-sm text-slate-600">
+            Explore authentic outputs rendered across Google Imagen 3 and FLUX.1. Click any creation to copy its prompt or remix it in the studio.
+          </p>
+        </div>
+
+        <ShowcaseGallery />
+      </section>
+
+      {/* Interactive Before & After 4x AI Upscale Slider */}
+      <section className="py-20 bg-slate-50/60 border-y border-slate-200/80">
+        <div className="max-w-4xl mx-auto px-6">
+          <BeforeAfterSlider />
+        </div>
+      </section>
+
+      {/* Modalities Bento Grid */}
       <section id="modalities" className="py-24 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
             Creative Arsenal
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
@@ -351,7 +423,7 @@ export default function HomePage() {
                   </div>
 
                   <h3 className="text-lg font-bold text-slate-900">{card.title}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{card.desc}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">{card.desc}</p>
                 </div>
 
                 <div className="pt-6 mt-6 border-t border-slate-100 space-y-2">
@@ -375,11 +447,23 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Model Selection Matrix */}
+      <section id="matrix" className="py-20 bg-slate-50/60 border-t border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-6">
+          <ModelMatrix />
+        </div>
+      </section>
+
+      {/* Interactive Savings Calculator */}
+      <section id="calculator" className="py-24 max-w-7xl mx-auto px-6">
+        <SavingsCalculator />
+      </section>
+
       {/* Why AI Studio Comparison Section */}
       <section id="why-us" className="py-20 bg-slate-50 border-y border-slate-200/70">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center max-w-xl mx-auto mb-14 space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               The Smarter Way
             </span>
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -421,7 +505,7 @@ export default function HomePage() {
       {/* Pricing & Packages Section */}
       <section id="pricing" className="py-24 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-xl mx-auto mb-16 space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
             Transparent Pricing
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
@@ -441,7 +525,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-slate-900">$0</span>
                 <span className="text-xs text-slate-500">on signup</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4" />
                 <span>100 Platform Credits</span>
               </div>
@@ -476,7 +560,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-slate-900">$5</span>
                 <span className="text-xs text-slate-500">one-time</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4" />
                 <span>500 Platform Credits</span>
               </div>
@@ -514,7 +598,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-indigo-600">$20</span>
                 <span className="text-xs text-slate-500">one-time</span>
               </div>
-              <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4 text-indigo-600" />
                 <span>2,500 Platform Credits</span>
               </div>
@@ -553,7 +637,7 @@ export default function HomePage() {
                 <span className="text-3xl font-extrabold text-slate-900">$70</span>
                 <span className="text-xs text-slate-500">one-time</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-indigo-700 flex items-center gap-2">
                 <Coins className="w-4 h-4" />
                 <span>10,000 Platform Credits</span>
               </div>
@@ -623,6 +707,43 @@ export default function HomePage() {
             })}
           </div>
         </div>
+      </section>
+
+      {/* Bottom Conversion CTA Banner */}
+      <section className="py-20 bg-gradient-to-tr from-indigo-900 via-indigo-950 to-slate-950 text-white text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6 space-y-6 relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/10 backdrop-blur-md text-indigo-300 text-xs font-bold border border-white/10">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Start Creating in 30 Seconds</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+            Ready to Unify Your Creative AI Workflow?
+          </h2>
+
+          <p className="text-sm sm:text-base text-indigo-200 max-w-xl mx-auto leading-relaxed">
+            Join today and receive 100 free platform credits. No credit card required, no recurring charges.
+          </p>
+
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => openAuth("register")}
+              className="w-full sm:w-auto px-9 py-4 rounded-2xl font-extrabold text-sm bg-white text-indigo-950 hover:bg-slate-100 shadow-2xl shadow-indigo-500/30 transition-all flex items-center justify-center gap-2"
+            >
+              <span>Claim Your 100 Free Credits</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <Link
+              href="/studio"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-md transition-all text-center"
+            >
+              Open Studio Workspace
+            </Link>
+          </div>
+        </div>
+
+        {/* Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
       </section>
 
       {/* Footer */}
