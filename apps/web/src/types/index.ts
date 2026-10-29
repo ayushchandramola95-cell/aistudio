@@ -58,3 +58,4 @@ export interface GenerationJob {
   completed_at: string | null;
   outputs: JobOutput[];
 }
+

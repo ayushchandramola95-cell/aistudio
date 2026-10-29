@@ -10,15 +10,16 @@
 
 ```
                       ┌────────────────────────────────────────┐
-                      │          AI STUDIO MAIN SHELL          │
-                      │  (Sidebar + Top Header + Status Bar)   │
+                      │          AI STUDIO MAIN PORTAL         │
+                      │  (Homepage `/` + Studio Shell `/studio`)│
                       └──────────────────┬─────────────────────┘
                                          │
      ┌──────────────────┬────────────────┼─────────────────┬──────────────────┐
      ▼                  ▼                ▼                 ▼                  ▼
 ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   ┌─────────────┐    ┌─────────────┐
-│  HOME / HUB │  │ GENERATION  │  │ CREATIONS   │   │ CREDITS &   │    │    ADMIN    │
-│  DASHBOARD  │  │ WORKSPACES  │  │   GALLERY   │   │   BILLING   │    │  DASHBOARD  │
+│ PUBLIC HOME │  │ CREATION    │  │ CREATIONS   │   │ CREDITS &   │    │    ADMIN    │
+│  MARKETING  │  │ WORKSPACES  │  │   GALLERY   │   │   BILLING   │    │  DASHBOARD  │
+│  PAGE (`/`) │  │ (`/studio`) │  │(`/creations`)│  │ (`/credits`)│    │  (`/admin`) │
 └─────────────┘  └──────┬──────┘  └─────────────┘   └─────────────┘    └─────────────┘
                         │
     ┌───────────────┬───┴───────────┬───────────────┬───────────────┐
@@ -29,6 +30,18 @@
 │        │     │        │     │  STT)   │      │        │      │           │
 └────────┘     └────────┘     └─────────┘      └────────┘      └───────────┘
 ```
+
+---
+
+## 2. Screen 0: Public Marketing Homepage (`/`) — Premium Light Theme
+* **Top Navigation Bar**: Brand logo, Modalities, Why AI Studio, Pricing, FAQ, Sign In button, and "Get 100 Free Credits" CTA.
+* **Hero Banner**: High-impact typography, value proposition, "Start Creating Free" CTA, and trust guarantees (Two-Phase Escrow, Zero Hardware Needed, Commercial License Verified).
+* **Interactive Live Studio Playground**: Visitors can test prompt inputs and switch style presets directly on the landing page before launching into the full studio.
+* **Bento Grid of Modalities**: Cards highlighting Image (Imagen 3/FLUX), Video (Veo 2/Wan), Voice (Kokoro), Writing (Gemini 2.0 Flash), and 4x Enhancement (Real-ESRGAN).
+* **Comparison Matrix**: Detailed breakdown contrasting traditional fragmented subscriptions ($100+/mo across 5 tools) against AI Studio's unified credit pool.
+* **Pricing & Credit Packages**: Transparent packages ($0 Free with 100 credits, $5 Starter, $20 Pro Studio, $70 Scale Agency).
+* **Interactive FAQ Accordion**: Expandable answers to common questions about billing, commercial licenses, and GPU controls.
+* **Auth Modal**: Tabbed Sign In / Create Account modal connecting directly to FastAPI `/api/v1/auth` endpoints with automatic welcome bonus credits.
 
 ---
 

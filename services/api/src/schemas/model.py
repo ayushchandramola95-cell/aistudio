@@ -20,3 +20,4 @@ class ModelResponse(BaseModel):
 
 class ModelListResponse(BaseModel):
     models: list[ModelResponse]
+

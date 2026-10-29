@@ -66,3 +66,4 @@ async def purchase_credits(
         available=account.available,
         lifetime_spent=float(account.lifetime_spent)
     )
+

@@ -40,3 +40,4 @@ class CreditTransaction(Base):
     user = relationship("User", back_populates="transactions")
 
 Index("ix_credit_transactions_user_created", CreditTransaction.user_id, CreditTransaction.created_at)
+

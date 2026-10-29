@@ -120,3 +120,4 @@ class ModelService:
         query = select(ModelRegistry).where(ModelRegistry.status != "disabled")
         result = await session.execute(query)
         return list(result.scalars().all())
+

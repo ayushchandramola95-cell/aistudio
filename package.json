@@ -11,3 +11,4 @@
     "web:build": "npm run build --workspace=@aistudio/web"
   }
 }
+

@@ -24,3 +24,4 @@ class PurchaseCreditsRequest(BaseModel):
     package_name: str
     amount: float
     price_usd: float
+

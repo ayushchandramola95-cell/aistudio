@@ -57,3 +57,4 @@ app.include_router(job_router)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("services.api.src.main:app", host="0.0.0.0", port=settings.API_PORT, reload=True)
+

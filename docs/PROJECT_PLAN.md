@@ -91,5 +91,6 @@ Instead of forcing users to jump between Midjourney for images, Runway/Luma for 
 
 | Date | Author | Changes |
 | :--- | :--- | :--- |
+| **2026-10-29** | AI Studio Team | Transformed visual design to high-aesthetic **Pure Light Theme**; added full public marketing homepage at `/` with interactive live preview, modality showcase, pricing, FAQ, and integrated Login/Register modal with 100 free welcome credits. Moved creative workspace to `/studio`. |
 | **2026-10-29** | AI Studio Team | Initial creation of the Master Project Plan based on Master Prompt specs. |
 

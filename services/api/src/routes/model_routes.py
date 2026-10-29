@@ -10,3 +10,4 @@ router = APIRouter(prefix="/api/v1/models", tags=["Model Registry"])
 async def get_models(session: AsyncSession = Depends(get_db)):
     models = await ModelService.list_models(session)
     return ModelListResponse(models=[ModelResponse.model_validate(m) for m in models])
+

@@ -33,29 +33,29 @@ export default function CreationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-studio-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <span className="p-1.5 rounded-lg bg-accent-purple/20 text-accent-purple">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
               <FolderHeart className="w-5 h-5" />
             </span>
             My Creations
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Access your generation history, download high-res files, and inspect prompt parameters.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-studio-950 rounded-xl border border-studio-800 text-xs">
+        <div className="flex items-center gap-1.5 p-1 bg-white rounded-2xl border border-slate-200 shadow-sm text-xs">
           {["all", "image", "video", "audio"].map((cat) => (
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-3 py-1.5 rounded-lg capitalize font-medium transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl capitalize font-bold transition-all ${
                 filter === cat
-                  ? "bg-accent-purple text-white shadow"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               {cat}
@@ -66,13 +66,13 @@ export default function CreationsPage() {
 
       {/* Grid or Empty State */}
       {filteredJobs.length === 0 ? (
-        <div className="glass-panel p-16 rounded-2xl border-studio-800 text-center space-y-4 max-w-lg mx-auto my-12">
-          <div className="w-16 h-16 rounded-2xl bg-studio-950 border border-studio-800 flex items-center justify-center mx-auto text-slate-500">
+        <div className="bg-white p-16 rounded-3xl border border-slate-200 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-indigo-600">
             <ImageIcon className="w-8 h-8" />
           </div>
-          <h3 className="text-base font-semibold text-white">No creations yet</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Head to the Image Studio on the sidebar, type a creative prompt, and click Generate to see your creations stored here!
+          <h3 className="text-base font-bold text-slate-900">No creations recorded yet</h3>
+          <p className="text-xs text-slate-500 leading-relaxed font-medium">
+            Head to the Image Studio on the sidebar, enter a prompt, and click Generate to see your outputs stored here!
           </p>
         </div>
       ) : (
@@ -80,37 +80,37 @@ export default function CreationsPage() {
           {filteredJobs.map((job) => (
             <div
               key={job.id}
-              className="glass-panel rounded-2xl border-studio-800 overflow-hidden hover:border-accent-purple/40 transition-all flex flex-col justify-between"
+              className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all flex flex-col justify-between"
             >
-              <div className="p-4 space-y-3">
+              <div className="p-5 space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="px-2 py-0.5 rounded-md bg-studio-800 text-slate-300 font-semibold uppercase text-[10px]">
+                  <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold uppercase text-[10px]">
                     {job.model_id}
                   </span>
                   <span
-                    className={`font-semibold text-[10px] px-2 py-0.5 rounded ${
+                    className={`font-bold text-[10px] px-2.5 py-1 rounded-full ${
                       job.status === "COMPLETED"
-                        ? "bg-emerald-950 text-emerald-400"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                         : job.status === "FAILED"
-                        ? "bg-rose-950 text-rose-400"
-                        : "bg-amber-950 text-amber-300"
+                        ? "bg-rose-50 text-rose-700 border border-rose-200"
+                        : "bg-amber-50 text-amber-700 border border-amber-200"
                     }`}
                   >
                     {job.status}
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-200 line-clamp-3 leading-relaxed italic">
+                <p className="text-xs text-slate-700 line-clamp-3 leading-relaxed italic font-medium">
                   "{job.raw_prompt}"
                 </p>
               </div>
 
-              <div className="p-4 pt-0 border-t border-studio-800/60 mt-3 flex items-center justify-between text-xs text-slate-500">
-                <div className="flex items-center gap-1.5">
+              <div className="p-5 pt-0 border-t border-slate-100 mt-3 flex items-center justify-between text-xs text-slate-400">
+                <div className="flex items-center gap-1.5 font-medium">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{new Date(job.created_at).toLocaleDateString()}</span>
                 </div>
-                <div className="text-slate-400 font-medium">💎 {job.credits_reserved} cr</div>
+                <div className="text-indigo-600 font-extrabold">💎 {job.credits_reserved} cr</div>
               </div>
             </div>
           ))}

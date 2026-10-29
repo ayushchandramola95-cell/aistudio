@@ -26,3 +26,4 @@ class ModelRegistry(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
 
     jobs = relationship("GenerationJob", back_populates="model")
+

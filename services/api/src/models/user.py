@@ -22,3 +22,4 @@ class User(Base):
     credit_account = relationship("CreditAccount", back_populates="user", uselist=False, cascade="all, delete-orphan")
     jobs = relationship("GenerationJob", back_populates="user", cascade="all, delete-orphan")
     transactions = relationship("CreditTransaction", back_populates="user", cascade="all, delete-orphan")
+
