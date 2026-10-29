@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   Coins,
   Cpu,
-  MousePointer,
   ChevronDown
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -145,53 +144,9 @@ export default function HomePage() {
       {/* 1. Pro Invideo-Style Navbar */}
       <Navbar onOpenAuth={openAuth} />
 
-      {/* 2. Hero Section with Technical Blueprint Grid & Floating Cursor Tags */}
+      {/* 2. Hero Section with Technical Blueprint Grid */}
       <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:48px_48px] border-b border-neutral-200/80">
         
-        {/* Floating Collaborator Cursor Tags (Exact Invideo Hero Match) */}
-        <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden hidden md:block">
-          
-          {/* Cursor Tag: "You" (Indigo/Purple - Top Left) */}
-          <div className="absolute top-12 left-12 flex items-start gap-1.5 transition-transform hover:scale-105">
-            <svg className="w-4 h-4 text-indigo-600 drop-shadow-sm fill-indigo-600" viewBox="0 0 24 24">
-              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
-            </svg>
-            <span className="bg-indigo-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
-              You
-            </span>
-          </div>
-
-          {/* Cursor Tag: "Andrew" (Emerald/Green - Top Right) */}
-          <div className="absolute top-14 right-20 flex items-start gap-1.5 transition-transform hover:scale-105">
-            <svg className="w-4 h-4 text-emerald-600 drop-shadow-sm fill-emerald-600" viewBox="0 0 24 24">
-              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
-            </svg>
-            <span className="bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
-              Andrew
-            </span>
-          </div>
-
-          {/* Cursor Tag: "Anna" (Coral/Orange - Mid Left) */}
-          <div className="absolute bottom-28 left-20 flex items-start gap-1.5 transition-transform hover:scale-105">
-            <svg className="w-4 h-4 text-amber-500 drop-shadow-sm fill-amber-500" viewBox="0 0 24 24">
-              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
-            </svg>
-            <span className="bg-amber-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
-              Anna
-            </span>
-          </div>
-
-          {/* Cursor Tag: "Agent Two" (Violet/Purple - Mid Right) */}
-          <div className="absolute bottom-24 right-28 flex items-start gap-1.5 transition-transform hover:scale-105">
-            <svg className="w-4 h-4 text-purple-600 drop-shadow-sm fill-purple-600" viewBox="0 0 24 24">
-              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
-            </svg>
-            <span className="bg-purple-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
-              Agent Two
-            </span>
-          </div>
-        </div>
-
         <div className="relative max-w-5xl mx-auto px-6 text-center space-y-7 z-10">
           
           {/* Editorial / Serif Hero Headline (Exact Invideo Style) */}
