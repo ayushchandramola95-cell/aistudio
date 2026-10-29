@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Sparkles, ArrowUpRight, Copy, Check, Wand2 } from "lucide-react";
+import { Sparkles, ArrowRight, Copy, Check, Wand2, Maximize2, ExternalLink } from "lucide-react";
 
 interface ShowcaseItem {
   id: string;
   title: string;
-  category: "photorealistic" | "cinematic" | "anime" | "3d_art" | "fantasy";
+  category: "photorealistic" | "cinematic" | "anime" | "3d_art" | "architecture";
   model: string;
   prompt: string;
   aspect: string;
   credits: number;
-  gradient: string;
+  imageUrl: string;
 }
 
 const SHOWCASE_ITEMS: ShowcaseItem[] = [
@@ -21,60 +21,60 @@ const SHOWCASE_ITEMS: ShowcaseItem[] = [
     title: "Kyoto Cyberpunk Shrine",
     category: "cinematic",
     model: "Google Imagen 3",
-    prompt: "An ancient Kyoto torii gate illuminated by neon holographic glyphs in heavy rain, cinematic lighting, 8k resolution, photorealistic reflections on wet stone pavement",
+    prompt: "An ancient Kyoto torii gate illuminated by neon holographic glyphs in heavy rain, cinematic lighting, 8k resolution, photorealistic reflections on wet stone pavement, anamorphic bokeh",
     aspect: "16:9",
     credits: 8,
-    gradient: "from-blue-600 via-indigo-700 to-purple-900",
+    imageUrl: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "2",
-    title: "Studio Ceramic Teapot",
+    title: "Studio Ceramic & Kintsugi Gold",
     category: "photorealistic",
     model: "FLUX.1 Schnell",
-    prompt: "Minimalist ceramic Japanese teapot with crackled kintsugi gold lacquer on weathered oak table, natural diffused morning window light, 50mm f/1.4 lens depth of field",
+    prompt: "Minimalist ceramic Japanese teapot with crackled kintsugi gold lacquer on weathered oak table, natural diffused morning window light, 50mm f/1.4 lens depth of field, architectural digest",
     aspect: "1:1",
     credits: 6,
-    gradient: "from-amber-600 via-stone-700 to-slate-900",
+    imageUrl: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "3",
     title: "Celestial Mech Pilot",
     category: "anime",
     model: "FLUX.1 Dev",
-    prompt: "Anime concept art of a futuristic mecha pilot in glowing armor looking out into deep nebula space from hangar bay, Makoto Shinkai style, vibrant colors",
+    prompt: "Anime concept art of a futuristic mecha pilot in glowing armor looking out into deep nebula space from hangar bay, Makoto Shinkai style, vibrant colors, cinematic composition",
     aspect: "9:16",
-    credits: 6,
-    gradient: "from-fuchsia-600 via-violet-700 to-indigo-950",
+    credits: 10,
+    imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "4",
     title: "Bioluminescent Abyssal Creature",
-    category: "fantasy",
+    category: "3d_art",
     model: "Google Imagen 3",
-    prompt: "An ethereal glowing deep-sea dragon swimming through dark abyssal trenches, radiant blue and gold bioluminescence, hyperdetailed scales, national geographic style",
+    prompt: "An ethereal glowing deep-sea dragon swimming through dark abyssal trenches, radiant blue and gold bioluminescence, hyperdetailed scales, national geographic undersea photography",
     aspect: "16:9",
     credits: 8,
-    gradient: "from-teal-600 via-emerald-800 to-slate-950",
+    imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "5",
-    title: "Isometric Solarpunk City",
-    category: "3d_art",
-    model: "FLUX.1 Schnell",
-    prompt: "3D render of an isometric solarpunk architectural habitat, lush rooftop vertical gardens, sleek floating transit rails, clay render aesthetic, soft ambient occlusion",
-    aspect: "1:1",
-    credits: 6,
-    gradient: "from-emerald-600 via-cyan-700 to-slate-900",
+    title: "Brutalist Concrete Villa",
+    category: "architecture",
+    model: "FLUX.1 Dev",
+    prompt: "Modern brutalist concrete architectural villa built over a serene alpine lake, floor-to-ceiling glass, sunset golden hour reflections, warm ambient interior lighting, ultra-realistic",
+    aspect: "16:9",
+    credits: 10,
+    imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "6",
-    title: "Cinematic Desert Nomad",
-    category: "cinematic",
+    title: "Nordic Watchmaker Portrait",
+    category: "photorealistic",
     model: "Google Imagen 3",
-    prompt: "Cinematic portrait of a nomadic desert wanderer in gilded brass goggles and flowing sand-blown scarves at twilight, dramatic rim light, dust motes, Arri Alexa 65",
-    aspect: "16:9",
+    prompt: "Studio portrait of an elderly watchmaker with intricate silver spectacles examining an antique pocket watch, soft dramatic side lighting, Hasselblad H6D-100c medium format clarity",
+    aspect: "1:1",
     credits: 8,
-    gradient: "from-orange-600 via-rose-800 to-indigo-950",
+    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1200&auto=format&fit=crop",
   },
 ];
 
@@ -102,15 +102,15 @@ export default function ShowcaseGallery() {
           { id: "photorealistic", label: "Photorealistic" },
           { id: "anime", label: "Anime / Concept" },
           { id: "3d_art", label: "3D Digital Art" },
-          { id: "fantasy", label: "Dark Fantasy" },
+          { id: "architecture", label: "Architecture" },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveFilter(tab.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-full text-xs font-semibold transition-all btn-tactile cursor-pointer ${
               activeFilter === tab.id
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                ? "bg-neutral-950 text-white shadow-sm"
+                : "bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50 hover:text-neutral-950"
             }`}
           >
             {tab.label}
@@ -118,73 +118,64 @@ export default function ShowcaseGallery() {
         ))}
       </div>
 
-      {/* Masonry-Style Card Grid */}
+      {/* High-Resolution Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item) => (
           <div
             key={item.id}
-            className="group bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all overflow-hidden flex flex-col justify-between"
+            className="group bg-white rounded-3xl border border-neutral-200/90 shadow-luxury hover:shadow-luxury-hover hover:border-neutral-950 transition-all duration-300 overflow-hidden flex flex-col justify-between"
           >
-            {/* Visual Canvas Card */}
-            <div
-              className={`h-56 sm:h-64 bg-gradient-to-br ${item.gradient} p-6 flex flex-col justify-between relative overflow-hidden text-white`}
-            >
-              <div className="flex items-center justify-between z-10">
-                <span className="px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md text-[11px] font-bold text-white border border-white/20">
+            {/* Real Photography Viewport */}
+            <div className="h-64 overflow-hidden relative">
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              
+              {/* Badges on Image */}
+              <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+                <span className="px-3 py-1 rounded-full bg-neutral-950/75 backdrop-blur-md text-[11px] font-bold text-white border border-white/10">
                   {item.model}
                 </span>
-                <span className="px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold text-white">
-                  {item.aspect} &bull; 💎 {item.credits} cr
+                <span className="px-2.5 py-1 rounded-full bg-neutral-950/75 backdrop-blur-md text-[11px] font-bold text-white border border-white/10">
+                  {item.aspect} &bull; {item.credits} cr
                 </span>
               </div>
 
-              {/* Title & Sparkle */}
-              <div className="z-10">
-                <h4 className="font-extrabold text-xl tracking-tight text-white drop-shadow">
-                  {item.title}
-                </h4>
+              {/* Hover Quick Actions */}
+              <div className="absolute inset-0 bg-neutral-950/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                <Link
+                  href="/studio"
+                  className="px-4 py-2 rounded-xl bg-white text-neutral-950 text-xs font-bold shadow-lg hover:scale-105 transition-transform flex items-center gap-1.5"
+                >
+                  <Wand2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Remix in Studio</span>
+                </Link>
+                <button
+                  onClick={() => handleCopyPrompt(item.id, item.prompt)}
+                  className="px-3 py-2 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+                >
+                  {copiedId === item.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedId === item.id ? "Copied" : "Prompt"}</span>
+                </button>
               </div>
-
-              {/* Decorative Subtle Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 pointer-events-none" />
             </div>
 
-            {/* Prompt & Quick Action Controls */}
-            <div className="p-5 space-y-4">
-              <div className="space-y-1">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Exact Generation Prompt:
-                </div>
-                <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed italic font-medium">
-                  "{item.prompt}"
+            {/* Info Container */}
+            <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 className="font-bold text-base text-neutral-950 group-hover:text-blue-600 transition-colors">
+                  {item.title}
+                </h4>
+                <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed mt-1 font-medium">
+                  {item.prompt}
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <button
-                  onClick={() => handleCopyPrompt(item.id, item.prompt)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                >
-                  {copiedId === item.id ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-700 font-bold">Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Copy Prompt</span>
-                    </>
-                  )}
-                </button>
-
-                <Link
-                  href="/studio"
-                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
-                >
-                  <Wand2 className="w-3.5 h-3.5" />
-                  <span>Remix in Studio</span>
-                </Link>
+              <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-400">
+                <span className="capitalize">{item.category}</span>
+                <span className="text-emerald-600 font-bold">100% Guaranteed Output</span>
               </div>
             </div>
           </div>
@@ -193,4 +184,3 @@ export default function ShowcaseGallery() {
     </div>
   );
 }
-

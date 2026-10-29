@@ -304,7 +304,7 @@ export default function HomePage() {
               href="/studio"
               className="text-xs text-neutral-500 hover:text-neutral-950 flex items-center gap-1 transition-colors"
             >
-              <span>Or start with your Cowork & Codex agents</span>
+              <span>Or start with your 100 free credits in Studio</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
