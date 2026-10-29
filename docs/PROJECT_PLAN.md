@@ -91,6 +91,7 @@ Instead of forcing users to jump between Midjourney for images, Runway/Luma for 
 
 | Date | Author | Changes |
 | :--- | :--- | :--- |
+| **2026-10-29** | AI Studio Team | Redesigned Studio workspace (`/studio`) with ergonomic layout: elevated prominent generation action bar so it never scrolls below the fold, added instant 1-click inspiration presets, multi-step progress bar, high-res canvas stage with 4K upscale / remix / download shortcuts, recent creations history strip, and synchronized minimalist obsidian header & sidebar. |
 | **2026-10-29** | AI Studio Team | Completed homepage comprehensive refinement: connected creation ribbon to dynamic studio preview with aspect ratio toggles and prompt copy, added 3-step walkthrough section, interactive production workflow tabs (Filmmakers, E-Commerce, Game Artists, Developers), and creator testimonial social proof cards. |
 | **2026-10-29** | AI Studio Team | Elevated navbar height to a generous 90px (`h-[90px]`), widened container, refined minimalist obsidian logo (`aistudio`), integrated luxury `Instrument Serif` editorial typography, authentic collaborator SVG cursors, and Invideo-style horizontal modality creation dock. |
 | **2026-10-29** | AI Studio Team | Transformed visual design to high-aesthetic **Pure Light Theme**; added full public marketing homepage at `/` with interactive live preview, modality showcase, pricing, FAQ, and integrated Login/Register modal with 100 free welcome credits. Moved creative workspace to `/studio`. |
