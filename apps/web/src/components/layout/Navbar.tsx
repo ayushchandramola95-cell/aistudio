@@ -3,21 +3,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
-  Sparkles,
   ChevronDown,
   Globe,
   Image as ImageIcon,
   Video,
   Mic,
-  FileText,
   Wand2,
-  Cpu,
-  Layers,
   ShieldCheck,
-  BookOpen,
   HelpCircle,
   Activity,
-  ArrowRight
+  Menu,
+  X
 } from "lucide-react";
 
 interface NavbarProps {
@@ -28,6 +24,7 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedLang, setSelectedLang] = useState("EN");
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
@@ -47,93 +44,107 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
   };
 
   return (
-    <header ref={navRef} className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 text-slate-800">
-      <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+    <header
+      ref={navRef}
+      className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 transition-all"
+    >
+      {/* Tall, Airy, Generous Invideo-Style Navbar Height (92px) across full width */}
+      <div className="w-full max-w-[1536px] mx-auto px-6 sm:px-10 lg:px-14 h-[90px] flex items-center justify-between">
         
-        {/* Left: Brand Logo */}
-        <div className="flex items-center gap-8">
+        {/* Left: Brand Logo & Wordmark (Clean Invideo Style) */}
+        <div className="flex items-center gap-10 xl:gap-12">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5" />
+            {/* Elegant Vector Mark */}
+            <div className="w-9 h-9 rounded-xl bg-neutral-950 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-white"
+              >
+                <path
+                  d="M12 2L14.39 9.61L22 12L14.39 14.39L12 22L9.61 14.39L2 12L9.61 9.61L12 2Z"
+                  fill="currentColor"
+                />
+              </svg>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-xl tracking-tight text-slate-900">
-                AI Studio
-              </span>
-              <span className="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70">
-                Platform
-              </span>
-            </div>
+            <span className="font-bold text-[22px] tracking-tight text-neutral-950 font-sans">
+              aistudio
+            </span>
           </Link>
 
-          {/* Center: Navigation Menu with Dropdowns */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
+          {/* Center: Navigation Menu with Invideo Spacing & Typography */}
+          <nav className="hidden lg:flex items-center gap-8 xl:gap-9 text-[15px] font-medium text-neutral-600">
             
             {/* Product Dropdown */}
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("product")}
-                className="flex items-center gap-1 hover:text-slate-950 py-2 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 hover:text-neutral-950 py-3 transition-colors cursor-pointer"
               >
                 <span>Product</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${activeDropdown === "product" ? "rotate-180 text-indigo-600" : ""}`} />
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${
+                    activeDropdown === "product" ? "rotate-180 text-neutral-950" : ""
+                  }`}
+                />
               </button>
 
               {activeDropdown === "product" && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-3xl p-3 border border-slate-200 shadow-2xl shadow-slate-900/10 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1">
+                <div className="absolute top-full left-0 mt-2 w-84 bg-white rounded-2xl p-3 border border-neutral-200/90 shadow-2xl shadow-neutral-900/10 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1 z-30">
                   <Link
                     href="/studio"
                     onClick={() => setActiveDropdown(null)}
-                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors"
+                    className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-neutral-50 transition-colors"
                   >
-                    <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 mt-0.5">
+                    <div className="p-2 rounded-lg bg-blue-50 text-blue-600 mt-0.5">
                       <ImageIcon className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-slate-900">AI Image Generator</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Photorealistic imagery via Imagen 3 & FLUX.1</div>
+                      <div className="text-xs font-bold text-neutral-900">AI Image Generator</div>
+                      <div className="text-[11px] text-neutral-500 font-normal">Photorealistic imagery via Imagen 3 & FLUX.1</div>
                     </div>
                   </Link>
 
                   <Link
-                    href="/video"
+                    href="/studio"
                     onClick={() => setActiveDropdown(null)}
-                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors"
+                    className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-neutral-50 transition-colors"
                   >
-                    <div className="p-2 rounded-xl bg-purple-50 text-purple-600 mt-0.5">
+                    <div className="p-2 rounded-lg bg-purple-50 text-purple-600 mt-0.5">
                       <Video className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-slate-900">AI Video Studio</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Cinematic video motion via Google Veo & Wan</div>
+                      <div className="text-xs font-bold text-neutral-900">AI Video Studio</div>
+                      <div className="text-[11px] text-neutral-500 font-normal">Cinematic video motion via Google Veo 2 & Wan</div>
                     </div>
                   </Link>
 
                   <Link
-                    href="/audio"
+                    href="/studio"
                     onClick={() => setActiveDropdown(null)}
-                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors"
+                    className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-neutral-50 transition-colors"
                   >
-                    <div className="p-2 rounded-xl bg-teal-50 text-teal-600 mt-0.5">
+                    <div className="p-2 rounded-lg bg-teal-50 text-teal-600 mt-0.5">
                       <Mic className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-slate-900">Voice & Speech</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Kokoro TTS speech & Faster-Whisper transcription</div>
+                      <div className="text-xs font-bold text-neutral-900">Voice & Speech</div>
+                      <div className="text-[11px] text-neutral-500 font-normal">Kokoro TTS speech & Faster-Whisper audio</div>
                     </div>
                   </Link>
 
                   <Link
-                    href="/enhance"
+                    href="/studio"
                     onClick={() => setActiveDropdown(null)}
-                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors"
+                    className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-neutral-50 transition-colors"
                   >
-                    <div className="p-2 rounded-xl bg-amber-50 text-amber-600 mt-0.5">
+                    <div className="p-2 rounded-lg bg-amber-50 text-amber-600 mt-0.5">
                       <Wand2 className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-slate-900">4x AI Upscale & Restoration</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Super-resolution clarity and background removal</div>
+                      <div className="text-xs font-bold text-neutral-900">4x AI Upscale & Restoration</div>
+                      <div className="text-[11px] text-neutral-500 font-normal">Clarity restoration and background removal</div>
                     </div>
                   </Link>
                 </div>
@@ -144,16 +155,20 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("models")}
-                className="flex items-center gap-1 hover:text-slate-950 py-2 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 hover:text-neutral-950 py-3 transition-colors cursor-pointer"
               >
                 <span>Models</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${activeDropdown === "models" ? "rotate-180 text-indigo-600" : ""}`} />
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${
+                    activeDropdown === "models" ? "rotate-180 text-neutral-950" : ""
+                  }`}
+                />
               </button>
 
               {activeDropdown === "models" && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-3xl p-3 border border-slate-200 shadow-2xl shadow-slate-900/10 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1">
-                  <div className="px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                    Hosted & Open-Weight
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl p-3 border border-neutral-200/90 shadow-2xl shadow-neutral-900/10 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1 z-30">
+                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                    Hosted & Open-Weight Catalog
                   </div>
                   {[
                     { name: "Google Imagen 3", tag: "Cloud API", cost: "8 cr" },
@@ -166,20 +181,20 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
                       key={m.name}
                       href="/studio"
                       onClick={() => setActiveDropdown(null)}
-                      className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition-colors text-xs font-bold text-slate-800"
+                      className="flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-50 transition-colors text-xs font-semibold text-neutral-800"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
                         <span>{m.name}</span>
                       </div>
-                      <span className="text-[10px] font-semibold text-slate-400">{m.cost}</span>
+                      <span className="text-[11px] font-medium text-neutral-400">{m.cost}</span>
                     </Link>
                   ))}
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="pt-2 border-t border-neutral-100">
                     <a
                       href="#matrix"
                       onClick={() => setActiveDropdown(null)}
-                      className="block text-center text-xs font-bold text-indigo-600 hover:text-indigo-700 py-1"
+                      className="block text-center text-xs font-bold text-blue-600 hover:text-blue-700 py-1"
                     >
                       View Full Capability Matrix &rarr;
                     </a>
@@ -188,19 +203,19 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
               )}
             </div>
 
-            <a href="#why-us" className="hover:text-slate-950 transition-colors">
+            <a href="#why-us" className="hover:text-neutral-950 py-3 transition-colors">
               Enterprise
             </a>
 
-            {/* Pricing with 100 Free Credits / 50% Off Badge */}
-            <a href="#pricing" className="flex items-center gap-1.5 hover:text-slate-950 transition-colors">
+            {/* Pricing with Signature Invideo Blue Badge */}
+            <a href="#pricing" className="flex items-center gap-1.5 hover:text-neutral-950 py-3 transition-colors">
               <span>Pricing</span>
-              <span className="bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wide uppercase">
+              <span className="bg-[#2563EB] text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
                 100 FREE CR
               </span>
             </a>
 
-            <a href="#matrix" className="hover:text-slate-950 transition-colors">
+            <a href="#matrix" className="hover:text-neutral-950 py-3 transition-colors">
               MCP
             </a>
 
@@ -208,18 +223,22 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("resources")}
-                className="flex items-center gap-1 hover:text-slate-950 py-2 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 hover:text-neutral-950 py-3 transition-colors cursor-pointer"
               >
                 <span>Resources</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${activeDropdown === "resources" ? "rotate-180 text-indigo-600" : ""}`} />
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${
+                    activeDropdown === "resources" ? "rotate-180 text-neutral-950" : ""
+                  }`}
+                />
               </button>
 
               {activeDropdown === "resources" && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-3xl p-3 border border-slate-200 shadow-2xl shadow-slate-900/10 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1">
+                <div className="absolute top-full left-0 mt-2 w-76 bg-white rounded-2xl p-3 border border-neutral-200/90 shadow-2xl shadow-neutral-900/10 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1 z-30">
                   <Link
                     href="/admin"
                     onClick={() => setActiveDropdown(null)}
-                    className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors text-xs font-bold text-slate-800"
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-neutral-50 transition-colors text-xs font-semibold text-neutral-800"
                   >
                     <Activity className="w-4 h-4 text-emerald-600" />
                     <span>System Health & Gauges</span>
@@ -227,15 +246,15 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
                   <Link
                     href="/credits"
                     onClick={() => setActiveDropdown(null)}
-                    className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors text-xs font-bold text-slate-800"
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-neutral-50 transition-colors text-xs font-semibold text-neutral-800"
                   >
-                    <ShieldCheck className="w-4 h-4 text-indigo-600" />
+                    <ShieldCheck className="w-4 h-4 text-blue-600" />
                     <span>Two-Phase Escrow Ledger</span>
                   </Link>
                   <a
                     href="#faq"
                     onClick={() => setActiveDropdown(null)}
-                    className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors text-xs font-bold text-slate-800"
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-neutral-50 transition-colors text-xs font-semibold text-neutral-800"
                   >
                     <HelpCircle className="w-4 h-4 text-amber-500" />
                     <span>Frequently Asked Questions</span>
@@ -244,28 +263,28 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
               )}
             </div>
 
-            <a href="#showcase" className="hover:text-slate-950 transition-colors">
+            <a href="#showcase" className="hover:text-neutral-950 py-3 transition-colors">
               Community
             </a>
           </nav>
         </div>
 
-        {/* Right: Language Picker, Login & Sign Up Pill */}
-        <div className="flex items-center gap-4">
+        {/* Right: Language Picker, Login & Signature Invideo-Style Sign Up Pill */}
+        <div className="hidden lg:flex items-center gap-5 xl:gap-6">
           
-          {/* Language Selector (Invideo style) */}
-          <div className="relative hidden sm:block">
+          {/* Language Selector */}
+          <div className="relative">
             <button
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-lg transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-[14px] font-medium text-neutral-600 hover:text-neutral-950 px-2 py-1.5 rounded-lg transition-colors cursor-pointer"
             >
-              <Globe className="w-3.5 h-3.5 text-slate-400" />
+              <Globe className="w-4 h-4 text-neutral-400" />
               <span>{selectedLang}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <ChevronDown className="w-3 h-3 text-neutral-400" />
             </button>
 
             {langDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-28 bg-white rounded-2xl p-1.5 border border-slate-200 shadow-xl text-xs font-bold text-slate-700 space-y-0.5">
+              <div className="absolute right-0 top-full mt-2 w-32 bg-white rounded-xl p-1 border border-neutral-200 shadow-xl text-xs font-semibold text-neutral-700 space-y-0.5 z-30">
                 {["EN", "ES", "FR", "DE", "JA"].map((lang) => (
                   <button
                     key={lang}
@@ -273,8 +292,8 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
                       setSelectedLang(lang);
                       setLangDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors ${
-                      selectedLang === lang ? "bg-indigo-50 text-indigo-600" : "hover:bg-slate-50"
+                    className={`w-full text-left px-3 py-1.5 rounded-lg transition-colors ${
+                      selectedLang === lang ? "bg-neutral-100 text-neutral-950 font-bold" : "hover:bg-neutral-50"
                     }`}
                   >
                     {lang}
@@ -284,33 +303,74 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
             )}
           </div>
 
-          {/* Login Text Button */}
+          {/* Login Text Link */}
           <button
             onClick={() => onOpenAuth("login")}
-            className="text-sm font-bold text-slate-700 hover:text-slate-950 transition-colors cursor-pointer"
+            className="text-[15px] font-medium text-neutral-700 hover:text-neutral-950 transition-colors cursor-pointer px-3 py-2"
           >
             Login
           </button>
 
-          {/* Invideo-style High Contrast Pill "Sign up" Button */}
+          {/* Invideo-Style Signature Pill "Sign up" Button */}
           <button
             onClick={() => onOpenAuth("register")}
-            className="px-5 py-2 rounded-full font-bold text-xs bg-slate-950 hover:bg-slate-800 text-white shadow-sm transition-all hover:scale-[1.02] cursor-pointer flex items-center gap-1.5"
+            className="px-6 py-2.5 rounded-full font-semibold text-[14px] bg-neutral-950 hover:bg-neutral-800 text-white shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
           >
-            <span>Sign up</span>
+            Sign up
           </button>
+        </div>
 
-          {/* Launch Studio Quick Pill */}
-          <Link
-            href="/studio"
-            className="hidden xl:flex items-center gap-1 px-4 py-2 rounded-full text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors"
+        {/* Mobile Hamburger Button */}
+        <div className="flex lg:hidden items-center gap-3">
+          <button
+            onClick={() => onOpenAuth("register")}
+            className="px-4 py-2 rounded-full font-semibold text-xs bg-neutral-950 text-white"
           >
-            <span>Studio</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
+            Sign up
+          </button>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 text-neutral-700 hover:text-neutral-950"
+            aria-label="Toggle mobile menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
 
       </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-neutral-200 bg-white px-6 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200">
+          <nav className="flex flex-col space-y-3 text-base font-semibold text-neutral-800">
+            <Link href="/studio" onClick={() => setMobileMenuOpen(false)}>AI Studio</Link>
+            <a href="#models" onClick={() => setMobileMenuOpen(false)}>Models Catalog</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing (100 Free Credits)</a>
+            <a href="#showcase" onClick={() => setMobileMenuOpen(false)}>Showcase Gallery</a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+          </nav>
+          <div className="pt-4 border-t border-neutral-100 flex gap-3">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenAuth("login");
+              }}
+              className="flex-1 py-3 text-center rounded-xl border border-neutral-200 font-semibold text-sm text-neutral-800"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenAuth("register");
+              }}
+              className="flex-1 py-3 text-center rounded-xl bg-neutral-950 text-white font-semibold text-sm"
+            >
+              Sign up
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -128,6 +128,7 @@ export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("register");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [activeHeroTab, setActiveHeroTab] = useState("image");
   const [interactivePrompt, setInteractivePrompt] = useState(
     "A majestic golden eagle soaring above snow-capped Alps, morning mist, cinematic sunlight"
   );
@@ -139,44 +140,53 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-white text-neutral-950 selection:bg-neutral-900 selection:text-white">
       
       {/* 1. Pro Invideo-Style Navbar */}
       <Navbar onOpenAuth={openAuth} />
 
-      {/* 2. Hero Section with Graph Grid & Floating Cursor Tags */}
-      <section className="relative pt-20 pb-24 md:pt-28 md:pb-32 overflow-hidden bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] border-b border-slate-200/70">
+      {/* 2. Hero Section with Technical Blueprint Grid & Floating Cursor Tags */}
+      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:48px_48px] border-b border-neutral-200/80">
         
-        {/* Floating Collaborator Cursor Tags (Inspired by Invideo Hero) */}
+        {/* Floating Collaborator Cursor Tags (Exact Invideo Hero Match) */}
         <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden hidden md:block">
-          {/* Cursor Tag: "You" (Indigo) */}
-          <div className="absolute top-12 left-16 flex items-center gap-1 animate-bounce duration-1000">
-            <MousePointer className="w-4 h-4 text-indigo-600 fill-indigo-600" />
-            <span className="bg-indigo-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+          
+          {/* Cursor Tag: "You" (Indigo/Purple - Top Left) */}
+          <div className="absolute top-12 left-12 flex items-start gap-1.5 transition-transform hover:scale-105">
+            <svg className="w-4 h-4 text-indigo-600 drop-shadow-sm fill-indigo-600" viewBox="0 0 24 24">
+              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
+            </svg>
+            <span className="bg-indigo-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
               You
             </span>
           </div>
 
-          {/* Cursor Tag: "Andrew" (Green) */}
-          <div className="absolute top-16 right-24 flex items-center gap-1">
-            <MousePointer className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-            <span className="bg-emerald-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+          {/* Cursor Tag: "Andrew" (Emerald/Green - Top Right) */}
+          <div className="absolute top-14 right-20 flex items-start gap-1.5 transition-transform hover:scale-105">
+            <svg className="w-4 h-4 text-emerald-600 drop-shadow-sm fill-emerald-600" viewBox="0 0 24 24">
+              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
+            </svg>
+            <span className="bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
               Andrew
             </span>
           </div>
 
-          {/* Cursor Tag: "Anna" (Orange) */}
-          <div className="absolute bottom-16 left-28 flex items-center gap-1">
-            <MousePointer className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span className="bg-amber-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+          {/* Cursor Tag: "Anna" (Coral/Orange - Mid Left) */}
+          <div className="absolute bottom-28 left-20 flex items-start gap-1.5 transition-transform hover:scale-105">
+            <svg className="w-4 h-4 text-amber-500 drop-shadow-sm fill-amber-500" viewBox="0 0 24 24">
+              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
+            </svg>
+            <span className="bg-amber-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
               Anna
             </span>
           </div>
 
-          {/* Cursor Tag: "Agent Two" (Purple) */}
-          <div className="absolute bottom-20 right-32 flex items-center gap-1">
-            <MousePointer className="w-4 h-4 text-purple-600 fill-purple-600" />
-            <span className="bg-purple-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded shadow">
+          {/* Cursor Tag: "Agent Two" (Violet/Purple - Mid Right) */}
+          <div className="absolute bottom-24 right-28 flex items-start gap-1.5 transition-transform hover:scale-105">
+            <svg className="w-4 h-4 text-purple-600 drop-shadow-sm fill-purple-600" viewBox="0 0 24 24">
+              <path d="M4 2l16 12-8.5 1.5L8 22 4 2z" />
+            </svg>
+            <span className="bg-purple-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
               Agent Two
             </span>
           </div>
@@ -184,50 +194,80 @@ export default function HomePage() {
 
         <div className="relative max-w-5xl mx-auto px-6 text-center space-y-7 z-10">
           
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span>The Unified Multi-Model AI Studio</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-            <span className="text-indigo-600 font-extrabold">100 Free Credits on Signup</span>
-          </div>
-
-          {/* Editorial / Serif Hero Headline (Invideo Style) */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 max-w-4xl mx-auto leading-[1.08] font-serif">
-            The AI generation platform for serious creatives
+          {/* Editorial / Serif Hero Headline (Exact Invideo Style) */}
+          <h1 className="text-5xl sm:text-7xl lg:text-[84px] font-normal tracking-tight text-neutral-950 max-w-4xl mx-auto leading-[1.05] font-editorial">
+            The AI generation platform for
+            <br className="hidden sm:inline" /> serious creatives
           </h1>
 
           {/* Subhead */}
-          <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-sans">
-            Don't waste time on fragmented AI tools you have to babysit. Do what you love while AI Studio's multi-model agents handle the rest.
+          <p className="text-base sm:text-[19px] text-neutral-600 max-w-2xl mx-auto leading-relaxed font-sans font-normal">
+            Don&apos;t waste time on AI you have to babysit. Do what you love while
+            <br className="hidden sm:inline" /> AI Studio&apos;s multi-model agents handle the rest.
           </p>
 
-          {/* Primary High-Contrast Centered CTA (Invideo Style) */}
+          {/* Primary Centered Pill CTA (Invideo Style) */}
           <div className="pt-2 flex flex-col items-center justify-center gap-3">
             <button
               onClick={() => openAuth("register")}
-              className="px-8 py-4 rounded-full font-bold text-sm bg-slate-950 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/10 transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
+              className="px-8 py-3.5 rounded-full font-semibold text-sm bg-neutral-950 hover:bg-neutral-800 text-white shadow-sm hover:shadow transition-all hover:scale-[1.02] flex items-center gap-2.5 cursor-pointer"
             >
               <span>Start Creating</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <Link
               href="/studio"
-              className="text-xs font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-1 transition-colors"
+              className="text-xs text-neutral-500 hover:text-neutral-950 flex items-center gap-1 transition-colors"
             >
-              <span>Or start with your 100 free credits in Studio</span>
+              <span>Or start with your Cowork & Codex agents</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
+          {/* Invideo-Style Creation Dock / Ribbon */}
+          <div className="pt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+            {[
+              { id: "image", icon: "🖼️", label: "Photoreal Image" },
+              { id: "video", icon: "🎬", label: "Cinematic Video" },
+              { id: "audio", icon: "🎙️", label: "Voice & Audio" },
+              { id: "ad", icon: "📦", label: "Product & Ad" },
+              { id: "upscale", icon: "✨", label: "4K AI Upscale" },
+              { id: "script", icon: "🎭", label: "Microdrama & Script" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveHeroTab(tab.id);
+                  if (tab.id === "video") {
+                    setInteractivePrompt("Drone shot through misty pine forest at sunrise, 4k 60fps cinematic movement");
+                  } else if (tab.id === "audio") {
+                    setInteractivePrompt("Natural expressive audiobook narration: The ancient clock struck midnight as the fog rolled in.");
+                  } else if (tab.id === "ad") {
+                    setInteractivePrompt("Luxury perfume bottle standing on polished marble with splashing rose water, commercial lighting");
+                  } else {
+                    setInteractivePrompt("A majestic golden eagle soaring above snow-capped Alps, morning mist, cinematic sunlight");
+                  }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                  activeHeroTab === tab.id
+                    ? "bg-neutral-950 text-white border-neutral-950 shadow-sm"
+                    : "bg-white/90 text-neutral-700 border-neutral-200 hover:border-neutral-300 hover:bg-white"
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Trust Guarantees */}
-          <div className="pt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-semibold text-slate-500">
+          <div className="pt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-medium text-neutral-500">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Two-Phase Escrow Billing</span>
             </div>
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-indigo-600" />
+              <Zap className="w-4 h-4 text-blue-600" />
               <span>Zero Local Hardware Needed</span>
             </div>
             <div className="flex items-center gap-2">
