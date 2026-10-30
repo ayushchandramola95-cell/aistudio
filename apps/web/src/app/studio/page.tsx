@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Sparkles,
   Wand2,
@@ -579,6 +579,51 @@ export default function StudioPage() {
     return STUDIO_MODELS;
   }, [modelFilter, favoriteModels]);
 
+  // Model Rail Scroll Navigation State
+  const [canScrollLeft, setCanScrollLeft] = useState<boolean>(false);
+  const [canScrollRight, setCanScrollRight] = useState<boolean>(true);
+
+  const checkScrollability = useCallback(() => {
+    const el = modelScrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 4);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = modelScrollRef.current;
+    if (!el) return;
+
+    const timer = setTimeout(checkScrollability, 50);
+    el.addEventListener("scroll", checkScrollability, { passive: true });
+    window.addEventListener("resize", checkScrollability);
+
+    return () => {
+      clearTimeout(timer);
+      el.removeEventListener("scroll", checkScrollability);
+      window.removeEventListener("resize", checkScrollability);
+    };
+  }, [checkScrollability, visibleModels]);
+
+  // Horizontal mouse wheel scrolling for Model Rail
+  useEffect(() => {
+    const el = modelScrollRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (el.scrollWidth > el.clientWidth && e.deltaY !== 0) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY * 1.15;
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, [visibleModels]);
+
   // Estimated Cost calculation
   const estimatedCost = useMemo(() => {
     let cost = currentModel.cost;
@@ -822,14 +867,20 @@ export default function StudioPage() {
     <div className="space-y-6 pb-20 animate-fadeIn">
       {/* ── Studio Header Bar ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200/80 pb-5">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-white shadow-xs">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-sm ring-4 ring-indigo-50">
               <Sparkles className="w-4 h-4" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-950 font-sans">
-              AI Image Studio
-            </h1>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-950 font-sans">
+                AI Image Studio
+              </h1>
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>8 Engines Online</span>
+              </span>
+            </div>
           </div>
           <p className="text-xs sm:text-sm text-neutral-500 font-normal">
             Create, edit and transform images with state-of-the-art AI models.
@@ -841,7 +892,7 @@ export default function StudioPage() {
           <button
             type="button"
             onClick={() => setHowItWorksOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all cursor-pointer"
           >
             <HelpCircle className="w-3.5 h-3.5 text-neutral-400" />
             <span>How it works</span>
@@ -850,7 +901,7 @@ export default function StudioPage() {
           <button
             type="button"
             onClick={() => setPromptGuideOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all cursor-pointer"
           >
             <BookOpen className="w-3.5 h-3.5 text-blue-600" />
             <span>Prompt Guide</span>
@@ -859,7 +910,7 @@ export default function StudioPage() {
           <button
             type="button"
             onClick={handleSurpriseMe}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-600" />
             <span>Examples</span>
@@ -868,7 +919,7 @@ export default function StudioPage() {
           <button
             type="button"
             onClick={() => setShortcutsOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors cursor-pointer hidden sm:inline-flex"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all cursor-pointer hidden sm:inline-flex"
           >
             <Keyboard className="w-3.5 h-3.5 text-neutral-400" />
             <span>Keyboard Shortcuts</span>
@@ -890,38 +941,75 @@ export default function StudioPage() {
                 <span className="text-base font-bold text-neutral-950 font-sans">
                   1. Choose a Model
                 </span>
+                <span className="text-xs text-neutral-400 font-medium hidden sm:inline">
+                  • {visibleModels.length} models
+                </span>
               </div>
 
-              {/* Category Filter Pills */}
-              <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
-                {[
-                  { id: "recommended", label: "Recommended" },
-                  { id: "all", label: "All Models" },
-                  { id: "google", label: "Google" },
-                  { id: "local", label: "Local" },
-                  { id: "favorites", label: "★ Favorites" },
-                ].map((tab) => (
+              {/* Category Filter Pills & Repositioned Navigation Arrows */}
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+                  {[
+                    { id: "recommended", label: "Recommended" },
+                    { id: "all", label: "All Models" },
+                    { id: "google", label: "Google" },
+                    { id: "local", label: "Local" },
+                    { id: "favorites", label: "★ Favorites" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setModelFilter(tab.id)}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                        modelFilter === tab.id
+                          ? "bg-blue-600 text-white shadow-2xs"
+                          : "bg-neutral-100 hover:bg-neutral-200/80 text-neutral-600"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Left & Right Chevron Navigation Controls in Header */}
+                <div className="flex items-center gap-1 pl-2 border-l border-neutral-200 shrink-0">
                   <button
-                    key={tab.id}
                     type="button"
-                    onClick={() => setModelFilter(tab.id)}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                      modelFilter === tab.id
-                        ? "bg-blue-600 text-white shadow-2xs"
-                        : "bg-neutral-100 hover:bg-neutral-200/80 text-neutral-600"
+                    onClick={() => modelScrollRef.current?.scrollBy({ left: -260, behavior: "smooth" })}
+                    disabled={!canScrollLeft}
+                    className={`w-7 h-7 rounded-lg border border-neutral-200/90 bg-white flex items-center justify-center transition-all ${
+                      canScrollLeft
+                        ? "text-neutral-700 hover:text-neutral-950 hover:bg-neutral-50 hover:border-neutral-300 shadow-2xs cursor-pointer active:scale-95"
+                        : "text-neutral-300 border-neutral-150 bg-neutral-50/50 cursor-not-allowed opacity-40"
                     }`}
+                    aria-label="Scroll models left"
+                    title="Previous models"
                   >
-                    {tab.label}
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => modelScrollRef.current?.scrollBy({ left: 260, behavior: "smooth" })}
+                    disabled={!canScrollRight}
+                    className={`w-7 h-7 rounded-lg border border-neutral-200/90 bg-white flex items-center justify-center transition-all ${
+                      canScrollRight
+                        ? "text-neutral-700 hover:text-neutral-950 hover:bg-neutral-50 hover:border-neutral-300 shadow-2xs cursor-pointer active:scale-95"
+                        : "text-neutral-300 border-neutral-150 bg-neutral-50/50 cursor-not-allowed opacity-40"
+                    }`}
+                    aria-label="Scroll models right"
+                    title="Next models"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Horizontal Scrollable Model Rail with Navigation Chevrons */}
-            <div className="relative group/models">
+            {/* Horizontal Scrollable Model Rail - Scrollbar completely hidden, Wheel & Header Arrows Enabled */}
+            <div className="relative">
               <div
                 ref={modelScrollRef}
-                className="flex items-stretch gap-3.5 overflow-x-auto pb-2 scrollbar-thin scroll-smooth"
+                className="flex items-stretch gap-3.5 overflow-x-auto pb-1 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
               >
                 {visibleModels.map((m) => {
                   const isSelected = selectedModelId === m.id;
@@ -930,7 +1018,7 @@ export default function StudioPage() {
                     <div
                       key={m.id}
                       onClick={() => setSelectedModelId(m.id)}
-                      className={`group relative h-[54px] min-w-[210px] sm:min-w-[220px] shrink-0 px-3.5 rounded-2xl border transition-all cursor-pointer bg-white flex items-center justify-between gap-3 ${
+                      className={`group relative h-[54px] min-w-[210px] sm:min-w-[220px] shrink-0 px-3.5 rounded-2xl border transition-all cursor-pointer bg-white flex items-center justify-between gap-3 hover:-translate-y-0.5 ${
                         isSelected
                           ? "border-blue-600 shadow-sm ring-2 ring-blue-500/20 bg-blue-50/20"
                           : "border-neutral-200/90 hover:border-neutral-300 hover:shadow-2xs"
@@ -974,7 +1062,7 @@ export default function StudioPage() {
                 {/* Compact "More Models" Card Triggering the Big Modal */}
                 <div
                   onClick={() => setModelModalOpen(true)}
-                  className="group relative h-[54px] min-w-[145px] shrink-0 px-3 rounded-2xl border border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/50 hover:bg-white transition-all cursor-pointer flex items-center gap-2.5"
+                  className="group relative h-[54px] min-w-[145px] shrink-0 px-3 rounded-2xl border border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/50 hover:bg-white transition-all cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
                 >
                   <div className="w-8 h-8 rounded-xl bg-neutral-100 group-hover:bg-neutral-900 group-hover:text-white flex items-center justify-center transition-colors text-neutral-600 shrink-0">
                     <Layers className="w-4 h-4" />
@@ -988,24 +1076,6 @@ export default function StudioPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Left & Right Chevron Arrows */}
-              <button
-                type="button"
-                onClick={() => modelScrollRef.current?.scrollBy({ left: -240, behavior: "smooth" })}
-                className="absolute -left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white border border-neutral-200/90 shadow-md text-neutral-700 hover:text-neutral-950 flex items-center justify-center cursor-pointer transition-all hover:scale-105 z-10 opacity-0 group-hover/models:opacity-100"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => modelScrollRef.current?.scrollBy({ left: 240, behavior: "smooth" })}
-                className="absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white border border-neutral-200/90 shadow-md text-neutral-700 hover:text-neutral-950 flex items-center justify-center cursor-pointer transition-all hover:scale-105 z-10 opacity-0 group-hover/models:opacity-100"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
             </div>
           </div>
 
