@@ -8,17 +8,25 @@ INITIAL_MODELS = [
         "display_name": "Nano Banana 2.1",
         "provider": "google-cloud",
         "family": "gemini-image",
-        "version": "gemini-3.1-flash-image",
+        "version": "gemini-nano-banana-2.1",
         "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image", "multi-reference", "4k-editing"],
+        "supported_tasks": ["text-to-image", "multi-reference", "4k-editing", "web-grounding"],
         "parameter_schema": {
-            "underlying_engine": "Gemini 3.1 Flash Image (Upgraded)",
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
-            "resolution": "1K to 4K",
+            "underlying_engine": "Gemini 3.1 Flash Image",
+            "primary_job": "Mainstream Gen & Edit",
+            "prompt_limit": "Up to 1,000,000 tokens",
+            "max_resolution": "Up to 4096x4096 (4K)",
+            "resolutions": ["512", "1024", "2048", "4096"],
+            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4", "4:1", "1:4", "8:1", "1:8"],
+            "max_reference_images": 14,
+            "web_grounding": True,
+            "batch_max": 1,
+            "synthid": True,
             "features": [
-                "Stronger prompt adherence",
-                "Multi-reference consistency",
-                "Production quality image generation and edits from 1K to 4K"
+                "Stronger prompt adherence & multi-reference consistency",
+                "Up to 14 multi-reference input images",
+                "Production quality image generation and edits from 1K to 4K",
+                "Real-time Web Search Grounding"
             ],
             "description": "Our upgraded mainstream Gemini image model with stronger prompt adherence, and multi-reference consistency, enabling production quality image generation and edits from 1K to 4K."
         },
@@ -34,16 +42,23 @@ INITIAL_MODELS = [
         "display_name": "Nano Banana 2 Lite",
         "provider": "google-cloud",
         "family": "gemini-image",
-        "version": "gemini-2.5-flash-image",
+        "version": "gemini-3.1-flash-lite-image",
         "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image", "high-volume", "low-latency"],
+        "supported_tasks": ["text-to-image", "rapid-iteration", "high-volume"],
         "parameter_schema": {
-            "underlying_engine": "Gemini 2.5 Flash Image (Optimized)",
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3"],
+            "underlying_engine": "Gemini 3.1 Flash Lite Image",
+            "primary_job": "Rapid iteration & drafts",
+            "prompt_limit": "Up to 1,000,000 tokens",
+            "max_resolution": "1024x1024 (1K)",
+            "resolutions": ["512", "1024"],
+            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "fast_mode_toggle": True,
+            "batch_max": 1,
+            "synthid": True,
             "features": [
                 "Class leading image generation capabilities",
-                "Optimized for high-volume creation",
-                "Ultra-low latency asset generation"
+                "Optimized for high-volume, latency-sensitive asset creation",
+                "512px and 1024px rapid draft rendering"
             ],
             "description": "Class leading image generation capabilities, now optimized for high-volume, latency-sensitive asset creation."
         },
@@ -61,16 +76,25 @@ INITIAL_MODELS = [
         "family": "gemini-image",
         "version": "gemini-3-pro-image",
         "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image", "world-knowledge", "multilingual-text"],
+        "supported_tasks": ["text-to-image", "thinking-reasoning", "multilingual-typography", "4k-studio"],
         "parameter_schema": {
             "underlying_engine": "Gemini 3 Pro Image",
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "primary_job": "Complex layouts & typography",
+            "prompt_limit": "Up to 1,000,000 tokens",
+            "max_resolution": "Up to 4096x4096 (4K)",
+            "resolutions": ["1024", "2048", "4096"],
+            "aspect_ratios": ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4", "8:1", "1:8"],
+            "thinking_budget": True,
+            "text_quotation_guide": True,
+            "batch_max": 1,
+            "synthid": True,
             "features": [
-                "High quality graphics & reasoning",
-                "Text rendering in multiple languages",
-                "Deep world knowledge"
+                "Internal Thinking Process before rendering",
+                "Multilingual embedded crisp typography",
+                "Complex infographics & brand-accurate spatial composition",
+                "Studio 4K resolution output"
             ],
-            "description": "A powerful image generation model that combines high quality graphics, text rendering in multiple languages, and world knowledge."
+            "description": "A powerful image generation model that combines high quality graphics, text rendering in multiple languages, and world knowledge"
         },
         "base_credit_cost": 10.0,
         "cost_multiplier_rules": {"aspect_ratio": 1.0, "batch": 1.0},
@@ -86,14 +110,20 @@ INITIAL_MODELS = [
         "family": "gemini-image",
         "version": "gemini-3.1-flash-image",
         "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image", "editing", "general-generation"],
+        "supported_tasks": ["text-to-image", "editing", "general-generation", "multi-character"],
         "parameter_schema": {
-            "underlying_engine": "gemini-3.1-flash-image",
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "underlying_engine": "Gemini 3.1 Flash Image",
+            "primary_job": "General-purpose predecessor to 2.1",
+            "prompt_limit": "Up to 1,000,000 tokens",
+            "max_resolution": "512px to 4K",
+            "aspect_ratios": ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4"],
+            "character_consistency": "Up to 5 characters & 14 objects",
+            "batch_max": 1,
+            "synthid": True,
             "features": [
+                "Multi-character consistency (up to 5 characters & 14 objects)",
                 "General image generation and editing tasks",
-                "High visual quality",
-                "Low latency response"
+                "Balanced high quality and low latency"
             ],
             "description": "gemini-3.1-flash-image is a model designed for general image generation and editing tasks, offering high quality and low latency."
         },
@@ -111,14 +141,19 @@ INITIAL_MODELS = [
         "family": "gemini-image",
         "version": "gemini-2.5-flash-image",
         "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image", "editing"],
+        "supported_tasks": ["text-to-image", "legacy-flash"],
         "parameter_schema": {
-            "underlying_engine": "gemini-2.5-flash-image",
+            "underlying_engine": "Gemini 2.5 Flash Image",
+            "primary_job": "Legacy Flash image generation",
+            "prompt_limit": "~128,000 to 1,000,000 tokens",
+            "max_resolution": "Native 1K (1024x1024)",
             "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "batch_max": 1,
+            "synthid": True,
             "features": [
-                "State-of-the-art image generation",
-                "Advanced image editing",
-                "Native multimodal architecture"
+                "State-of-the-art native multimodal image generation",
+                "Native 1K resolution baseline",
+                "Direct prompt synthesis"
             ],
             "description": "gemini-2.5-flash-image. State-of-the-art image generation and editing model."
         },
@@ -136,14 +171,21 @@ INITIAL_MODELS = [
         "family": "imagen",
         "version": "imagen-4.0-fast",
         "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image", "rapid-drafting"],
+        "supported_tasks": ["text-to-image", "diffusion", "batch-parallel"],
         "parameter_schema": {
             "underlying_engine": "Imagen 4 Fast",
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3"],
+            "primary_job": "Rapid pure text-to-photo",
+            "prompt_limit": "Traditional text prompt (~480–1,000 chars)",
+            "max_resolution": "~1408x768 (approx. 1 MP)",
+            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "batch_max": 4,
+            "person_generation_filter": ["allow_all", "dont_allow", "allow_adult"],
+            "synthid": True,
             "features": [
-                "Next-generation Imagen architecture",
-                "Fast text-to-image generation",
-                "Sub-second composition rendering"
+                "Sub-3-second diffusion generation",
+                "Parallel batch sampling (1 to 4 images)",
+                "Person generation safety filters",
+                "5 supported diffusion aspect ratios"
             ],
             "description": "Fast image generation with text prompts."
         },
@@ -164,11 +206,18 @@ INITIAL_MODELS = [
         "supported_tasks": ["virtual-try-on", "fashion-editing", "product-mockups"],
         "parameter_schema": {
             "underlying_engine": "Google Virtual Try-On",
-            "aspect_ratios": ["3:4", "9:16", "1:1"],
+            "primary_job": "Garment transfer",
+            "input_mode": "dual-image",
+            "prompt_limit": "Optional text hint (e.g. fit description)",
+            "max_resolution": "1024px / Portrait (3:4, 9:16)",
+            "aspect_ratios": ["1:1", "3:4", "9:16"],
+            "categories": ["Tops", "Bottoms", "Dresses", "Outerwear"],
+            "batch_max": 1,
+            "synthid": True,
             "features": [
-                "Specialized clothing simulation",
+                "Dual image dropzones (Person photo + Garment photo)",
                 "Realistic fabric drape & body shape adaptation",
-                "Photorealistic apparel try-on"
+                "Apparel category specialization (Tops, Bottoms, Dresses)"
             ],
             "description": "Specialized model to generate images of people trying on clothing."
         },
@@ -186,43 +235,26 @@ INITIAL_MODELS = [
         "family": "imagen",
         "version": "imagen-3.0-capability-001",
         "backend_type": "hosted_api",
-        "supported_tasks": ["image-editing", "inpainting", "canvas-modification"],
+        "supported_tasks": ["image-editing", "inpainting", "outpainting", "background-swap"],
         "parameter_schema": {
             "underlying_engine": "Imagen 3 Capability 001",
+            "primary_job": "Mask-based inpainting",
+            "input_mode": "base-image-plus-mask",
+            "prompt_limit": "Short descriptive text prompt with base image & edit mask",
+            "max_resolution": "1024x1024 (Native 1K)",
             "aspect_ratios": ["1:1", "16:9", "9:16", "4:3"],
+            "modes": ["inpainting", "outpainting", "background-swap"],
+            "batch_max": 4,
+            "synthid": True,
             "features": [
-                "Fast image editing",
-                "Inpainting & localized correction",
-                "High precision regional brush control"
+                "Targeted inpainting with visual brush mask editor",
+                "Outpainting boundary expansion",
+                "Background replacement mode",
+                "Native 1K precision editing"
             ],
             "description": "Fast image editing."
         },
         "base_credit_cost": 5.0,
-        "cost_multiplier_rules": {"aspect_ratio": 1.0},
-        "min_vram_gb": None,
-        "status": "active",
-        "commercial_license": "google-cloud-commercial",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "imagen-3",
-        "display_name": "Imagen 3",
-        "provider": "google-cloud",
-        "family": "imagen",
-        "version": "imagen-3.0-generate-002",
-        "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image", "photorealism"],
-        "parameter_schema": {
-            "underlying_engine": "imagen-3.0-generate-002",
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
-            "features": [
-                "Exceptional photorealism",
-                "High prompt adherence",
-                "Crisp, legible text rendering"
-            ],
-            "description": "General photorealism and high-fidelity text-heavy image synthesis."
-        },
-        "base_credit_cost": 8.0,
         "cost_multiplier_rules": {"aspect_ratio": 1.0},
         "min_vram_gb": None,
         "status": "active",
@@ -236,7 +268,7 @@ class ModelService:
     async def seed_initial_models(session: AsyncSession):
         allowed_ids = {m["id"] for m in INITIAL_MODELS}
 
-        # 1. Remove legacy models not in this Google catalog
+        # 1. Remove models not in this exact Google catalog
         await session.execute(
             delete(ModelRegistry).where(ModelRegistry.id.not_in(allowed_ids))
         )

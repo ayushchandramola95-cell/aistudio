@@ -20,7 +20,7 @@ logger = logging.getLogger("aistudio.image_service")
 OUTPUT_DIR = Path(settings.STORAGE_DIR) / "outputs"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-SUPPORTED_ASPECT_RATIOS = {"1:1", "3:4", "4:3", "9:16", "16:9"}
+SUPPORTED_ASPECT_RATIOS = {"1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4", "8:1", "1:8", "21:9"}
 
 class ImageService:
     @staticmethod
@@ -115,15 +115,13 @@ class ImageService:
                 # Vertex AI Target Engine Mapping
                 ENGINE_MAP = {
                     "nano-banana-2-1": "gemini-3.1-flash-image",
-                    "nano-banana-2-lite": "gemini-2.5-flash-image",
+                    "nano-banana-2-lite": "gemini-3.1-flash-lite-image",
                     "nano-banana-pro": "gemini-3-pro-image",
                     "nano-banana-2": "gemini-3.1-flash-image",
                     "nano-banana": "gemini-2.5-flash-image",
                     "imagen-4-fast": "imagen-4.0-fast",
                     "virtual-try-on": "virtual-try-on-v1",
                     "imagen-3-capability-001": "imagen-3.0-capability-001",
-                    "imagen-3": "imagen-3.0-generate-002",
-                    "imagen-2": "imagegeneration@006",
                 }
                 target_engine = ENGINE_MAP.get(job.model_id, "gemini-2.5-flash-image")
 

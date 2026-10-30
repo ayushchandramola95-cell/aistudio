@@ -441,48 +441,6 @@ const DEFAULT_MODELS: ModelItem[] = [
       recentLatencies: [1.6, 1.8, 1.9, 1.7, 1.8, 1.7, 1.8],
     },
   },
-  {
-    id: "imagen-3",
-    name: "Imagen 3",
-    backend: "Google Vertex AI",
-    status: "ACTIVE",
-    category: "google-image",
-    type: "Vertex AI Image API",
-    cost: 8,
-    latency: "2.1s",
-    region: "us-central1",
-    enabled: true,
-    desc: "Exceptional photorealism, high prompt adherence, crisp legible text rendering. Best for beautiful realistic artwork & product shots.",
-    version: "imagen-3.0-generate-002",
-    requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
-      maxPromptLength: 2500,
-      maxBatchCount: 4,
-      safetyFilterLevel: "block_medium_and_above",
-      personGeneration: "allow_adult",
-      synthIdWatermark: true,
-      minCreditBalance: 8,
-      stepsMin: 20,
-      stepsMax: 50,
-      stepsDefault: 30,
-      cfgMin: 1.0,
-      cfgMax: 15.0,
-      cfgDefault: 7.0,
-      enforceNegativePrompt: true,
-      negativePromptDefault: "blurry, low resolution, bad anatomy, deformed fingers",
-    },
-    monitoring: {
-      calls24h: 3842,
-      p95LatencySec: 2.14,
-      avgLatencySec: 1.82,
-      successRate: "99.98%",
-      errorCount24h: 1,
-      creditsEarned: 30736,
-      uptimePercent: "100.0%",
-      health: "HEALTHY",
-      recentLatencies: [1.8, 1.9, 2.1, 1.7, 2.0, 1.8, 2.2],
-    },
-  },
 ];
 
 const DEFAULT_KEYS: ApiKeyItem[] = [
@@ -1444,7 +1402,7 @@ export default function DedicatedDeveloperConsolePage() {
   -H "Authorization: Bearer sk_live_your_key" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model_id": "imagen-3",
+    "model_id": "nano-banana-2-1",
     "raw_prompt": "A majestic golden eagle soaring above snow-capped Alps, 8k",
     "parameters": { "aspect_ratio": "16:9", "sample_count": 1 }
   }'`}</pre>

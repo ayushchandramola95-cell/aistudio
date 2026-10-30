@@ -137,21 +137,6 @@ const VERTEX_MODELS: VertexModelInfo[] = [
     creditCost: 5,
     highlight: false,
   },
-  {
-    id: "imagen-3",
-    name: "Imagen 3",
-    engine: "imagen-3.0-generate-002",
-    features: [
-      "Exceptional photorealism",
-      "High prompt adherence",
-      "Crisp, legible text rendering",
-    ],
-    bestUseCases: "General Photorealism & High-Quality Design: Beautiful realistic artwork, professional product shots, and text-heavy images.",
-    promptLimit: "~250 - 500 words",
-    watermarking: "Yes (Built-in)",
-    creditCost: 8,
-    highlight: false,
-  },
 ];
 
 export default function ModelMatrix() {
