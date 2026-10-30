@@ -6,13 +6,21 @@ import { Coins, Zap, User as UserIcon, ExternalLink } from "lucide-react";
 
 export default function Header() {
   const [balance, setBalance] = useState<number>(100);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch("http://localhost:8100/api/v1/credits/balance")
+    const token = typeof window !== "undefined" ? localStorage.getItem("aistudio_token") : null;
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    fetch("http://localhost:8100/api/v1/credits/balance", { headers })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && typeof data.available === "number") {
           setBalance(data.available);
+          if (data.available >= 999999) {
+            setIsAdmin(true);
+          }
         }
       })
       .catch(() => {});
@@ -73,23 +81,25 @@ export default function Header() {
           <Coins className="w-4 h-4 text-blue-600 group-hover:rotate-12 transition-transform" />
           <span className="text-xs font-medium text-neutral-500">Balance:</span>
           <span className="text-sm font-bold text-neutral-950 tracking-tight">
-            {balance.toFixed(0)} cr
+            {isAdmin ? "∞ Unlimited" : `${balance.toFixed(0)} cr`}
           </span>
           <span className="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-md font-bold">
-            + Top Up
+            {isAdmin ? "Admin Tier" : "+ Top Up"}
           </span>
         </Link>
 
         {/* User Profile */}
         <div className="flex items-center gap-2.5 pl-2 border-l border-neutral-200">
-          <div className="w-8 h-8 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-700 font-bold text-xs">
-            A
+          <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-200 flex items-center justify-center text-white font-bold text-xs">
+            {isAdmin ? "★" : "A"}
           </div>
           <div className="hidden sm:block text-left">
-            <div className="text-xs font-bold text-neutral-950">Creative Explorer</div>
+            <div className="text-xs font-bold text-neutral-950">
+              {isAdmin ? "Super Admin" : "Creative Explorer"}
+            </div>
             <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Escrow Active
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{isAdmin ? "Unlimited Access" : "Escrow Active"}</span>
             </div>
           </div>
         </div>

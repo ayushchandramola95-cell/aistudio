@@ -63,11 +63,22 @@ class CreditService:
         if not account:
             account = await CreditService.get_or_create_account(session, user_id)
 
+        # Admin unlimited credit protection
+        from services.api.src.models.user import User
+        user_res = await session.execute(select(User).where(User.id == user_id))
+        user_obj = user_res.scalar_one_or_none()
+        is_admin = user_obj is not None and user_obj.role == "admin"
+
         available = float(account.balance) - float(account.reserved)
         if available < amount:
-            raise InsufficientCreditsError(
-                f"You need {amount:.1f} credits, but only have {available:.1f} available."
-            )
+            if is_admin:
+                # Auto-replenish admin for infinite generations
+                account.balance = float(account.balance) + 1000000.0
+                available = float(account.balance) - float(account.reserved)
+            else:
+                raise InsufficientCreditsError(
+                    f"You need {amount:.1f} credits, but only have {available:.1f} available."
+                )
 
         account.reserved = float(account.reserved) + amount
         

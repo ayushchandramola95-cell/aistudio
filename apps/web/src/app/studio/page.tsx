@@ -297,10 +297,14 @@ export default function StudioPage() {
       setElapsedTime(Math.round((Date.now() - startTime) / 100) / 10);
     }, 100);
 
+    const token = typeof window !== "undefined" ? localStorage.getItem("aistudio_token") : null;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     try {
       const res = await fetch("http://localhost:8100/api/v1/jobs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           model_id: selectedModelId,
           task_type: "image_generation",
