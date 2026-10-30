@@ -25,26 +25,38 @@ SUPPORTED_ASPECT_RATIOS = {"1:1", "3:4", "4:3", "9:16", "16:9"}
 class ImageService:
     @staticmethod
     def get_genai_client():
-        """Initializes Google GenAI Client with either Vertex AI or Gemini API key."""
+        """Initializes Google GenAI Client with either Vertex AI (for GCP Cloud Credits) or Gemini API key."""
+        project = settings.GOOGLE_CLOUD_PROJECT or os.environ.get("GOOGLE_CLOUD_PROJECT")
         api_key = (
             settings.GEMINI_API_KEY
             or settings.GOOGLE_GENAI_API_KEY
+            or os.environ.get("GEMINI_API_KEY")
             or os.environ.get("GOOGLE_GENAI_API_KEY")
         )
 
         try:
             from google import genai
 
-            # Cloud Run / Vertex AI native credentials
-            if settings.VERTEX_AI or settings.GOOGLE_CLOUD_PROJECT or os.environ.get("GOOGLE_CLOUD_PROJECT"):
-                project = settings.GOOGLE_CLOUD_PROJECT or os.environ.get("GOOGLE_CLOUD_PROJECT")
+            # 1. Vertex AI Mode: Uses Google Cloud Free Credits ($200/$300)
+            # Active when VERTEX_AI=true or when running inside Google Cloud Run
+            if settings.VERTEX_AI or (project and os.environ.get("K_SERVICE")):
                 return genai.Client(
                     vertexai=True,
                     project=project,
                     location=settings.GOOGLE_CLOUD_REGION,
                 )
-            elif api_key and not api_key.startswith("test"):
+
+            # 2. Direct API Key (Google AI Studio)
+            if api_key and not api_key.startswith("test"):
                 return genai.Client(api_key=api_key)
+
+            # 3. Fallback to Vertex AI if project is specified
+            if project:
+                return genai.Client(
+                    vertexai=True,
+                    project=project,
+                    location=settings.GOOGLE_CLOUD_REGION,
+                )
         except Exception as e:
             logger.warning(f"Google GenAI Client initialization note: {e}")
         return None
