@@ -18,20 +18,34 @@ interface VertexModelInfo {
 
 const VERTEX_MODELS: VertexModelInfo[] = [
   {
-    id: "nano-banana-2",
-    name: "Nano Banana 2",
-    engine: "Gemini 3.1 Flash Image",
+    id: "nano-banana-2-1",
+    name: "Nano Banana 2.1",
+    engine: "Gemini 3.1 Flash Image (Upgraded)",
     features: [
-      "Multi-character consistency (up to 5 characters & 14 objects)",
-      "Real-time Web Search grounding",
-      "Exceptional text-in-image rendering",
+      "Stronger prompt adherence",
+      "Multi-reference consistency",
+      "Production quality generation & edits from 1K to 4K",
     ],
-    bestUseCases:
-      "Interactive & Storytelling Apps: Ideal for generating storyboards, custom comic books, or mockups where characters must remain identical across multiple scenes. Uses real-time search to match current events/niche real-world objects.",
-    promptLimit: "~1,000+ words (Uses Gemini's large context to process long, highly descriptive scenes & character profiles).",
+    bestUseCases: "Flagship Creative Suite: High-resolution 1K to 4K generation, storytelling consistency, and premium commercial assets.",
+    promptLimit: "1K to 4K Native Resolution",
     watermarking: "Yes (Built-in)",
-    creditCost: 5,
+    creditCost: 6,
     highlight: true,
+  },
+  {
+    id: "nano-banana-2-lite",
+    name: "Nano Banana 2 Lite",
+    engine: "Gemini 2.5 Flash Image",
+    features: [
+      "Class leading image generation",
+      "Optimized for high-volume creation",
+      "Latency-sensitive asset production",
+    ],
+    bestUseCases: "High-Volume Real-Time Apps: Fast drafting, social variations, and real-time generation interfaces.",
+    promptLimit: "Optimized for Low Latency",
+    watermarking: "Yes (Built-in)",
+    creditCost: 3,
+    highlight: false,
   },
   {
     id: "nano-banana-pro",
@@ -39,14 +53,88 @@ const VERTEX_MODELS: VertexModelInfo[] = [
     engine: "Gemini 3 Pro Image",
     features: [
       "Complex prompt reasoning",
-      "Professional-grade visual quality",
-      "Advanced editing (inpainting & outpainting)",
+      "Multilingual text rendering",
+      "Deep world knowledge integration",
     ],
-    bestUseCases:
-      "Studio & Marketing Production: High-end graphic design, complex infographics, educational diagrams, and promotional materials that require precise, stylized rendering and custom editing (adjusting lighting, camera angles, color grading).",
-    promptLimit: "~1,000+ words (Excellent for complex prompt chains and reference image inputs).",
+    bestUseCases: "Studio & Marketing Production: Graphic design, infographics, advertising with multilingual typography and camera lighting control.",
+    promptLimit: "~1,000+ words",
     watermarking: "Yes (Built-in)",
     creditCost: 10,
+    highlight: false,
+  },
+  {
+    id: "nano-banana-2",
+    name: "Nano Banana 2",
+    engine: "gemini-3.1-flash-image",
+    features: [
+      "General image generation and editing tasks",
+      "High visual quality",
+      "Low latency response",
+    ],
+    bestUseCases: "Interactive Storytelling: Character consistency across panels, comic design, and real-time grounded scenes.",
+    promptLimit: "High Quality & Low Latency",
+    watermarking: "Yes (Built-in)",
+    creditCost: 5,
+    highlight: false,
+  },
+  {
+    id: "nano-banana",
+    name: "Nano Banana",
+    engine: "gemini-2.5-flash-image",
+    features: [
+      "State-of-the-art image generation",
+      "Advanced multimodal image editing",
+      "Direct Google Cloud integration",
+    ],
+    bestUseCases: "General Purpose Creative Generation: High photorealism, artistic portraits, and multimodal instruction following.",
+    promptLimit: "Multimodal Native",
+    watermarking: "Yes (Built-in)",
+    creditCost: 4,
+    highlight: false,
+  },
+  {
+    id: "imagen-4-fast",
+    name: "Imagen 4 Fast",
+    engine: "Imagen 4 Fast",
+    features: [
+      "Next-generation Imagen architecture",
+      "Fast text prompt execution",
+      "Sub-second composition drafting",
+    ],
+    bestUseCases: "Instant Visual Exploration: Rapid text-to-image concepting and real-time idea drafting.",
+    promptLimit: "Fast Text Prompts",
+    watermarking: "Yes (Built-in)",
+    creditCost: 4,
+    highlight: false,
+  },
+  {
+    id: "virtual-try-on",
+    name: "Virtual try-on",
+    engine: "Google Virtual Try-On",
+    features: [
+      "Specialized apparel simulation",
+      "Accurate fabric drape & lighting",
+      "Photorealistic clothing fit",
+    ],
+    bestUseCases: "E-Commerce & Fashion: Render clothes and garments directly onto custom models and subjects.",
+    promptLimit: "Clothing & Garment Inputs",
+    watermarking: "Yes (Built-in)",
+    creditCost: 8,
+    highlight: false,
+  },
+  {
+    id: "imagen-3-capability-001",
+    name: "Imagen 3 Capability 001",
+    engine: "Imagen 3 Capability 001",
+    features: [
+      "Fast localized image editing",
+      "Precision region inpainting",
+      "Background replacement",
+    ],
+    bestUseCases: "Interactive Photo Editing: Inpainting, object replacement, and generative fill corrections.",
+    promptLimit: "Image Masking & Inpainting",
+    watermarking: "Yes (Built-in)",
+    creditCost: 5,
     highlight: false,
   },
   {
@@ -58,27 +146,10 @@ const VERTEX_MODELS: VertexModelInfo[] = [
       "High prompt adherence",
       "Crisp, legible text rendering",
     ],
-    bestUseCases:
-      "General Photorealism & High-Quality Design: Best for creating beautiful, realistic artwork, professional product shots, and high-fidelity text-heavy images.",
-    promptLimit: "~250 - 500 words (Optimized for concise but highly descriptive text prompts).",
+    bestUseCases: "General Photorealism & High-Quality Design: Beautiful realistic artwork, professional product shots, and text-heavy images.",
+    promptLimit: "~250 - 500 words",
     watermarking: "Yes (Built-in)",
     creditCost: 8,
-    highlight: false,
-  },
-  {
-    id: "imagen-2",
-    name: "Imagen 2",
-    engine: "imagegeneration@006",
-    features: [
-      "Reliable baseline text-to-image",
-      "Image expansion (outpainting)",
-      "Subject editing (inpainting)",
-    ],
-    bestUseCases:
-      "Legacy Applications & High-Volume Tasks: Great for cost-effective standard generation, bulk image assets, and standard image editing tasks like placing product mockups in different environments.",
-    promptLimit: "~250 words",
-    watermarking: "Yes (Built-in)",
-    creditCost: 4,
     highlight: false,
   },
 ];
@@ -89,6 +160,7 @@ export default function ModelMatrix() {
   const filteredModels = VERTEX_MODELS.filter((m) => {
     if (filter === "nano") return m.id.startsWith("nano");
     if (filter === "imagen") return m.id.startsWith("imagen");
+    if (filter === "specialized") return m.id === "virtual-try-on";
     return true;
   });
 
@@ -97,22 +169,23 @@ export default function ModelMatrix() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-6">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-            Google Cloud Vertex AI
+            Google Cloud Vertex AI Official Catalog
           </span>
           <h3 className="text-2xl font-bold text-neutral-950 mt-2 font-editorial text-3xl">
-            Google Cloud Vertex AI Image Generation Models
+            Google Image Generation & Editing Models
           </h3>
           <p className="text-xs text-neutral-500 mt-1">
-            Production generative engines powered by your Google Cloud Vertex AI infrastructure and $200 free trial credits.
+            Complete suite of Google's official image models, from Nano Banana 2.1 to Virtual Try-On and Imagen 4 Fast.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 bg-neutral-100 p-1 rounded-2xl self-start sm:self-center">
+        <div className="flex items-center gap-1.5 bg-neutral-100 p-1 rounded-2xl self-start sm:self-center flex-wrap">
           {[
             { id: "all", label: `All Models (${VERTEX_MODELS.length})` },
             { id: "nano", label: "Nano Banana Series" },
             { id: "imagen", label: "Imagen Series" },
+            { id: "specialized", label: "Specialized" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -134,13 +207,13 @@ export default function ModelMatrix() {
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-neutral-200 text-neutral-400 font-bold uppercase tracking-wider text-[10px]">
-              <th className="pb-3 px-3 min-w-[150px]">Model Name</th>
-              <th className="pb-3 px-3 min-w-[170px]">Underlying Engine</th>
+              <th className="pb-3 px-3 min-w-[170px]">Model Name</th>
+              <th className="pb-3 px-3 min-w-[190px]">Underlying Engine</th>
               <th className="pb-3 px-3 min-w-[260px]">Key Features</th>
               <th className="pb-3 px-3 min-w-[280px]">Best Use Cases / "How it Works"</th>
-              <th className="pb-3 px-3 min-w-[180px]">Max Prompt Length / Limit</th>
-              <th className="pb-3 px-3 min-w-[140px]">Watermarking (SynthID)</th>
-              <th className="pb-3 px-3 min-w-[90px]">Credit Cost</th>
+              <th className="pb-3 px-3 min-w-[170px]">Capability / Limit</th>
+              <th className="pb-3 px-3 min-w-[130px]">Watermark</th>
+              <th className="pb-3 px-3 min-w-[80px]">Cost</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100 text-neutral-700">
@@ -160,7 +233,7 @@ export default function ModelMatrix() {
 
                 {/* Underlying Engine */}
                 <td className="py-4 px-3 align-top font-mono font-semibold text-neutral-800">
-                  <span className="px-2 py-1 rounded-md bg-neutral-100 border border-neutral-200/60 text-xs">
+                  <span className="px-2 py-1 rounded-md bg-neutral-100 border border-neutral-200/60 text-xs inline-block">
                     {m.engine}
                   </span>
                 </td>
@@ -182,7 +255,7 @@ export default function ModelMatrix() {
                   {m.bestUseCases}
                 </td>
 
-                {/* Max Prompt Length */}
+                {/* Max Prompt Length / Limit */}
                 <td className="py-4 px-3 align-top text-neutral-600 leading-snug">
                   {m.promptLimit}
                 </td>
@@ -210,7 +283,7 @@ export default function ModelMatrix() {
       <div className="pt-4 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-500">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Every generation is backed by Google Cloud Vertex AI & Two-Phase Escrow</span>
+          <span>Every model powered by your Google Cloud Vertex AI infrastructure & trial credits</span>
         </div>
         <Link
           href="/studio"

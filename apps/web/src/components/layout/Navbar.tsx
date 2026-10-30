@@ -359,35 +359,63 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
                     {[
                       {
-                        name: "Nano Banana 2",
-                        engine: "Gemini 3.1 Flash Image",
-                        cost: "5 cr",
-                        tag: "Story & Characters",
-                        desc: "Multi-character consistency (up to 5 chars & 14 objects), web search grounding & text rendering",
+                        name: "Nano Banana 2.1",
+                        engine: "Gemini 3.1 Flash Image (Upgraded)",
+                        cost: "6 cr",
+                        tag: "Flagship 4K",
+                        desc: "Upgraded mainstream Gemini image model with stronger prompt adherence, 1K to 4K edits",
+                      },
+                      {
+                        name: "Nano Banana 2 Lite",
+                        engine: "Gemini 2.5 Flash Image",
+                        cost: "3 cr",
+                        tag: "Ultra-Fast",
+                        desc: "Class leading image generation capabilities optimized for high-volume creation",
                       },
                       {
                         name: "Nano Banana Pro",
                         engine: "Gemini 3 Pro Image",
                         cost: "10 cr",
-                        tag: "Studio & Marketing",
-                        desc: "Complex prompt reasoning, professional visual quality, advanced inpainting & outpainting",
+                        tag: "Pro Studio",
+                        desc: "Powerful graphics, multilingual text rendering, and world knowledge",
                       },
                       {
-                        name: "Imagen 3",
-                        engine: "imagen-3.0-generate-002",
-                        cost: "8 cr",
-                        tag: "Photorealism",
-                        desc: "Exceptional photorealism, high prompt adherence & crisp legible text rendering",
+                        name: "Nano Banana 2",
+                        engine: "Gemini 3.1 Flash Image",
+                        cost: "5 cr",
+                        tag: "General & Edit",
+                        desc: "Designed for general image generation and editing tasks, high quality and low latency",
                       },
                       {
-                        name: "Imagen 2",
-                        engine: "imagegeneration@006",
+                        name: "Nano Banana",
+                        engine: "Gemini 2.5 Flash Image",
                         cost: "4 cr",
-                        tag: "High-Volume / Legacy",
-                        desc: "Reliable baseline text-to-image, outpainting expansion & subject inpainting",
+                        tag: "State-of-the-Art",
+                        desc: "State-of-the-art image generation and editing multimodal model",
+                      },
+                      {
+                        name: "Imagen 4 Fast",
+                        engine: "Imagen 4 Fast",
+                        cost: "4 cr",
+                        tag: "Next-Gen Fast",
+                        desc: "Fast image generation with text prompts",
+                      },
+                      {
+                        name: "Virtual try-on",
+                        engine: "Google Virtual Try-On",
+                        cost: "8 cr",
+                        tag: "Fashion & Retail",
+                        desc: "Specialized model to generate images of people trying on clothing",
+                      },
+                      {
+                        name: "Imagen 3 Capability 001",
+                        engine: "Imagen 3 Capability 001",
+                        cost: "5 cr",
+                        tag: "Fast Editing",
+                        desc: "Fast precision image editing and inpainting",
                       },
                     ].map((m) => (
                       <Link

@@ -114,12 +114,18 @@ class ImageService:
 
                 # Vertex AI Target Engine Mapping
                 ENGINE_MAP = {
-                    "nano-banana-2": "gemini-3.1-flash-image",
+                    "nano-banana-2-1": "gemini-3.1-flash-image",
+                    "nano-banana-2-lite": "gemini-2.5-flash-image",
                     "nano-banana-pro": "gemini-3-pro-image",
+                    "nano-banana-2": "gemini-3.1-flash-image",
+                    "nano-banana": "gemini-2.5-flash-image",
+                    "imagen-4-fast": "imagen-4.0-fast",
+                    "virtual-try-on": "virtual-try-on-v1",
+                    "imagen-3-capability-001": "imagen-3.0-capability-001",
                     "imagen-3": "imagen-3.0-generate-002",
                     "imagen-2": "imagegeneration@006",
                 }
-                target_engine = ENGINE_MAP.get(job.model_id, "imagen-3.0-generate-002")
+                target_engine = ENGINE_MAP.get(job.model_id, "gemini-2.5-flash-image")
 
                 if client is not None:
                     try:

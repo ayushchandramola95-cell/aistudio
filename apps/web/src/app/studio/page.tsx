@@ -27,18 +27,30 @@ import {
 } from "lucide-react";
 import { GenerationJob } from "@/types";
 
-// ─── Models (Google Cloud Vertex AI Exclusively) ───────────────────────────
+// ─── Models (Official Google Cloud Image Suite) ───────────────────────────
 const AVAILABLE_MODELS = [
   {
-    id: "nano-banana-2",
-    name: "Nano Banana 2",
+    id: "nano-banana-2-1",
+    name: "Nano Banana 2.1",
     engine: "Gemini 3.1 Flash Image",
-    cost: 5,
-    desc: "Multi-character consistency (up to 5 chars & 14 objects), web search grounding & text rendering",
-    badge: "Story & Characters",
+    cost: 6,
+    desc: "Our upgraded mainstream Gemini image model with stronger prompt adherence, and multi-reference consistency, enabling production quality image generation and edits from 1K to 4K.",
+    badge: "Flagship 4K",
+    badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+    dotColor: "bg-blue-500",
+    maxLimit: "1K to 4K Resolution",
+    synthId: true,
+  },
+  {
+    id: "nano-banana-2-lite",
+    name: "Nano Banana 2 Lite",
+    engine: "Gemini 2.5 Flash Image",
+    cost: 3,
+    desc: "Class leading image generation capabilities, now optimized for high-volume, latency-sensitive asset creation.",
+    badge: "Ultra-Fast",
     badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     dotColor: "bg-emerald-500",
-    maxLimit: "~1,000+ words",
+    maxLimit: "High-Volume",
     synthId: true,
   },
   {
@@ -46,11 +58,71 @@ const AVAILABLE_MODELS = [
     name: "Nano Banana Pro",
     engine: "Gemini 3 Pro Image",
     cost: 10,
-    desc: "Complex prompt reasoning, professional visual quality, inpainting & outpainting",
-    badge: "Studio & Marketing",
+    desc: "A powerful image generation model that combines high quality graphics, text rendering in multiple languages, and world knowledge",
+    badge: "Pro Studio",
     badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
     dotColor: "bg-purple-500",
-    maxLimit: "~1,000+ words",
+    maxLimit: "Multilingual & World Knowledge",
+    synthId: true,
+  },
+  {
+    id: "nano-banana-2",
+    name: "Nano Banana 2",
+    engine: "Gemini 3.1 Flash Image",
+    cost: 5,
+    desc: "gemini-3.1-flash-image is a model designed for general image generation and editing tasks, offering high quality and low latency.",
+    badge: "General & Edit",
+    badgeColor: "bg-teal-50 text-teal-700 border-teal-200",
+    dotColor: "bg-teal-500",
+    maxLimit: "High Quality & Low Latency",
+    synthId: true,
+  },
+  {
+    id: "nano-banana",
+    name: "Nano Banana",
+    engine: "Gemini 2.5 Flash Image",
+    cost: 4,
+    desc: "gemini-2.5-flash-image. State-of-the-art image generation and editing model.",
+    badge: "State-of-the-Art",
+    badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    dotColor: "bg-indigo-500",
+    maxLimit: "Multimodal Native",
+    synthId: true,
+  },
+  {
+    id: "imagen-4-fast",
+    name: "Imagen 4 Fast",
+    engine: "Imagen 4 Fast",
+    cost: 4,
+    desc: "Fast image generation with text prompts.",
+    badge: "Next-Gen Fast",
+    badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
+    dotColor: "bg-amber-500",
+    maxLimit: "Fast Text Prompts",
+    synthId: true,
+  },
+  {
+    id: "virtual-try-on",
+    name: "Virtual try-on",
+    engine: "Google Virtual Try-On",
+    cost: 8,
+    desc: "Specialized model to generate images of people trying on clothing.",
+    badge: "Fashion & Retail",
+    badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+    dotColor: "bg-rose-500",
+    maxLimit: "Clothing Simulation",
+    synthId: true,
+  },
+  {
+    id: "imagen-3-capability-001",
+    name: "Imagen 3 Capability 001",
+    engine: "Imagen 3 Capability 001",
+    cost: 5,
+    desc: "Fast image editing.",
+    badge: "Fast Editing",
+    badgeColor: "bg-cyan-50 text-cyan-700 border-cyan-200",
+    dotColor: "bg-cyan-500",
+    maxLimit: "Precision Editing",
     synthId: true,
   },
   {
@@ -63,18 +135,6 @@ const AVAILABLE_MODELS = [
     badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
     dotColor: "bg-blue-500",
     maxLimit: "~250 - 500 words",
-    synthId: true,
-  },
-  {
-    id: "imagen-2",
-    name: "Imagen 2",
-    engine: "imagegeneration@006",
-    cost: 4,
-    desc: "Reliable baseline text-to-image, outpainting expansion & subject inpainting",
-    badge: "High-Volume / Legacy",
-    badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
-    dotColor: "bg-amber-500",
-    maxLimit: "~250 words",
     synthId: true,
   },
 ];
@@ -578,12 +638,12 @@ export default function StudioPage() {
               </button>
 
               {modelMenuOpen && (
-                <div className="absolute left-0 bottom-full mb-2 w-[350px] bg-white rounded-2xl border border-neutral-200 shadow-[0_8px_40px_rgba(0,0,0,0.12)] p-2 z-40 animate-spring">
-                  <div className="px-3 pb-2 pt-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                    <span>Google Vertex AI Models</span>
-                    <span className="text-blue-600 font-medium">Free Credits Active</span>
+                <div className="absolute left-0 bottom-full mb-2 w-[380px] max-h-[460px] flex flex-col bg-white rounded-2xl border border-neutral-200 shadow-[0_8px_40px_rgba(0,0,0,0.12)] p-2 z-40 animate-spring">
+                  <div className="px-3 pb-2 pt-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-400 border-b border-neutral-100 shrink-0">
+                    <span>Google Image Models ({AVAILABLE_MODELS.length})</span>
+                    <span className="text-blue-600 font-medium">Vertex AI Active</span>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 overflow-y-auto pt-1 pr-1 flex-1">
                     {AVAILABLE_MODELS.map((m) => (
                       <button
                         key={m.id}
