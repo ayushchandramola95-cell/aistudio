@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm run dev --workspace=@aistudio/web",
     "web:dev": "npm run dev --workspace=@aistudio/web",
     "web:build": "npm run build --workspace=@aistudio/web"
   }
