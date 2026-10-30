@@ -27,7 +27,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="h-[72px] border-b border-neutral-200/90 bg-white/95 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 transition-all">
+    <header className="h-[72px] shrink-0 border-b border-neutral-200/90 bg-white/95 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 transition-all">
       {/* Brand & Workspace */}
       <div className="flex items-center gap-3 sm:gap-5 shrink-0">
         <Link href="/" className="flex items-center gap-2.5 group">

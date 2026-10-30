@@ -395,6 +395,98 @@ const INITIAL_REFERENCES = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// OFFICIAL MODEL LOGO RENDERER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderOfficialLogo(modelId: string, className = "w-8 h-8") {
+  if (modelId.startsWith("nano-banana")) {
+    // Official Google 'G' Logo
+    return (
+      <div className={`${className} rounded-xl bg-white border border-neutral-200/90 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full">
+          <path
+            fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+          />
+        </svg>
+      </div>
+    );
+  }
+
+  if (modelId === "flux-1-dev") {
+    // Official Black Forest Labs (BFL) FLUX Logo
+    return (
+      <div className={`${className} rounded-xl bg-black border border-neutral-900 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 4h7v7H3V4zm11 0h7v7h-7V4zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z" fill="#FFFFFF" fillOpacity="0.8" />
+          <path d="M12 7.5L16.5 12L12 16.5L7.5 12L12 7.5Z" fill="#38BDF8" />
+        </svg>
+      </div>
+    );
+  }
+
+  if (modelId === "qwen-image") {
+    // Official Alibaba / Qwen Logo
+    return (
+      <div className={`${className} rounded-xl bg-gradient-to-tr from-[#615CED] to-[#8C52FF] shadow-2xs flex items-center justify-center shrink-0 p-1.5 border border-indigo-400/30`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full text-white" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" fill="white" fillOpacity="0.25" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+      </div>
+    );
+  }
+
+  if (modelId === "sdxl") {
+    // Official Stability AI Logo
+    return (
+      <div className={`${className} rounded-xl bg-[#0B0F19] border border-neutral-800 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="8" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="3 3"/>
+          <circle cx="12" cy="12" r="5" stroke="#EC4899" strokeWidth="2"/>
+          <circle cx="12" cy="12" r="2" fill="#38BDF8"/>
+        </svg>
+      </div>
+    );
+  }
+
+  if (modelId === "realvis-xl") {
+    // RealVisXL Photographic Aperture Logo
+    return (
+      <div className={`${className} rounded-xl bg-neutral-900 border border-neutral-800 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full text-amber-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+    );
+  }
+
+  // Juggernaut & other engines
+  return (
+    <div className={`${className} rounded-xl bg-gradient-to-tr from-slate-900 to-slate-800 border border-slate-700 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
+      <svg viewBox="0 0 24 24" className="w-full h-full text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -838,88 +930,60 @@ export default function StudioPage() {
                     <div
                       key={m.id}
                       onClick={() => setSelectedModelId(m.id)}
-                      className={`group relative w-[230px] shrink-0 p-3.5 rounded-2xl border transition-all cursor-pointer bg-white flex flex-col justify-between ${
+                      className={`group relative h-[54px] min-w-[210px] sm:min-w-[220px] shrink-0 px-3.5 rounded-2xl border transition-all cursor-pointer bg-white flex items-center justify-between gap-3 ${
                         isSelected
-                          ? "border-blue-600 shadow-card-elevated ring-2 ring-blue-500/20"
-                          : "border-neutral-200/90 hover:border-neutral-300 hover:shadow-subtle"
+                          ? "border-blue-600 shadow-sm ring-2 ring-blue-500/20 bg-blue-50/20"
+                          : "border-neutral-200/90 hover:border-neutral-300 hover:shadow-2xs"
                       }`}
                     >
-                      <div>
-                        {/* Top Row: Avatar/Icon + Titles + Badges + Favorite */}
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 border ${m.iconBg || "bg-neutral-100 border-neutral-200"}`}
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {renderOfficialLogo(m.id)}
+
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-neutral-950 truncate">
+                            {m.name}
+                          </div>
+                          <div className="text-[10px] text-neutral-400 font-medium truncate flex items-center gap-1">
+                            <span>{m.provider}</span>
+                            <span>•</span>
+                            <span className="text-amber-600 font-bold">{m.cost} cr</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        {isSelected ? (
+                          <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => toggleFavoriteModel(m.id, e)}
+                            className="p-1 text-neutral-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Add to Favorites"
                           >
-                            {m.avatarIcon || "🤖"}
-                          </div>
-
-                          <div className="flex-1 min-w-0 space-y-0.5">
-                            <div className="flex items-center justify-between gap-1">
-                              <h4 className="text-xs font-bold text-neutral-950 truncate">
-                                {m.name}
-                              </h4>
-                              <button
-                                type="button"
-                                onClick={(e) => toggleFavoriteModel(m.id, e)}
-                                className="p-0.5 text-neutral-300 hover:text-rose-500 transition-colors"
-                                title="Add to Favorites"
-                              >
-                                <Heart className={`w-3.5 h-3.5 ${isFav ? "fill-rose-500 text-rose-500" : ""}`} />
-                              </button>
-                            </div>
-
-                            <p className="text-[11px] text-neutral-400 font-medium">
-                              {m.provider}
-                            </p>
-
-                            <div className="flex items-center gap-1 pt-0.5">
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border leading-tight ${m.badgeColor}`}>
-                                {m.badge}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        <p className="mt-2.5 text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
-                          {m.desc}
-                        </p>
+                            <Heart className={`w-3.5 h-3.5 ${isFav ? "fill-rose-500 text-rose-500 opacity-100" : ""}`} />
+                          </button>
+                        )}
                       </div>
-
-                      {/* Bottom Specs & Cost Tag */}
-                      <div className="mt-3 pt-2.5 border-t border-neutral-100 flex items-center justify-between text-[10px]">
-                        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
-                          {m.maxResolution.includes("4K") ? "4K" : "2K"}
-                        </span>
-                        <span className="inline-flex items-center gap-1 font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                          <span>⚡</span>
-                          <span>{m.cost} cr</span>
-                        </span>
-                      </div>
-
-                      {/* Active Selected Checkmark */}
-                      {isSelected && (
-                        <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs">
-                          <Check className="w-3 h-3 stroke-[3]" />
-                        </div>
-                      )}
                     </div>
                   );
                 })}
 
-                {/* "More Models" Card Triggering the Big Modal */}
+                {/* Compact "More Models" Card Triggering the Big Modal */}
                 <div
                   onClick={() => setModelModalOpen(true)}
-                  className="group relative w-[160px] shrink-0 p-3.5 rounded-2xl border border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/50 hover:bg-white transition-all cursor-pointer flex flex-col items-center justify-center text-center space-y-2"
+                  className="group relative h-[54px] min-w-[145px] shrink-0 px-3 rounded-2xl border border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/50 hover:bg-white transition-all cursor-pointer flex items-center gap-2.5"
                 >
-                  <div className="w-10 h-10 rounded-full bg-neutral-100 group-hover:bg-neutral-900 group-hover:text-white flex items-center justify-center transition-colors text-neutral-600">
-                    <Layers className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-xl bg-neutral-100 group-hover:bg-neutral-900 group-hover:text-white flex items-center justify-center transition-colors text-neutral-600 shrink-0">
+                    <Layers className="w-4 h-4" />
                   </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-neutral-950">More Models</h4>
-                    <p className="text-[10px] text-blue-600 font-bold group-hover:underline flex items-center justify-center gap-0.5 mt-0.5">
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-bold text-neutral-950 truncate">More Models</h4>
+                    <p className="text-[10px] text-blue-600 font-bold group-hover:underline flex items-center gap-0.5">
                       <span>View All</span>
-                      <ArrowRight className="w-3 h-3" />
+                      <ArrowRight className="w-2.5 h-2.5" />
                     </p>
                   </div>
                 </div>
@@ -928,7 +992,7 @@ export default function StudioPage() {
               {/* Left & Right Chevron Arrows */}
               <button
                 type="button"
-                onClick={() => modelScrollRef.current?.scrollBy({ left: -260, behavior: "smooth" })}
+                onClick={() => modelScrollRef.current?.scrollBy({ left: -240, behavior: "smooth" })}
                 className="absolute -left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white border border-neutral-200/90 shadow-md text-neutral-700 hover:text-neutral-950 flex items-center justify-center cursor-pointer transition-all hover:scale-105 z-10 opacity-0 group-hover/models:opacity-100"
                 aria-label="Scroll left"
               >
@@ -936,7 +1000,7 @@ export default function StudioPage() {
               </button>
               <button
                 type="button"
-                onClick={() => modelScrollRef.current?.scrollBy({ left: 260, behavior: "smooth" })}
+                onClick={() => modelScrollRef.current?.scrollBy({ left: 240, behavior: "smooth" })}
                 className="absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white border border-neutral-200/90 shadow-md text-neutral-700 hover:text-neutral-950 flex items-center justify-center cursor-pointer transition-all hover:scale-105 z-10 opacity-0 group-hover/models:opacity-100"
                 aria-label="Scroll right"
               >
@@ -1790,11 +1854,7 @@ export default function StudioPage() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 border ${m.iconBg || "bg-neutral-100 border-neutral-200"}`}
-                        >
-                          {m.avatarIcon || "🤖"}
-                        </div>
+                        {renderOfficialLogo(m.id, "w-10 h-10")}
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="text-sm font-bold text-neutral-950">{m.name}</h4>

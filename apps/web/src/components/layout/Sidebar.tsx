@@ -85,7 +85,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 border-r border-neutral-200/90 bg-white flex flex-col justify-between shrink-0 hidden lg:flex h-[calc(100vh-72px)] sticky top-[72px] overflow-y-auto scrollbar-thin">
+    <aside className="w-64 border-r border-neutral-200/90 bg-white flex flex-col justify-between shrink-0 hidden lg:flex h-full overflow-y-auto scrollbar-thin">
       <div className="p-3 space-y-5">
         {navigationItems.map((group) => (
           <div key={group.category} className="space-y-1">

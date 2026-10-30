@@ -15,12 +15,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#FBFBFD] text-neutral-950 flex flex-col antialiased">
+    <div className="h-screen bg-[#FBFBFD] text-neutral-950 flex flex-col overflow-hidden antialiased">
       <Header />
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
-        <main className={`flex-1 overflow-y-auto bg-[#FBFBFD] ${pathname === "/studio" ? "p-4 sm:p-6" : "p-6 md:p-8"}`}>
-          <div className={`${pathname === "/studio" ? "max-w-[1740px]" : "max-w-7xl"} mx-auto`}>{children}</div>
+        <main className={`flex-1 h-full overflow-y-auto bg-[#FBFBFD] ${pathname === "/studio" ? "p-4 sm:p-6" : "p-6 md:p-8"}`}>
+          <div className={`${pathname === "/studio" ? "max-w-[1740px]" : "max-w-7xl"} mx-auto pb-16`}>{children}</div>
         </main>
       </div>
     </div>
