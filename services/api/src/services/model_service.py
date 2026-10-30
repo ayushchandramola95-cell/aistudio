@@ -1,21 +1,86 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from services.api.src.models.model_registry import ModelRegistry
 
 INITIAL_MODELS = [
     {
+        "id": "nano-banana-2",
+        "display_name": "Nano Banana 2",
+        "provider": "google-cloud",
+        "family": "gemini-image",
+        "version": "gemini-3.1-flash-image",
+        "backend_type": "hosted_api",
+        "supported_tasks": ["text-to-image", "multi-character", "storyboarding", "web-grounded"],
+        "parameter_schema": {
+            "underlying_engine": "Gemini 3.1 Flash Image",
+            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "max_prompt_words": "~1,000+ words",
+            "multi_character_limit": 5,
+            "objects_limit": 14,
+            "web_search_grounding": True,
+            "synthid_watermark": True,
+            "features": [
+                "Multi-character consistency (up to 5 characters & 14 objects)",
+                "Real-time Web Search grounding",
+                "Exceptional text-in-image rendering"
+            ],
+            "best_use_cases": "Interactive & Storytelling Apps: Ideal for generating storyboards, custom comic books, or mockups where characters must remain identical across multiple scenes. Uses real-time search to match current events/niche real-world objects."
+        },
+        "base_credit_cost": 5.0,
+        "cost_multiplier_rules": {"aspect_ratio": 1.0, "batch": 1.0},
+        "min_vram_gb": None,
+        "status": "active",
+        "commercial_license": "google-cloud-commercial",
+        "is_approved_for_paid": True
+    },
+    {
+        "id": "nano-banana-pro",
+        "display_name": "Nano Banana Pro",
+        "provider": "google-cloud",
+        "family": "gemini-image",
+        "version": "gemini-3-pro-image",
+        "backend_type": "hosted_api",
+        "supported_tasks": ["text-to-image", "inpainting", "outpainting", "complex-reasoning"],
+        "parameter_schema": {
+            "underlying_engine": "Gemini 3 Pro Image",
+            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "max_prompt_words": "~1,000+ words",
+            "advanced_editing": ["inpainting", "outpainting"],
+            "synthid_watermark": True,
+            "features": [
+                "Complex prompt reasoning",
+                "Professional-grade visual quality",
+                "Advanced editing (inpainting & outpainting)"
+            ],
+            "best_use_cases": "Studio & Marketing Production: High-end graphic design, complex infographics, educational diagrams, and promotional materials that require precise, stylized rendering and custom editing (adjusting lighting, camera angles, color grading)."
+        },
+        "base_credit_cost": 10.0,
+        "cost_multiplier_rules": {"aspect_ratio": 1.0, "batch": 1.0},
+        "min_vram_gb": None,
+        "status": "active",
+        "commercial_license": "google-cloud-commercial",
+        "is_approved_for_paid": True
+    },
+    {
         "id": "imagen-3",
-        "display_name": "Google Imagen 3 (High Quality)",
+        "display_name": "Imagen 3",
         "provider": "google-cloud",
         "family": "imagen",
-        "version": "3.0-generate-002",
+        "version": "imagen-3.0-generate-002",
         "backend_type": "hosted_api",
         "supported_tasks": ["text-to-image", "image-to-image"],
         "parameter_schema": {
+            "underlying_engine": "imagen-3.0-generate-002",
             "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "max_prompt_words": "~250 - 500 words",
             "sample_count": [1, 2, 4],
-            "person_generation": ["allow_adult", "dont_allow"],
-            "safety_filter_level": ["block_medium_and_above", "block_low_and_above", "block_none"]
+            "synthid_watermark": True,
+            "features": [
+                "Exceptional photorealism",
+                "High prompt adherence",
+                "Crisp, legible text rendering"
+            ],
+            "best_use_cases": "General Photorealism & High-Quality Design: Best for creating beautiful, realistic artwork, professional product shots, and high-fidelity text-heavy images."
         },
         "base_credit_cost": 8.0,
         "cost_multiplier_rules": {"aspect_ratio": 1.0, "batch": 1.0},
@@ -25,178 +90,30 @@ INITIAL_MODELS = [
         "is_approved_for_paid": True
     },
     {
-        "id": "imagen-3-fast",
-        "display_name": "Google Imagen 3 Fast",
+        "id": "imagen-2",
+        "display_name": "Imagen 2",
         "provider": "google-cloud",
         "family": "imagen",
-        "version": "3.0-fast-generate-001",
+        "version": "imagegeneration@006",
         "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-image"],
+        "supported_tasks": ["text-to-image", "outpainting", "inpainting"],
         "parameter_schema": {
+            "underlying_engine": "imagegeneration@006",
             "aspect_ratios": ["1:1", "16:9", "9:16", "4:3"],
-            "sample_count": [1, 2],
-            "person_generation": ["allow_adult", "dont_allow"]
+            "max_prompt_words": "~250 words",
+            "synthid_watermark": True,
+            "features": [
+                "Reliable baseline text-to-image",
+                "Image expansion (outpainting)",
+                "Subject editing (inpainting)"
+            ],
+            "best_use_cases": "Legacy Applications & High-Volume Tasks: Great for cost-effective standard generation, bulk image assets, and standard image editing tasks like placing product mockups in different environments."
         },
         "base_credit_cost": 4.0,
-        "cost_multiplier_rules": {},
+        "cost_multiplier_rules": {"aspect_ratio": 1.0},
         "min_vram_gb": None,
         "status": "active",
         "commercial_license": "google-cloud-commercial",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "imagen-3-edit",
-        "display_name": "Google Imagen 3 Inpainting & Edit",
-        "provider": "google-cloud",
-        "family": "imagen",
-        "version": "3.0-generate-002",
-        "backend_type": "hosted_api",
-        "supported_tasks": ["image-to-image", "inpainting"],
-        "parameter_schema": {
-            "requires_mask": True,
-            "aspect_ratios": ["1:1", "16:9", "9:16"]
-        },
-        "base_credit_cost": 10.0,
-        "cost_multiplier_rules": {},
-        "min_vram_gb": None,
-        "status": "active",
-        "commercial_license": "google-cloud-commercial",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "imagen-3-upscale",
-        "display_name": "Google Imagen 4K Upscaler",
-        "provider": "google-cloud",
-        "family": "imagen",
-        "version": "3.0-upscale",
-        "backend_type": "hosted_api",
-        "supported_tasks": ["image-upscaling"],
-        "parameter_schema": {
-            "upscale_factor": ["2x", "4x"]
-        },
-        "base_credit_cost": 4.0,
-        "cost_multiplier_rules": {"4x": 2.0},
-        "min_vram_gb": None,
-        "status": "active",
-        "commercial_license": "google-cloud-commercial",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "flux-1-schnell",
-        "display_name": "FLUX.1 Schnell",
-        "provider": "black-forest-labs",
-        "family": "flux",
-        "version": "1.0",
-        "backend_type": "gpu_worker",
-        "supported_tasks": ["text-to-image"],
-        "parameter_schema": {
-            "steps": {"min": 4, "max": 12, "default": 4},
-            "guidance_scale": {"min": 1.0, "max": 7.0, "default": 3.5},
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3"]
-        },
-        "base_credit_cost": 6.0,
-        "cost_multiplier_rules": {},
-        "min_vram_gb": 16.0,
-        "status": "active",
-        "commercial_license": "apache-2.0",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "flux-1-dev",
-        "display_name": "FLUX.1 Dev",
-        "provider": "black-forest-labs",
-        "family": "flux",
-        "version": "1.0",
-        "backend_type": "gpu_worker",
-        "supported_tasks": ["text-to-image"],
-        "parameter_schema": {
-            "steps": {"min": 20, "max": 50, "default": 28},
-            "guidance_scale": {"min": 1.0, "max": 12.0, "default": 4.5},
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3"]
-        },
-        "base_credit_cost": 10.0,
-        "cost_multiplier_rules": {},
-        "min_vram_gb": 24.0,
-        "status": "active",
-        "commercial_license": "bfl-non-commercial-api",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "sd-3-5",
-        "display_name": "Stable Diffusion 3.5 Large",
-        "provider": "stability-ai",
-        "family": "sd3",
-        "version": "3.5",
-        "backend_type": "gpu_worker",
-        "supported_tasks": ["text-to-image"],
-        "parameter_schema": {
-            "steps": {"min": 20, "max": 40, "default": 25},
-            "guidance_scale": {"min": 1.0, "max": 10.0, "default": 4.5},
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3"]
-        },
-        "base_credit_cost": 5.0,
-        "cost_multiplier_rules": {},
-        "min_vram_gb": 16.0,
-        "status": "active",
-        "commercial_license": "stability-community",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "gemini-2-flash",
-        "display_name": "Google Gemini 2.0 Flash",
-        "provider": "google-cloud",
-        "family": "gemini",
-        "version": "2.0-flash",
-        "backend_type": "hosted_api",
-        "supported_tasks": ["text-generation", "prompt-enhancement", "multimodal"],
-        "parameter_schema": {
-            "temperature": {"min": 0.0, "max": 2.0, "default": 0.7},
-            "max_tokens": {"min": 100, "max": 8192, "default": 2048}
-        },
-        "base_credit_cost": 1.0,
-        "cost_multiplier_rules": {},
-        "min_vram_gb": None,
-        "status": "active",
-        "commercial_license": "google-cloud-commercial",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "veo-2",
-        "display_name": "Google Veo 2",
-        "provider": "google-cloud",
-        "family": "veo",
-        "version": "2.0",
-        "backend_type": "hosted_api",
-        "supported_tasks": ["text-to-video", "image-to-video"],
-        "parameter_schema": {
-            "duration_seconds": [3, 5, 8],
-            "aspect_ratios": ["16:9", "9:16"],
-            "resolution": ["720p", "1080p"]
-        },
-        "base_credit_cost": 80.0,
-        "cost_multiplier_rules": {"1080p": 1.5, "duration_8s": 1.6},
-        "min_vram_gb": None,
-        "status": "active",
-        "commercial_license": "google-cloud-commercial",
-        "is_approved_for_paid": True
-    },
-    {
-        "id": "kokoro-tts",
-        "display_name": "Kokoro TTS",
-        "provider": "open-source",
-        "family": "kokoro",
-        "version": "0.19",
-        "backend_type": "gpu_worker",
-        "supported_tasks": ["text-to-speech"],
-        "parameter_schema": {
-            "voices": ["af_bella", "af_sarah", "am_adam", "am_michael", "bf_emma"],
-            "speed": {"min": 0.5, "max": 2.0, "default": 1.0}
-        },
-        "base_credit_cost": 2.0,
-        "cost_multiplier_rules": {},
-        "min_vram_gb": 4.0,
-        "status": "active",
-        "commercial_license": "apache-2.0",
         "is_approved_for_paid": True
     }
 ]
@@ -204,17 +121,33 @@ INITIAL_MODELS = [
 class ModelService:
     @staticmethod
     async def seed_initial_models(session: AsyncSession):
+        allowed_ids = {m["id"] for m in INITIAL_MODELS}
+
+        # 1. Purge / remove any legacy models not in the approved Vertex AI set
+        await session.execute(
+            delete(ModelRegistry).where(ModelRegistry.id.not_in(allowed_ids))
+        )
+
+        # 2. Upsert each approved model
         for model_data in INITIAL_MODELS:
             existing = await session.execute(
                 select(ModelRegistry).where(ModelRegistry.id == model_data["id"])
             )
-            if not existing.scalar_one_or_none():
-                model_entry = ModelRegistry(**model_data)
-                session.add(model_entry)
+            model_entry = existing.scalar_one_or_none()
+            if not model_entry:
+                session.add(ModelRegistry(**model_data))
+            else:
+                for k, v in model_data.items():
+                    setattr(model_entry, k, v)
+
         await session.commit()
 
     @staticmethod
     async def list_models(session: AsyncSession) -> list[ModelRegistry]:
-        query = select(ModelRegistry).where(ModelRegistry.status != "disabled")
+        allowed_ids = {m["id"] for m in INITIAL_MODELS}
+        query = select(ModelRegistry).where(
+            ModelRegistry.id.in_(allowed_ids),
+            ModelRegistry.status != "disabled"
+        )
         result = await session.execute(query)
         return list(result.scalars().all())

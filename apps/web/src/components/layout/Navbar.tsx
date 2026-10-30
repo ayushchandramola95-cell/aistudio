@@ -344,124 +344,81 @@ export default function Navbar({ onOpenAuth }: NavbarProps) {
               </button>
 
               {activeDropdown === "models" && (
-                <div className="absolute top-full -left-28 mt-3 w-[820px] bg-white rounded-3xl p-6 border border-neutral-200/90 shadow-2xl shadow-neutral-900/15 animate-in fade-in slide-in-from-top-2 duration-150 z-50">
+                <div className="absolute top-full -left-28 mt-3 w-[780px] bg-white rounded-3xl p-6 border border-neutral-200/90 shadow-2xl shadow-neutral-900/15 animate-in fade-in slide-in-from-top-2 duration-150 z-50">
                   <div className="flex items-center justify-between border-b border-neutral-100 pb-3 mb-4">
                     <div>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
-                        Unified Model Catalog
+                        Google Cloud Vertex AI Image Models
                       </h4>
                       <div className="text-xs font-bold text-neutral-950 mt-0.5">
-                        Dual-Path Engine: Cloud APIs & Rented GPU Inference
+                        Native Cloud Architecture Powered by Google Cloud Trial Credits ($200)
                       </div>
                     </div>
                     <span className="text-[11px] font-semibold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
-                      12 Active Models
+                      4 Active Models
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-6">
-                    
-                    {/* Category 1: Image Models */}
-                    <div className="space-y-2">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-blue-600 mb-2">
-                        Image Synthesis
-                      </div>
-                      {[
-                        { name: "Google Imagen 3", cost: "8 cr", tag: "Cloud API", desc: "Top-tier photorealism & text rendering" },
-                        { name: "FLUX.1 Schnell", cost: "6 cr", tag: "GPU Worker", desc: "Ultra-fast 4-step generation" },
-                        { name: "FLUX.1 Dev", cost: "10 cr", tag: "GPU Worker", desc: "High-fidelity guidance & prompt accuracy" },
-                        { name: "Stable Diffusion 3.5", cost: "5 cr", tag: "Open-Weight", desc: "Versatile creative illustration styles" },
-                      ].map((m) => (
-                        <Link
-                          key={m.name}
-                          href="/studio"
-                          onClick={() => setActiveDropdown(null)}
-                          className="block p-2.5 rounded-xl hover:bg-neutral-50 transition-colors border border-transparent hover:border-neutral-200/80"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-neutral-900">{m.name}</span>
-                            <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">{m.cost}</span>
-                          </div>
-                          <div className="text-[10px] text-neutral-500 font-normal mt-0.5">{m.desc}</div>
-                        </Link>
-                      ))}
-                    </div>
-
-                    {/* Category 2: Video & Audio Models */}
-                    <div className="space-y-2">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-purple-600 mb-2">
-                        Video & Audio
-                      </div>
-                      {[
-                        { name: "Google Veo 2", cost: "80 cr", tag: "Cloud API", desc: "Cinematic 1080p motion & camera pans" },
-                        { name: "Wan AI 2.1", cost: "60 cr", tag: "GPU Worker", desc: "Open-weight video foundation model" },
-                        { name: "HunyuanVideo", cost: "70 cr", tag: "GPU Worker", desc: "High temporal physics consistency" },
-                        { name: "Kokoro TTS", cost: "2 cr", tag: "Open-Weight", desc: "Lightweight natural human speech" },
-                        { name: "Faster-Whisper", cost: "1 cr/min", tag: "GPU Worker", desc: "Multi-lingual audio transcription" },
-                      ].map((m) => (
-                        <Link
-                          key={m.name}
-                          href="/studio"
-                          onClick={() => setActiveDropdown(null)}
-                          className="block p-2.5 rounded-xl hover:bg-neutral-50 transition-colors border border-transparent hover:border-neutral-200/80"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-neutral-900">{m.name}</span>
-                            <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">{m.cost}</span>
-                          </div>
-                          <div className="text-[10px] text-neutral-500 font-normal mt-0.5">{m.desc}</div>
-                        </Link>
-                      ))}
-                    </div>
-
-                    {/* Category 3: Reasoning & Hardware */}
-                    <div className="space-y-2">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 mb-2">
-                        Reasoning & GPU Nodes
-                      </div>
-                      {[
-                        { name: "Gemini 2.0 Flash", cost: "1 cr", tag: "Cloud API", desc: "Low-latency prompt expansion & logic" },
-                        { name: "Qwen 2.5 72B", cost: "2 cr", tag: "GPU Worker", desc: "Creative screenplay & story director" },
-                        { name: "RTX 6000 Ada GPU", cost: "Auto-Stop", tag: "Hardware", desc: "96GB VRAM on-demand GPU clusters" },
-                      ].map((m) => (
-                        <Link
-                          key={m.name}
-                          href="/admin"
-                          onClick={() => setActiveDropdown(null)}
-                          className="block p-2.5 rounded-xl hover:bg-neutral-50 transition-colors border border-transparent hover:border-neutral-200/80"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-neutral-900">{m.name}</span>
-                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">{m.cost}</span>
-                          </div>
-                          <div className="text-[10px] text-neutral-500 font-normal mt-0.5">{m.desc}</div>
-                        </Link>
-                      ))}
-
-                      <div className="pt-2">
-                        <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-1.5">
-                          <div className="text-[11px] font-bold text-neutral-900">Custom Checkpoint Support</div>
-                          <p className="text-[10px] text-neutral-500 leading-snug">
-                            Upload LoRAs and safetensors to run private inference on dedicated workers.
-                          </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      {
+                        name: "Nano Banana 2",
+                        engine: "Gemini 3.1 Flash Image",
+                        cost: "5 cr",
+                        tag: "Story & Characters",
+                        desc: "Multi-character consistency (up to 5 chars & 14 objects), web search grounding & text rendering",
+                      },
+                      {
+                        name: "Nano Banana Pro",
+                        engine: "Gemini 3 Pro Image",
+                        cost: "10 cr",
+                        tag: "Studio & Marketing",
+                        desc: "Complex prompt reasoning, professional visual quality, advanced inpainting & outpainting",
+                      },
+                      {
+                        name: "Imagen 3",
+                        engine: "imagen-3.0-generate-002",
+                        cost: "8 cr",
+                        tag: "Photorealism",
+                        desc: "Exceptional photorealism, high prompt adherence & crisp legible text rendering",
+                      },
+                      {
+                        name: "Imagen 2",
+                        engine: "imagegeneration@006",
+                        cost: "4 cr",
+                        tag: "High-Volume / Legacy",
+                        desc: "Reliable baseline text-to-image, outpainting expansion & subject inpainting",
+                      },
+                    ].map((m) => (
+                      <Link
+                        key={m.name}
+                        href="/studio"
+                        onClick={() => setActiveDropdown(null)}
+                        className="block p-3.5 rounded-2xl hover:bg-neutral-50 transition-colors border border-neutral-100 hover:border-neutral-200/80"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-neutral-950">{m.name}</span>
+                          <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">{m.cost}</span>
                         </div>
-                      </div>
-                    </div>
-
+                        <div className="text-[10px] font-mono text-neutral-500 mt-0.5">{m.engine} • {m.tag}</div>
+                        <div className="text-[11px] text-neutral-600 font-normal mt-1 leading-snug">{m.desc}</div>
+                      </Link>
+                    ))}
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between">
-                    <span className="text-xs text-neutral-500">
-                      All models are vetted for commercial legality and licensing compliance.
+                  <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-500">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Every model includes built-in SynthID digital watermarking</span>
                     </span>
-                    <a
-                      href="#matrix"
+                    <Link
+                      href="/developers"
                       onClick={() => setActiveDropdown(null)}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      className="font-bold text-neutral-950 hover:underline flex items-center gap-1"
                     >
-                      <span>Explore Full Capability & Benchmark Matrix</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </a>
+                      <span>Model Configuration Console</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
                   </div>
                 </div>
               )}

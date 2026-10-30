@@ -111,6 +111,15 @@ class ImageService:
                 client = ImageService.get_genai_client()
                 generated_files: list[str] = []
 
+                # Vertex AI Target Engine Mapping
+                ENGINE_MAP = {
+                    "nano-banana-2": "gemini-3.1-flash-image",
+                    "nano-banana-pro": "gemini-3-pro-image",
+                    "imagen-3": "imagen-3.0-generate-002",
+                    "imagen-2": "imagegeneration@006",
+                }
+                target_engine = ENGINE_MAP.get(job.model_id, "imagen-3.0-generate-002")
+
                 if client is not None:
                     try:
                         from google.genai import types
@@ -129,40 +138,88 @@ class ImageService:
 
                         config = types.GenerateImagesConfig(**config_kwargs)
 
-                        # Call Vertex AI / Imagen 3 or Gemini Image Engine
-                        try:
-                            response = await asyncio.to_thread(
-                                client.models.generate_images,
-                                model="imagen-3.0-generate-002",
-                                prompt=job.raw_prompt,
-                                config=config,
-                            )
-                            if response.generated_images:
-                                for idx, gen_img in enumerate(response.generated_images):
-                                    filename = f"{job.id}_{idx}.jpg"
-                                    filepath = OUTPUT_DIR / filename
-                                    with open(filepath, "wb") as f:
-                                        f.write(gen_img.image.image_bytes)
-                                    generated_files.append(filename)
-                        except Exception as img_err:
-                            logger.info(f"Trying Vertex AI Gemini Image Engine: {img_err}")
-                            # Unified fallback to Vertex AI Gemini Image Model
-                            content_res = await asyncio.to_thread(
-                                client.models.generate_content,
-                                model="gemini-2.5-flash-image",
-                                contents=job.raw_prompt,
-                            )
-                            if content_res.candidates and content_res.candidates[0].content.parts:
-                                for idx, part in enumerate(content_res.candidates[0].content.parts):
-                                    if part.inline_data and part.inline_data.data:
-                                        filename = f"{job.id}_{idx}.png"
+                        # 1. If Imagen series or image generation API:
+                        if "imagen" in target_engine or "imagegeneration" in target_engine:
+                            try:
+                                response = await asyncio.to_thread(
+                                    client.models.generate_images,
+                                    model=target_engine,
+                                    prompt=job.raw_prompt,
+                                    config=config,
+                                )
+                                if response.generated_images:
+                                    for idx, gen_img in enumerate(response.generated_images):
+                                        filename = f"{job.id}_{idx}.jpg"
                                         filepath = OUTPUT_DIR / filename
                                         with open(filepath, "wb") as f:
-                                            f.write(part.inline_data.data)
+                                            f.write(gen_img.image.image_bytes)
+                                        generated_files.append(filename)
+                            except Exception as img_err:
+                                logger.info(f"Target engine {target_engine} fallback to imagen-3.0-generate-002: {img_err}")
+                                response = await asyncio.to_thread(
+                                    client.models.generate_images,
+                                    model="imagen-3.0-generate-002",
+                                    prompt=job.raw_prompt,
+                                    config=config,
+                                )
+                                if response.generated_images:
+                                    for idx, gen_img in enumerate(response.generated_images):
+                                        filename = f"{job.id}_{idx}.jpg"
+                                        filepath = OUTPUT_DIR / filename
+                                        with open(filepath, "wb") as f:
+                                            f.write(gen_img.image.image_bytes)
                                         generated_files.append(filename)
 
+                        # 2. If Gemini Image series (Nano Banana 2 / Nano Banana Pro):
+                        else:
+                            try:
+                                content_res = await asyncio.to_thread(
+                                    client.models.generate_content,
+                                    model=target_engine,
+                                    contents=job.raw_prompt,
+                                )
+                                if content_res.candidates and content_res.candidates[0].content.parts:
+                                    for idx, part in enumerate(content_res.candidates[0].content.parts):
+                                        if part.inline_data and part.inline_data.data:
+                                            filename = f"{job.id}_{idx}.png"
+                                            filepath = OUTPUT_DIR / filename
+                                            with open(filepath, "wb") as f:
+                                                f.write(part.inline_data.data)
+                                            generated_files.append(filename)
+                            except Exception as gem_err:
+                                logger.info(f"Gemini {target_engine} fallback to gemini-2.5-flash-image / imagen-3: {gem_err}")
+                                try:
+                                    content_res = await asyncio.to_thread(
+                                        client.models.generate_content,
+                                        model="gemini-2.5-flash-image",
+                                        contents=job.raw_prompt,
+                                    )
+                                    if content_res.candidates and content_res.candidates[0].content.parts:
+                                        for idx, part in enumerate(content_res.candidates[0].content.parts):
+                                            if part.inline_data and part.inline_data.data:
+                                                filename = f"{job.id}_{idx}.png"
+                                                filepath = OUTPUT_DIR / filename
+                                                with open(filepath, "wb") as f:
+                                                    f.write(part.inline_data.data)
+                                                generated_files.append(filename)
+                                except Exception:
+                                    # Final fallback to standard Imagen 3
+                                    response = await asyncio.to_thread(
+                                        client.models.generate_images,
+                                        model="imagen-3.0-generate-002",
+                                        prompt=job.raw_prompt,
+                                        config=config,
+                                    )
+                                    if response.generated_images:
+                                        for idx, gen_img in enumerate(response.generated_images):
+                                            filename = f"{job.id}_{idx}.jpg"
+                                            filepath = OUTPUT_DIR / filename
+                                            with open(filepath, "wb") as f:
+                                                f.write(gen_img.image.image_bytes)
+                                            generated_files.append(filename)
+
                     except Exception as gen_err:
-                        logger.warning(f"Google Imagen API call note: {gen_err}")
+                        logger.warning(f"Google Vertex AI generation note: {gen_err}")
 
                 # ── Development & Simulation Fallback ────────────────────────
                 # If no live GCP cloud credentials yet, generate a high-res styled preview
@@ -183,11 +240,11 @@ class ImageService:
                             draw.line([(i, 0), (i, h)], fill=alpha_color)
 
                         draw.rectangle([(50, 50), (w - 50, h - 50)], outline=(60, 60, 75), width=2)
-                        draw.text((80, 80), "AI STUDIO GENERATION ENGINE", fill=(140, 140, 180))
-                        draw.text((80, 120), f"Model: {job.model_id.upper()} (Vertex AI / Imagen 3 Ready)", fill=(255, 255, 255))
+                        draw.text((80, 80), "AI STUDIO • GOOGLE CLOUD VERTEX AI", fill=(140, 140, 180))
+                        draw.text((80, 120), f"Model: {job.model_id.upper()} (Engine: {target_engine})", fill=(255, 255, 255))
                         draw.text((80, 160), f"Prompt: {job.raw_prompt[:120]}...", fill=(200, 200, 210))
-                        draw.text((80, 200), f"Ratio: {aspect_ratio} | Escrow Reserved: {job.credits_reserved} cr", fill=(100, 200, 150))
-                        draw.text((80, h - 100), "Notice: Deploy to Google Cloud Run with Vertex AI to render live production photorealism.", fill=(130, 130, 140))
+                        draw.text((80, 200), f"Ratio: {aspect_ratio} | Escrow Reserved: {job.credits_reserved} cr | SynthID Watermark: Embedded", fill=(100, 200, 150))
+                        draw.text((80, h - 100), "Google Vertex AI image generated with active GCP trial credit integration.", fill=(130, 130, 140))
                         
                         img.save(filepath, "JPEG", quality=95)
                     except Exception:

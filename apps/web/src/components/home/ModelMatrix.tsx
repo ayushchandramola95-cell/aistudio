@@ -2,96 +2,83 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Layers, Zap, Clock, ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
+import { Clock, ShieldCheck, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 
-interface ModelInfo {
+interface VertexModelInfo {
   id: string;
   name: string;
-  provider: string;
-  task: string;
-  speed: string;
+  engine: string;
+  features: string[];
+  bestUseCases: string;
+  promptLimit: string;
+  watermarking: string;
   creditCost: number;
-  bestFor: string;
-  license: string;
   highlight: boolean;
 }
 
-const MODELS_CATALOG: ModelInfo[] = [
+const VERTEX_MODELS: VertexModelInfo[] = [
   {
-    id: "imagen-3",
-    name: "Google Imagen 3",
-    provider: "Google Cloud Vertex AI",
-    task: "Text-to-Image",
-    speed: "2.8s",
-    creditCost: 8,
-    bestFor: "Photorealism, crisp typography, cinematic lighting & intricate textures",
-    license: "Commercial Cloud API",
+    id: "nano-banana-2",
+    name: "Nano Banana 2",
+    engine: "Gemini 3.1 Flash Image",
+    features: [
+      "Multi-character consistency (up to 5 characters & 14 objects)",
+      "Real-time Web Search grounding",
+      "Exceptional text-in-image rendering",
+    ],
+    bestUseCases:
+      "Interactive & Storytelling Apps: Ideal for generating storyboards, custom comic books, or mockups where characters must remain identical across multiple scenes. Uses real-time search to match current events/niche real-world objects.",
+    promptLimit: "~1,000+ words (Uses Gemini's large context to process long, highly descriptive scenes & character profiles).",
+    watermarking: "Yes (Built-in)",
+    creditCost: 5,
     highlight: true,
   },
   {
-    id: "flux-1-schnell",
-    name: "FLUX.1 Schnell",
-    provider: "Black Forest Labs",
-    task: "Text-to-Image",
-    speed: "1.2s",
-    creditCost: 6,
-    bestFor: "Ultra-fast concept iteration, character anatomy, diverse aesthetics",
-    license: "Apache 2.0 (Open-Weight)",
-    highlight: false,
-  },
-  {
-    id: "flux-1-dev",
-    name: "FLUX.1 Dev",
-    provider: "Black Forest Labs",
-    task: "Text-to-Image",
-    speed: "4.5s",
+    id: "nano-banana-pro",
+    name: "Nano Banana Pro",
+    engine: "Gemini 3 Pro Image",
+    features: [
+      "Complex prompt reasoning",
+      "Professional-grade visual quality",
+      "Advanced editing (inpainting & outpainting)",
+    ],
+    bestUseCases:
+      "Studio & Marketing Production: High-end graphic design, complex infographics, educational diagrams, and promotional materials that require precise, stylized rendering and custom editing (adjusting lighting, camera angles, color grading).",
+    promptLimit: "~1,000+ words (Excellent for complex prompt chains and reference image inputs).",
+    watermarking: "Yes (Built-in)",
     creditCost: 10,
-    bestFor: "Artistic perfection, complex prompt adherence, high dynamic range",
-    license: "Non-Commercial / Pro Studio",
     highlight: false,
   },
   {
-    id: "veo-2",
-    name: "Google Veo 2",
-    provider: "Google Cloud",
-    task: "Text-to-Video",
-    speed: "28s",
-    creditCost: 80,
-    bestFor: "Cinematic camera pans, high frame stability, 1080p motion physics",
-    license: "Commercial Cloud API",
+    id: "imagen-3",
+    name: "Imagen 3",
+    engine: "imagen-3.0-generate-002",
+    features: [
+      "Exceptional photorealism",
+      "High prompt adherence",
+      "Crisp, legible text rendering",
+    ],
+    bestUseCases:
+      "General Photorealism & High-Quality Design: Best for creating beautiful, realistic artwork, professional product shots, and high-fidelity text-heavy images.",
+    promptLimit: "~250 - 500 words (Optimized for concise but highly descriptive text prompts).",
+    watermarking: "Yes (Built-in)",
+    creditCost: 8,
     highlight: false,
   },
   {
-    id: "gemini-2-flash",
-    name: "Google Gemini 2.0 Flash",
-    provider: "Google Cloud",
-    task: "Prompt Expansion & Scripts",
-    speed: "0.4s",
-    creditCost: 1,
-    bestFor: "Instant prompt enhancement, cinematic screenplays, creative dialogue",
-    license: "Commercial Cloud API",
-    highlight: false,
-  },
-  {
-    id: "kokoro-tts",
-    name: "Kokoro TTS",
-    provider: "Open-Source AI",
-    task: "Text-to-Speech",
-    speed: "0.8s",
-    creditCost: 2,
-    bestFor: "Natural human inflection, conversational dialogue, audiobooks",
-    license: "Apache 2.0 (Open-Weight)",
-    highlight: false,
-  },
-  {
-    id: "real-esrgan",
-    name: "Real-ESRGAN 4x+",
-    provider: "Open-Source AI",
-    task: "AI Upscaling",
-    speed: "1.9s",
+    id: "imagen-2",
+    name: "Imagen 2",
+    engine: "imagegeneration@006",
+    features: [
+      "Reliable baseline text-to-image",
+      "Image expansion (outpainting)",
+      "Subject editing (inpainting)",
+    ],
+    bestUseCases:
+      "Legacy Applications & High-Volume Tasks: Great for cost-effective standard generation, bulk image assets, and standard image editing tasks like placing product mockups in different environments.",
+    promptLimit: "~250 words",
+    watermarking: "Yes (Built-in)",
     creditCost: 4,
-    bestFor: "Restoring low-res images, texture sharpening, 4K print export",
-    license: "BSD-3-Clause",
     highlight: false,
   },
 ];
@@ -99,10 +86,9 @@ const MODELS_CATALOG: ModelInfo[] = [
 export default function ModelMatrix() {
   const [filter, setFilter] = useState<string>("all");
 
-  const filteredModels = MODELS_CATALOG.filter((m) => {
-    if (filter === "image") return m.task.includes("Image");
-    if (filter === "video") return m.task.includes("Video");
-    if (filter === "audio_text") return m.task.includes("Speech") || m.task.includes("Prompt");
+  const filteredModels = VERTEX_MODELS.filter((m) => {
+    if (filter === "nano") return m.id.startsWith("nano");
+    if (filter === "imagen") return m.id.startsWith("imagen");
     return true;
   });
 
@@ -111,23 +97,22 @@ export default function ModelMatrix() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-6">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-            Real Inference Catalog
+            Google Cloud Vertex AI
           </span>
           <h3 className="text-2xl font-bold text-neutral-950 mt-2 font-editorial text-3xl">
-            Unified Multi-Model Capability Matrix
+            Google Cloud Vertex AI Image Generation Models
           </h3>
           <p className="text-xs text-neutral-500 mt-1">
-            Compare latency, credit costs, and verified commercial licenses across every deployed engine.
+            Production generative engines powered by your Google Cloud Vertex AI infrastructure and $200 free trial credits.
           </p>
         </div>
 
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 bg-neutral-100 p-1 rounded-2xl self-start sm:self-center">
           {[
-            { id: "all", label: "All Models" },
-            { id: "image", label: "Image" },
-            { id: "video", label: "Video" },
-            { id: "audio_text", label: "Audio & Text" },
+            { id: "all", label: `All Models (${VERTEX_MODELS.length})` },
+            { id: "nano", label: "Nano Banana Series" },
+            { id: "imagen", label: "Imagen Series" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -148,44 +133,72 @@ export default function ModelMatrix() {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="border-b border-neutral-100 text-neutral-400 font-bold uppercase tracking-wider text-[10px]">
-              <th className="pb-3 px-3">Model Name</th>
-              <th className="pb-3 px-3">Provider</th>
-              <th className="pb-3 px-3">Primary Task</th>
-              <th className="pb-3 px-3">Avg Latency</th>
-              <th className="pb-3 px-3">Credit Cost</th>
-              <th className="pb-3 px-3">Best Recommended For</th>
-              <th className="pb-3 px-3">Commercial License</th>
+            <tr className="border-b border-neutral-200 text-neutral-400 font-bold uppercase tracking-wider text-[10px]">
+              <th className="pb-3 px-3 min-w-[150px]">Model Name</th>
+              <th className="pb-3 px-3 min-w-[170px]">Underlying Engine</th>
+              <th className="pb-3 px-3 min-w-[260px]">Key Features</th>
+              <th className="pb-3 px-3 min-w-[280px]">Best Use Cases / "How it Works"</th>
+              <th className="pb-3 px-3 min-w-[180px]">Max Prompt Length / Limit</th>
+              <th className="pb-3 px-3 min-w-[140px]">Watermarking (SynthID)</th>
+              <th className="pb-3 px-3 min-w-[90px]">Credit Cost</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100 text-neutral-700">
             {filteredModels.map((m) => (
               <tr key={m.id} className="hover:bg-neutral-50/80 transition-colors">
-                <td className="py-4 px-3">
+                {/* Model Name */}
+                <td className="py-4 px-3 align-top">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-neutral-950 text-sm">{m.name}</span>
                     {m.highlight && (
                       <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                        Top Pick
+                        Featured
                       </span>
                     )}
                   </div>
                 </td>
-                <td className="py-4 px-3 text-neutral-500 font-medium">{m.provider}</td>
-                <td className="py-4 px-3 font-semibold text-neutral-800">{m.task}</td>
-                <td className="py-4 px-3 font-mono font-medium text-blue-600 flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-neutral-400" />
-                  <span>{m.speed}</span>
-                </td>
-                <td className="py-4 px-3 font-bold text-neutral-950">
-                  <span className="px-2 py-1 rounded-md bg-neutral-100 text-neutral-900 font-bold">
-                    {m.creditCost} cr
+
+                {/* Underlying Engine */}
+                <td className="py-4 px-3 align-top font-mono font-semibold text-neutral-800">
+                  <span className="px-2 py-1 rounded-md bg-neutral-100 border border-neutral-200/60 text-xs">
+                    {m.engine}
                   </span>
                 </td>
-                <td className="py-4 px-3 text-neutral-600 max-w-xs leading-snug">{m.bestFor}</td>
-                <td className="py-4 px-3">
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    {m.license}
+
+                {/* Key Features */}
+                <td className="py-4 px-3 align-top">
+                  <ul className="space-y-1 text-neutral-600 leading-snug">
+                    {m.features.map((feature, fIdx) => (
+                      <li key={fIdx} className="flex items-start gap-1.5">
+                        <span className="text-neutral-400">•</span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </td>
+
+                {/* Best Use Cases */}
+                <td className="py-4 px-3 align-top text-neutral-600 leading-snug">
+                  {m.bestUseCases}
+                </td>
+
+                {/* Max Prompt Length */}
+                <td className="py-4 px-3 align-top text-neutral-600 leading-snug">
+                  {m.promptLimit}
+                </td>
+
+                {/* Watermarking */}
+                <td className="py-4 px-3 align-top">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>{m.watermarking}</span>
+                  </span>
+                </td>
+
+                {/* Credit Cost */}
+                <td className="py-4 px-3 align-top font-bold text-neutral-950">
+                  <span className="px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-900 font-bold text-xs inline-block">
+                    {m.creditCost} cr
                   </span>
                 </td>
               </tr>
@@ -197,13 +210,13 @@ export default function ModelMatrix() {
       <div className="pt-4 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-500">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Every generation is protected by Two-Phase Escrow billing</span>
+          <span>Every generation is backed by Google Cloud Vertex AI & Two-Phase Escrow</span>
         </div>
         <Link
           href="/studio"
           className="text-xs font-bold text-neutral-950 hover:underline flex items-center gap-1"
         >
-          <span>Try All Models in Studio Workspace</span>
+          <span>Open Creative Studio</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>

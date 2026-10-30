@@ -27,52 +27,55 @@ import {
 } from "lucide-react";
 import { GenerationJob } from "@/types";
 
-// ─── Models ────────────────────────────────────────────────────────────────
+// ─── Models (Google Cloud Vertex AI Exclusively) ───────────────────────────
 const AVAILABLE_MODELS = [
   {
-    id: "imagen-3",
-    name: "Google Imagen 3",
-    cost: 8,
-    desc: "Top-tier photorealism, typography & intricate textures",
-    badge: "Recommended",
-    badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
-    dotColor: "bg-blue-500",
-  },
-  {
-    id: "flux-1-schnell",
-    name: "FLUX.1 Schnell",
-    cost: 6,
-    desc: "Ultra-fast generation with sharp composition",
-    badge: "Fastest",
+    id: "nano-banana-2",
+    name: "Nano Banana 2",
+    engine: "Gemini 3.1 Flash Image",
+    cost: 5,
+    desc: "Multi-character consistency (up to 5 chars & 14 objects), web search grounding & text rendering",
+    badge: "Story & Characters",
     badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     dotColor: "bg-emerald-500",
+    maxLimit: "~1,000+ words",
+    synthId: true,
   },
   {
-    id: "flux-1-dev",
-    name: "FLUX.1 Dev",
+    id: "nano-banana-pro",
+    name: "Nano Banana Pro",
+    engine: "Gemini 3 Pro Image",
     cost: 10,
-    desc: "Highest prompt adherence & artistic precision",
-    badge: "Pro Studio",
+    desc: "Complex prompt reasoning, professional visual quality, inpainting & outpainting",
+    badge: "Studio & Marketing",
     badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
     dotColor: "bg-purple-500",
+    maxLimit: "~1,000+ words",
+    synthId: true,
   },
   {
-    id: "sd-3-5",
-    name: "Stable Diffusion 3.5",
-    cost: 5,
-    desc: "Versatile styling, character design & concepts",
-    badge: "Creative",
+    id: "imagen-3",
+    name: "Imagen 3",
+    engine: "imagen-3.0-generate-002",
+    cost: 8,
+    desc: "Exceptional photorealism, high prompt adherence & crisp legible text rendering",
+    badge: "Photorealism",
+    badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+    dotColor: "bg-blue-500",
+    maxLimit: "~250 - 500 words",
+    synthId: true,
+  },
+  {
+    id: "imagen-2",
+    name: "Imagen 2",
+    engine: "imagegeneration@006",
+    cost: 4,
+    desc: "Reliable baseline text-to-image, outpainting expansion & subject inpainting",
+    badge: "High-Volume / Legacy",
     badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
     dotColor: "bg-amber-500",
-  },
-  {
-    id: "gemini-2-flash",
-    name: "Gemini 2.0 Flash",
-    cost: 7,
-    desc: "Multimodal understanding with native image generation",
-    badge: "Multimodal",
-    badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
-    dotColor: "bg-indigo-500",
+    maxLimit: "~250 words",
+    synthId: true,
   },
 ];
 
@@ -163,23 +166,23 @@ export default function StudioPage() {
       id: "hist-1",
       prompt: "An ancient Kyoto torii gate illuminated by neon holographic glyphs in heavy rain",
       url: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=600&auto=format&fit=crop",
-      model: "Google Imagen 3",
+      model: "Imagen 3",
       ratio: "16:9",
       date: "12m ago",
     },
     {
       id: "hist-2",
-      prompt: "Minimalist ceramic teapot with crackled kintsugi gold lacquer on weathered oak",
+      prompt: "Multi-character fantasy graphic novel sequence with consistent protagonist across panels",
       url: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=600&auto=format&fit=crop",
-      model: "FLUX.1 Schnell",
+      model: "Nano Banana 2",
       ratio: "1:1",
       date: "1h ago",
     },
     {
       id: "hist-3",
-      prompt: "Surreal floating islands above an ocean, fantasy concept art, cinematic",
+      prompt: "Studio marketing infographic with intricate technical diagrams and precise lighting",
       url: "https://images.unsplash.com/photo-1465101162946-4377e57745c3?q=80&w=600&auto=format&fit=crop",
-      model: "FLUX.1 Dev",
+      model: "Nano Banana Pro",
       ratio: "16:9",
       date: "3h ago",
     },
@@ -571,38 +574,44 @@ export default function StudioPage() {
               </button>
 
               {modelMenuOpen && (
-                <div className="absolute left-0 bottom-full mb-2 w-[320px] bg-white rounded-2xl border border-neutral-200 shadow-[0_8px_40px_rgba(0,0,0,0.12)] p-2 z-40 animate-spring">
-                  <div className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                    AI Generation Model
+                <div className="absolute left-0 bottom-full mb-2 w-[350px] bg-white rounded-2xl border border-neutral-200 shadow-[0_8px_40px_rgba(0,0,0,0.12)] p-2 z-40 animate-spring">
+                  <div className="px-3 pb-2 pt-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                    <span>Google Vertex AI Models</span>
+                    <span className="text-blue-600 font-medium">Free Credits Active</span>
                   </div>
-                  {AVAILABLE_MODELS.map((m) => (
-                    <button
-                      key={m.id}
-                      type="button"
-                      onClick={() => { setSelectedModelId(m.id); setModelMenuOpen(false); }}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-start justify-between gap-2 cursor-pointer ${
-                        selectedModelId === m.id ? "bg-neutral-950 text-white" : "hover:bg-neutral-50 text-neutral-800"
-                      }`}
-                    >
-                      <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                        <span className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${selectedModelId === m.id ? "bg-white" : m.dotColor}`} />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[12px] font-bold leading-none">{m.name}</span>
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border leading-none ${
-                              selectedModelId === m.id ? "bg-neutral-800 text-neutral-200 border-neutral-700" : m.badgeColor
-                            }`}>{m.badge}</span>
+                  <div className="space-y-1">
+                    {AVAILABLE_MODELS.map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => { setSelectedModelId(m.id); setModelMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-start justify-between gap-2 cursor-pointer ${
+                          selectedModelId === m.id ? "bg-neutral-950 text-white" : "hover:bg-neutral-50 text-neutral-800"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                          <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${selectedModelId === m.id ? "bg-white" : m.dotColor}`} />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-[12px] font-bold leading-none">{m.name}</span>
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border leading-none ${
+                                selectedModelId === m.id ? "bg-neutral-800 text-neutral-200 border-neutral-700" : m.badgeColor
+                              }`}>{m.badge}</span>
+                            </div>
+                            <div className={`text-[10px] font-mono mt-0.5 ${selectedModelId === m.id ? "text-neutral-400" : "text-neutral-500"}`}>
+                              Engine: {m.engine} • {m.maxLimit}
+                            </div>
+                            <p className={`text-[11px] mt-1 leading-tight line-clamp-2 ${selectedModelId === m.id ? "text-neutral-300" : "text-neutral-600"}`}>
+                              {m.desc}
+                            </p>
                           </div>
-                          <p className={`text-[11px] mt-0.5 leading-tight ${selectedModelId === m.id ? "text-neutral-300" : "text-neutral-500"}`}>
-                            {m.desc}
-                          </p>
                         </div>
-                      </div>
-                      <span className={`text-[11px] font-bold px-2 py-1 rounded-lg shrink-0 tabular-nums ${
-                        selectedModelId === m.id ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-700"
-                      }`}>{m.cost} cr</span>
-                    </button>
-                  ))}
+                        <span className={`text-[11px] font-bold px-2 py-1 rounded-lg shrink-0 tabular-nums ${
+                          selectedModelId === m.id ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-700"
+                        }`}>{m.cost} cr</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
