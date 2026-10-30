@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
@@ -976,178 +976,138 @@ export default function StudioPage() {
       <div
         className={`w-full bg-white rounded-3xl border border-neutral-200/90 prompt-box-shadow glow-focus-ring relative transition-all duration-300 hover:border-neutral-300`}
       >
-        {/* ── Contextual Controls Strip (Only shows when model has special features - NO redundant model button!) ── */}
-        {hasContextualControls && (
-          <div className="px-5 py-2.5 bg-neutral-50/90 border-b border-neutral-100 flex items-center justify-between gap-2.5 flex-wrap text-xs rounded-t-3xl">
-            {/* Model-Specific Contextual Controls */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Nano Banana 2.1 Controls */}
-              {selectedModelId === "nano-banana-2-1" && (
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => setWebGrounding(!webGrounding)}
-                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-                      webGrounding
-                        ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
-                        : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100"
-                    }`}
-                    title="Ground generation with real-time Google Web Search"
-                  >
-                    <Globe className="w-3.5 h-3.5" />
-                    <span>Google Search Grounding</span>
-                    <span className={`w-2 h-2 rounded-full ${webGrounding ? "bg-white animate-pulse" : "bg-neutral-300"}`} />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => multiFileInputRef.current?.click()}
-                    disabled={multiRefImages.length >= 14}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-100 hover:border-neutral-300 transition-all cursor-pointer"
-                    title="Upload up to 14 reference photos for character & style consistency"
-                  >
-                    <Plus className="w-3.5 h-3.5 text-blue-600" />
-                    <span>References</span>
-                    <span className="px-1.5 py-0.2 rounded-md bg-blue-50 text-blue-700 font-mono text-[10px] font-bold">
-                      {multiRefImages.length}/14
-                    </span>
-                  </button>
-                </div>
-              )}
-
-              {/* Nano Banana 2 Lite Controls */}
-              {selectedModelId === "nano-banana-2-lite" && (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setFastMode(!fastMode)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border cursor-pointer transition-all ${
-                      fastMode
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
-                        : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100"
-                    }`}
-                  >
-                    <Zap className="w-3.5 h-3.5" />
-                    <span>Turbo Draft Mode {fastMode ? "Active" : "Off"}</span>
-                  </button>
-                  <span className="text-[11px] text-neutral-400 hidden sm:inline font-mono">
-                    Sub-second generation latency
+        {/* â”€â”€ Contextual Controls Strip (always shown as model header) â”€â”€ */}
+        <div className="px-4 py-2.5 bg-gradient-to-r from-neutral-50 to-white border-b border-neutral-100/80 flex items-center justify-between gap-2 flex-wrap rounded-t-3xl">
+          {/* Left: Model Identity + Model-specific controls */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
+              <span className="text-[11px] font-bold text-neutral-800">{currentModel.name}</span>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${currentModel.badgeColor} leading-tight`}>
+                {currentModel.badge}
+              </span>
+            </div>
+            <span className="w-px h-3 bg-neutral-200 shrink-0" />
+            {/* Nano Banana 2.1 Controls */}
+            {selectedModelId === "nano-banana-2-1" && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setWebGrounding(!webGrounding)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer border ${
+                    webGrounding
+                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : "bg-white border-neutral-200 text-neutral-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700"
+                  }`}
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>Search</span>
+                  {webGrounding && <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => multiFileInputRef.current?.click()}
+                  disabled={multiRefImages.length >= 14}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all cursor-pointer"
+                >
+                  <Plus className="w-3 h-3 text-blue-500" />
+                  <span>Refs</span>
+                  <span className="px-1 py-0 rounded bg-blue-50 text-blue-700 font-mono text-[9px] font-bold">{multiRefImages.length}/14</span>
+                </button>
+              </div>
+            )}
+            {/* Nano Banana 2 Lite Controls */}
+            {selectedModelId === "nano-banana-2-lite" && (
+              <button
+                type="button"
+                onClick={() => setFastMode(!fastMode)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition-all ${
+                  fastMode ? "bg-emerald-600 text-white border-emerald-600" : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100"
+                }`}
+              >
+                <Zap className="w-3 h-3" />
+                <span>Turbo {fastMode ? "ON" : "OFF"}</span>
+              </button>
+            )}
+            {/* Nano Banana Pro Controls */}
+            {selectedModelId === "nano-banana-pro" && (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
+                  <span className="px-2 text-neutral-400 text-[10px] font-medium flex items-center gap-1">
+                    <Brain className="w-2.5 h-2.5 text-purple-500" /> Think:
                   </span>
-                </div>
-              )}
-
-              {/* Nano Banana Pro Controls */}
-              {selectedModelId === "nano-banana-pro" && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-xs font-semibold shadow-2xs">
-                    <span className="px-2.5 text-neutral-400 text-[11px] font-medium flex items-center gap-1">
-                      <Brain className="w-3 h-3 text-purple-600" /> Reasoning:
-                    </span>
-                    {(["minimal", "medium", "deep"] as const).map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setThinkingBudget(t)}
-                        className={`px-2.5 py-0.5 rounded-full capitalize cursor-pointer transition-all ${
-                          thinkingBudget === t ? "bg-purple-600 text-white shadow-2xs font-bold" : "text-neutral-500 hover:text-neutral-900"
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleInsertQuote}
-                    className="px-3 py-1 rounded-full bg-white border border-neutral-200 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
-                    title="Click to quote exact text for crisp typography"
-                  >
-                    <span>“Quote Typography”</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Imagen 4 Fast Controls */}
-              {selectedModelId === "imagen-4-fast" && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-xs font-semibold shadow-2xs">
-                    <span className="px-2.5 text-neutral-400 text-[11px] font-medium">People Safety:</span>
-                    {(["allow_all", "allow_adult", "dont_allow"] as const).map((f) => (
-                      <button
-                        key={f}
-                        type="button"
-                        onClick={() => setPersonFilter(f)}
-                        className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all text-xs ${
-                          personFilter === f ? "bg-amber-600 text-white shadow-2xs font-bold" : "text-neutral-500 hover:text-neutral-900"
-                        }`}
-                      >
-                        {f === "allow_all" ? "All People" : f === "allow_adult" ? "Adults Only" : "No People"}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="text-[11px] text-neutral-400 hidden sm:inline font-mono">
-                    Sub-3s pure diffusion (~1MP)
-                  </span>
-                </div>
-              )}
-
-              {/* Virtual Try-On Controls */}
-              {selectedModelId === "virtual-try-on" && (
-                <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-xs font-semibold shadow-2xs">
-                  <span className="px-2.5 text-neutral-400 text-[11px] font-medium">Garment Type:</span>
-                  {(["tops", "bottoms", "dresses", "outerwear"] as const).map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setTryOnCategory(cat)}
-                      className={`px-3 py-0.5 rounded-full capitalize cursor-pointer transition-all text-xs ${
-                        tryOnCategory === cat ? "bg-rose-600 text-white shadow-2xs font-bold" : "text-neutral-500 hover:text-neutral-900"
-                      }`}
-                    >
-                      {cat}
-                    </button>
+                  {(["minimal", "medium", "deep"] as const).map((t) => (
+                    <button key={t} type="button" onClick={() => setThinkingBudget(t)}
+                      className={`px-2 py-0.5 rounded-full capitalize cursor-pointer transition-all ${thinkingBudget === t ? "bg-purple-600 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
+                    >{t}</button>
                   ))}
                 </div>
-              )}
-
-              {/* Imagen 3 Capability 001 Controls */}
-              {selectedModelId === "imagen-3-capability-001" && (
-                <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-xs font-semibold shadow-2xs">
-                  {(["inpaint", "outpaint", "background"] as const).map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setEditMode(m)}
-                      className={`px-3 py-0.5 rounded-full capitalize cursor-pointer transition-all text-xs ${
-                        editMode === m ? "bg-cyan-600 text-white shadow-2xs font-bold" : "text-neutral-500 hover:text-neutral-900"
-                      }`}
-                    >
-                      {m === "inpaint" ? "Inpainting" : m === "outpaint" ? "Outpainting" : "BG Swap"}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Nano Banana 2 Controls */}
-              {selectedModelId === "nano-banana-2" && (
-                <span className="text-[11px] text-teal-800 font-semibold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                  <span>Maintains consistency across up to 5 characters & 14 objects</span>
-                </span>
-              )}
-            </div>
-
-            {/* Model Engine Tag */}
-            <div className="hidden md:flex items-center gap-1.5 text-[11px] text-neutral-400 font-medium">
-              <span>Engine:</span>
-              <strong className="text-neutral-700 font-semibold">{currentModel.engine}</strong>
-            </div>
+                <button type="button" onClick={handleInsertQuote}
+                  className="px-2.5 py-1 rounded-full bg-white border border-neutral-200 hover:bg-neutral-100 text-[11px] font-semibold text-neutral-700 flex items-center gap-1 cursor-pointer transition-all"
+                ><span>"Text"</span></button>
+              </div>
+            )}
+            {/* Imagen 4 Fast Controls */}
+            {selectedModelId === "imagen-4-fast" && (
+              <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
+                <span className="px-2 text-neutral-400 text-[10px] font-medium">People:</span>
+                {(["allow_all", "allow_adult", "dont_allow"] as const).map((f) => (
+                  <button key={f} type="button" onClick={() => setPersonFilter(f)}
+                    className={`px-2 py-0.5 rounded-full cursor-pointer transition-all text-[10px] ${personFilter === f ? "bg-amber-500 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
+                  >
+                    {f === "allow_all" ? "All" : f === "allow_adult" ? "Adults" : "None"}
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Virtual Try-On Controls */}
+            {selectedModelId === "virtual-try-on" && (
+              <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
+                <span className="px-2 text-neutral-400 text-[10px] font-medium">Garment:</span>
+                {(["tops", "bottoms", "dresses", "outerwear"] as const).map((cat) => (
+                  <button key={cat} type="button" onClick={() => setTryOnCategory(cat)}
+                    className={`px-2 py-0.5 rounded-full capitalize cursor-pointer transition-all text-[10px] ${tryOnCategory === cat ? "bg-rose-500 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
+                  >{cat}</button>
+                ))}
+              </div>
+            )}
+            {/* Imagen 3 Capability 001 Controls */}
+            {selectedModelId === "imagen-3-capability-001" && (
+              <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
+                {(["inpaint", "outpaint", "background"] as const).map((m) => (
+                  <button key={m} type="button" onClick={() => setEditMode(m)}
+                    className={`px-2.5 py-0.5 rounded-full capitalize cursor-pointer transition-all text-[10px] ${editMode === m ? "bg-cyan-600 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
+                  >
+                    {m === "inpaint" ? "Inpaint" : m === "outpaint" ? "Outpaint" : "BG Swap"}
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Nano Banana 2 Controls */}
+            {selectedModelId === "nano-banana-2" && (
+              <span className="text-[10px] text-teal-700 font-semibold flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-teal-500" />
+                5 chars Â· 14 objects
+              </span>
+            )}
+            {/* Nano Banana (legacy) Controls */}
+            {selectedModelId === "nano-banana" && (
+              <span className="text-[10px] text-indigo-600 font-semibold flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                Legacy stable generation
+              </span>
+            )}
           </div>
-        )}
+          {/* Right: Engine label */}
+          <div className="hidden sm:flex items-center gap-1 text-[10px] text-neutral-400 font-medium">
+            <span className="text-neutral-300">via</span>
+            <strong className="text-neutral-600 font-semibold">{currentModel.engine}</strong>
+          </div>
+        </div>
 
-        {/* ── Main Input Area (Adapts dynamically by Model) ── */}
+        {/* â”€â”€ Main Input Area (Adapts dynamically by Model) â”€â”€ */}
         <div className="p-5 pb-3">
-          {/* ── A. Virtual Try-On Specialized Dual Dropzones ── */}
+          {/* â”€â”€ A. Virtual Try-On Specialized Dual Dropzones â”€â”€ */}
           {selectedModelId === "virtual-try-on" ? (
             <div className="space-y-3.5 animate-spring">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -1233,7 +1193,7 @@ export default function StudioPage() {
               </div>
             </div>
           ) : selectedModelId === "imagen-3-capability-001" ? (
-            /* ── B. Imagen 3 Capability 001 Inpainting Dropzones ── */
+            /* â”€â”€ B. Imagen 3 Capability 001 Inpainting Dropzones â”€â”€ */
             <div className="space-y-3.5 animate-spring">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Base Image Dropzone */}
@@ -1318,7 +1278,7 @@ export default function StudioPage() {
               </div>
             </div>
           ) : (
-            /* ── C. Nano Banana 2.1 & Standard Models ── */
+            /* â”€â”€ C. Standard Models â”€â”€ */
             <div className="space-y-3">
               {/* Horizontal Reference Thumbnails when images exist (Nano Banana 2.1) */}
               {selectedModelId === "nano-banana-2-1" && multiRefImages.length > 0 && (
@@ -1353,80 +1313,60 @@ export default function StudioPage() {
                 </div>
               )}
 
-              {/* Input Row: Left Dropzone (if 0 multi-refs or standard model) + Textarea */}
-              <div className="flex items-stretch gap-0">
-                {selectedModelId !== "imagen-4-fast" && (selectedModelId !== "nano-banana-2-1" || multiRefImages.length === 0) && (
-                  <div
-                    onClick={() => {
-                      if (selectedModelId === "nano-banana-2-1") {
-                        multiFileInputRef.current?.click();
-                      } else {
-                        fileInputRef.current?.click();
-                      }
-                    }}
-                    className={`shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all group mr-4.5 ${
-                      attachedImage
-                        ? "border-neutral-300 bg-neutral-50 shadow-2xs"
-                        : "border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50/80"
-                    }`}
-                    title={selectedModelId === "nano-banana-2-1" ? "Add reference images (up to 14)" : "Add reference image"}
-                  >
-                    {attachedImage ? (
-                      <div className="relative w-full h-full rounded-[14px] overflow-hidden">
-                        <img src={attachedImage} alt="Reference" className="w-full h-full object-cover" />
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setAttachedImage(null); }}
-                          className="absolute top-1 right-1 p-0.5 rounded-full bg-neutral-900/80 text-white hover:bg-neutral-950 transition-all cursor-pointer"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                        <div className="absolute bottom-0 inset-x-0 bg-neutral-950/75 text-white text-[8px] font-bold text-center py-0.5 tracking-wide">
-                          REF
+              {/* Main Prompt Textarea â€” clean, full-width, no awkward dropzone beside it */}
+              <div className="relative flex flex-col">
+                <textarea
+                  ref={textareaRef}
+                  rows={hasActiveContent ? 2 : 3}
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder={dynamicPlaceholder}
+                  className="w-full bg-transparent text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none font-normal leading-relaxed"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleGenerate();
+                    }
+                  }}
+                />
+                {/* Attachment button inside textarea bottom-left */}
+                {selectedModelId !== "imagen-4-fast" && !hasActiveContent && (
+                  <div className="flex items-center gap-2 mt-1">
+                    {selectedModelId === "nano-banana-2-1" && multiRefImages.length === 0 && (
+                      <button
+                        type="button"
+                        onClick={() => multiFileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-blue-600 transition-colors cursor-pointer group"
+                        title="Add reference images (up to 14)"
+                      >
+                        <div className="w-6 h-6 rounded-lg border border-neutral-200 group-hover:border-blue-300 group-hover:bg-blue-50 flex items-center justify-center transition-all">
+                          <Plus className="w-3.5 h-3.5" />
                         </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-7 h-8 mb-1 opacity-25 group-hover:opacity-45 transition-opacity">
-                          <svg viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="2" y="1" width="26" height="34" rx="3" stroke="#555" strokeWidth="2" fill="#F5F5F5"/>
-                            <rect x="6" y="8" width="18" height="14" rx="2" fill="#D4D4D4"/>
-                            <path d="M6 18l5-5 4 4 3-3 6 6H6z" fill="#A3A3A3"/>
-                            <circle cx="14" cy="13" r="2" fill="#A3A3A3"/>
-                            <rect x="6" y="26" width="12" height="2" rx="1" fill="#D4D4D4"/>
-                          </svg>
+                        <span className="group-hover:text-blue-600">Add refs (0/14)</span>
+                      </button>
+                    )}
+                    {(selectedModelId === "nano-banana-2" || selectedModelId === "nano-banana" || selectedModelId === "nano-banana-pro") && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer group"
+                        title="Attach a reference image"
+                      >
+                        <div className="w-6 h-6 rounded-lg border border-neutral-200 group-hover:border-neutral-400 flex items-center justify-center transition-all">
+                          <ImageIcon className="w-3.5 h-3.5" />
                         </div>
-                        <span className="text-[10px] text-neutral-400 font-semibold text-center leading-tight px-1">
-                          {selectedModelId === "nano-banana-2-1" ? "Add ref (14)" : "Add image"}
-                        </span>
-                      </>
+                        {attachedImage ? <span className="text-emerald-600 font-semibold">Image attached âœ“</span> : <span>Attach image</span>}
+                      </button>
                     )}
                   </div>
                 )}
-
-                {/* Textarea */}
-                <div className="flex-1 relative flex flex-col justify-center">
-                  <textarea
-                    ref={textareaRef}
-                    rows={hasActiveContent ? 2 : 3}
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder={dynamicPlaceholder}
-                    className="w-full bg-transparent text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none font-normal leading-relaxed"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleGenerate();
-                      }
-                    }}
-                  />
-                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* ── Style Chips (idle only) ── */}
-        {!hasActiveContent && selectedModelId !== "virtual-try-on" && (
+        {/* â”€â”€ Style Chips (idle only, not for specialized models) â”€â”€ */}
+        {!hasActiveContent && selectedModelId !== "virtual-try-on" && selectedModelId !== "imagen-3-capability-001" && (
           <div className="px-5 pb-3 flex flex-wrap items-center gap-1.5">
             {STYLE_CHIPS.map((chip) => {
               const isApplied = prompt.toLowerCase().includes(chip.label.toLowerCase());
@@ -1435,7 +1375,7 @@ export default function StudioPage() {
                   key={chip.label}
                   type="button"
                   onClick={() => handleStyleChip(chip)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer flex items-center gap-1.5 btn-tactile-subtle ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer flex items-center gap-1.5 ${
                     isApplied
                       ? "bg-neutral-900 text-white border-neutral-900 shadow-xs"
                       : "bg-white border-neutral-200/90 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 hover:border-neutral-300 shadow-2xs"
@@ -1449,7 +1389,7 @@ export default function StudioPage() {
             <button
               type="button"
               onClick={handleSurpriseMe}
-              className="px-3 py-1 rounded-full text-xs font-medium border border-dashed border-neutral-300 bg-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800 hover:border-neutral-400 transition-all cursor-pointer flex items-center gap-1.5 btn-tactile-subtle"
+              className="px-3 py-1 rounded-full text-xs font-medium border border-dashed border-neutral-300 bg-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800 hover:border-neutral-400 transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Dice5 className="w-3.5 h-3.5 text-neutral-400" />
               <span>Surprise me</span>
@@ -1457,11 +1397,11 @@ export default function StudioPage() {
           </div>
         )}
 
-        {/* ── Bottom Controls Bar (Single Source of Truth) ── */}
-        <div className="px-5 py-3 border-t border-neutral-100 flex items-center justify-between gap-2.5 flex-wrap bg-white rounded-b-3xl">
-          {/* Left: Model Selector, Ratio, Model-Aware Resolution, Batch, Seed, Settings */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* 1. Anchored Model Selector Popover Dropdown (Google AI Studio aesthetic) */}
+        {/* â”€â”€ Bottom Controls Bar â”€â”€ */}
+        <div className="px-4 py-3 border-t border-neutral-100 flex items-center justify-between gap-2 flex-wrap bg-white rounded-b-3xl">
+          {/* Left Group: Model + Ratio + Resolution in a compact pill row */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Model Selector */}
             <div className="relative" ref={modelMenuRef}>
               <button
                 type="button"
@@ -1470,29 +1410,18 @@ export default function StudioPage() {
                   setRatioMenuOpen(false);
                   setResolutionMenuOpen(false);
                 }}
-                className={`h-8.5 px-3 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${
+                className={`h-8 px-2.5 rounded-xl border text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   modelDropdownOpen
                     ? "bg-neutral-950 text-white border-neutral-950 shadow-sm"
-                    : "bg-neutral-50 hover:bg-neutral-100/90 border-neutral-200/90 text-neutral-900 hover:border-neutral-300"
+                    : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-900 hover:border-neutral-300"
                 }`}
               >
-                <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0 animate-pulse`} />
-                <span className="truncate max-w-[130px] sm:max-w-none">{currentModel.name}</span>
-                <span
-                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded-md border ${
-                    modelDropdownOpen ? "bg-neutral-800 text-neutral-100 border-neutral-700" : currentModel.badgeColor
-                  }`}
-                >
-                  {currentModel.badge}
-                </span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-neutral-400 ml-0.5 transition-transform duration-200 ${
-                    modelDropdownOpen ? "rotate-180 text-white" : ""
-                  }`}
-                />
+                <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
+                <span className="truncate max-w-[110px]">{currentModel.name}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${modelDropdownOpen ? "rotate-180 text-white" : "text-neutral-400"}`} />
               </button>
 
-              {/* Floating Dropdown Popover */}
+              {/* Floating Model Dropdown */}
               {modelDropdownOpen && (
                 <div className="absolute left-0 bottom-full mb-2 w-[580px] max-w-[94vw] bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_55px_rgba(0,0,0,0.18),0_0_0_1px_rgba(0,0,0,0.04)] z-50 flex flex-col overflow-hidden animate-dropdown">
                   {/* Search Filter Header */}
@@ -1520,52 +1449,32 @@ export default function StudioPage() {
                   <div className="flex min-h-[300px] max-h-[380px] overflow-hidden">
                     {/* Left Categories */}
                     <div className="w-36 border-r border-neutral-100 bg-neutral-50/50 p-2 flex flex-col gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("all")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "all" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
+                      <button type="button" onClick={() => setSelectedCategoryTab("all")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "all" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
                       >
                         <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> All</span>
                         <span className="text-[10px] font-mono opacity-70">8</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("latest")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "latest" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
+                      <button type="button" onClick={() => setSelectedCategoryTab("latest")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "latest" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
                       >
                         <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-amber-500" /> Latest</span>
                         <span className="text-[10px] font-mono opacity-70">2</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("gemini")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "gemini" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
+                      <button type="button" onClick={() => setSelectedCategoryTab("gemini")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "gemini" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
                       >
                         <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-blue-500" /> Gemini</span>
                         <span className="text-[10px] font-mono opacity-70">5</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("imagen")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "imagen" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
+                      <button type="button" onClick={() => setSelectedCategoryTab("imagen")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "imagen" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
                       >
                         <span className="flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5 text-amber-500" /> Imagen</span>
                         <span className="text-[10px] font-mono opacity-70">2</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("specialized")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "specialized" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
+                      <button type="button" onClick={() => setSelectedCategoryTab("specialized")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "specialized" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
                       >
                         <span className="flex items-center gap-1.5"><Shirt className="w-3.5 h-3.5 text-rose-500" /> Fashion</span>
                         <span className="text-[10px] font-mono opacity-70">1</span>
@@ -1594,7 +1503,7 @@ export default function StudioPage() {
                               <div className="flex items-center gap-2">
                                 <span className={`w-2 h-2 rounded-full ${m.dotColor} shrink-0`} />
                                 <span className="text-xs font-bold text-neutral-950">{m.name}</span>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${m.badgeColor}`}>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${m.badgeColor} leading-tight`}>
                                   {m.badge}
                                 </span>
                               </div>
@@ -1608,11 +1517,11 @@ export default function StudioPage() {
                             <p className="text-[11px] text-neutral-600 line-clamp-2 leading-snug">
                               {m.desc}
                             </p>
-                            <div className="flex items-center gap-2 pt-0.5 text-[9px] text-neutral-400 font-medium">
-                              <span>📐 {m.maxResolution}</span>
-                              <span>·</span>
-                              <span>⚡ {m.primaryJob}</span>
-                              <span>·</span>
+                            <div className="flex items-center gap-2 pt-0.5 text-[9px] text-neutral-400 font-medium flex-wrap">
+                              <span>ðŸ“ {m.maxResolution}</span>
+                              <span>Â·</span>
+                              <span>âš¡ {m.primaryJob}</span>
+                              <span>Â·</span>
                               <span className="font-mono text-neutral-500">{m.engine}</span>
                             </div>
                           </button>
@@ -1629,17 +1538,17 @@ export default function StudioPage() {
                       onClick={() => { setModelDropdownOpen(false); setModelModalOpen(true); }}
                       className="text-blue-600 hover:underline font-semibold cursor-pointer"
                     >
-                      Compare full specs →
+                      Compare full specs â†’
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Divider */}
+            {/* Thin divider */}
             <span className="w-px h-4 bg-neutral-200 shrink-0" />
 
-            {/* 2. Dynamic Frame Ratio Dropdown with Visual Geometry Preview */}
+            {/* Aspect Ratio Dropdown */}
             <div className="relative" ref={ratioMenuRef}>
               <button
                 type="button"
@@ -1648,7 +1557,7 @@ export default function StudioPage() {
                   setModelDropdownOpen(false);
                   setResolutionMenuOpen(false);
                 }}
-                className={`h-8.5 px-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs ${
+                className={`h-8 px-2 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   ratioMenuOpen
                     ? "bg-neutral-950 text-white border-neutral-950"
                     : "bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300"
@@ -1658,23 +1567,15 @@ export default function StudioPage() {
                 {/* Mini Visual Shape */}
                 <div className="flex items-center justify-center w-3.5 h-3.5">
                   <div
-                    className={`border rounded-xs ${
-                      ratioMenuOpen ? "border-white bg-white/30" : "border-neutral-600 bg-neutral-100"
-                    } ${ALL_FRAME_RATIOS[selectedRatio]?.boxWidth || "w-3.5"} ${
-                      ALL_FRAME_RATIOS[selectedRatio]?.boxHeight || "h-2.5"
-                    }`}
+                    className={`border rounded-sm ${ratioMenuOpen ? "border-white bg-white/30" : "border-neutral-600 bg-neutral-100"} ${ALL_FRAME_RATIOS[selectedRatio]?.boxWidth || "w-3.5"} ${ALL_FRAME_RATIOS[selectedRatio]?.boxHeight || "h-2.5"}`}
                   />
                 </div>
                 <span className="font-bold">{selectedRatio}</span>
-                <ChevronDown
-                  className={`w-3 h-3 transition-transform duration-200 ${
-                    ratioMenuOpen ? "rotate-180 text-white" : "text-neutral-400"
-                  }`}
-                />
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${ratioMenuOpen ? "rotate-180 text-white" : "text-neutral-400"}`} />
               </button>
 
               {ratioMenuOpen && (
-                <div className="absolute left-0 bottom-full mb-2 w-[300px] max-h-[380px] overflow-y-auto glass-dropdown rounded-2xl border border-neutral-200/90 shadow-[0_20px_50px_rgba(0,0,0,0.16)] p-2 z-50 animate-dropdown scrollbar-thin">
+                <div className="absolute left-0 bottom-full mb-2 w-[300px] max-h-[380px] overflow-y-auto bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_50px_rgba(0,0,0,0.16)] p-2 z-50 animate-dropdown scrollbar-thin">
                   <div className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between border-b border-neutral-100 mb-1">
                     <span>Aspect Ratios</span>
                     <span className="text-neutral-400 font-mono text-[9px]">{availableRatios.length} supported</span>
@@ -1687,21 +1588,14 @@ export default function StudioPage() {
                           key={r.id}
                           type="button"
                           onClick={() => { setSelectedRatio(r.id); setRatioMenuOpen(false); }}
-                          className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
-                            isSelected ? "bg-neutral-950 text-white shadow-xs" : "hover:bg-neutral-100/80 text-neutral-800"
-                          }`}
+                          className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${isSelected ? "bg-neutral-950 text-white shadow-xs" : "hover:bg-neutral-100/80 text-neutral-800"}`}
                         >
                           <div className="flex items-center gap-3">
-                            {/* Realistic Aspect Ratio Geometry Box */}
                             <div className="w-8 h-8 rounded-lg bg-neutral-100/90 flex items-center justify-center shrink-0">
-                              <div
-                                className={`border-2 rounded-xs ${
-                                  isSelected ? "border-white bg-white/20" : "border-neutral-700 bg-neutral-300/40"
-                                } ${r.boxWidth} ${r.boxHeight}`}
-                              />
+                              <div className={`border-2 rounded-sm ${isSelected ? "border-white bg-white/20" : "border-neutral-700 bg-neutral-300/40"} ${r.boxWidth} ${r.boxHeight}`} />
                             </div>
                             <div>
-                              <div className="text-[12px] font-bold leading-none">{r.id} · {r.label}</div>
+                              <div className="text-[12px] font-bold leading-none">{r.id} Â· {r.label}</div>
                               <div className={`text-[10px] mt-0.5 ${isSelected ? "text-neutral-300" : "text-neutral-400"}`}>{r.desc}</div>
                             </div>
                           </div>
@@ -1714,10 +1608,10 @@ export default function StudioPage() {
               )}
             </div>
 
-            {/* Divider */}
+            {/* Thin divider */}
             <span className="w-px h-4 bg-neutral-200 shrink-0" />
 
-            {/* 3. Model-Aware Resolution Dropdown (Clearly Shows Supported vs Locked) */}
+            {/* Resolution Dropdown */}
             <div className="relative" ref={resolutionMenuRef}>
               <button
                 type="button"
@@ -1726,37 +1620,21 @@ export default function StudioPage() {
                   setModelDropdownOpen(false);
                   setRatioMenuOpen(false);
                 }}
-                className={`h-8.5 px-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs ${
+                className={`h-8 px-2 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   resolutionMenuOpen
                     ? "bg-neutral-950 text-white border-neutral-950"
                     : "bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300"
                 }`}
                 title={`Output Resolution: ${currentResolution.label}`}
               >
-                <span className="text-neutral-400 font-mono text-[10px]">RES</span>
-                <span className="font-bold text-neutral-900">
-                  {currentResolution.id === "4096"
-                    ? "4K Ultra"
-                    : currentResolution.id === "2048"
-                    ? "2K HD"
-                    : currentResolution.id === "1024"
-                    ? "1K (1024px)"
-                    : "512px Draft"}
+                <span className={`font-bold ${resolutionMenuOpen ? "text-white" : "text-neutral-900"}`}>
+                  {currentResolution.badge}
                 </span>
-                {currentResolution.id === "4096" && (
-                  <span className="text-[9px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                    4K
-                  </span>
-                )}
-                <ChevronDown
-                  className={`w-3 h-3 transition-transform duration-200 ${
-                    resolutionMenuOpen ? "rotate-180 text-white" : "text-neutral-400"
-                  }`}
-                />
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${resolutionMenuOpen ? "rotate-180 text-white" : "text-neutral-400"}`} />
               </button>
 
               {resolutionMenuOpen && (
-                <div className="absolute left-0 bottom-full mb-2 w-[310px] glass-dropdown rounded-2xl border border-neutral-200/90 shadow-[0_20_50px_rgba(0,0,0,0.16)] p-2 z-50 animate-dropdown">
+                <div className="absolute left-0 bottom-full mb-2 w-[310px] bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_50px_rgba(0,0,0,0.16)] p-2 z-50 animate-dropdown">
                   <div className="px-3 pb-2 pt-1 border-b border-neutral-100 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                     <span>Output Resolution</span>
                     <span className="font-mono text-[9px] text-neutral-500 font-semibold">{currentModel.name}</span>
@@ -1781,26 +1659,16 @@ export default function StudioPage() {
                               <div className="text-[12px] font-bold flex items-center gap-1.5">
                                 <span>{opt.label}</span>
                                 {opt.id === "4096" && (
-                                  <span
-                                    className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
-                                      isSelected
-                                        ? "bg-neutral-800 text-blue-200 border-neutral-700"
-                                        : "bg-blue-50 text-blue-700 border-blue-200"
-                                    }`}
-                                  >
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${isSelected ? "bg-neutral-800 text-blue-200 border-neutral-700" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
                                     4K Ultra
                                   </span>
                                 )}
                               </div>
                               <div className={`text-[10px] mt-0.5 ${isSelected ? "text-neutral-300" : "text-neutral-400"}`}>
-                                {opt.dimensions} · {opt.sub}
+                                {opt.dimensions} Â· {opt.sub}
                               </div>
                             </div>
-                            <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${
-                                isSelected ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-700"
-                              }`}
-                            >
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${isSelected ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-700"}`}>
                               {opt.tag}
                             </span>
                           </button>
@@ -1810,20 +1678,16 @@ export default function StudioPage() {
                           <div
                             key={opt.id}
                             className="w-full text-left px-3 py-2 rounded-xl bg-neutral-50/70 border border-neutral-100/90 opacity-45 cursor-not-allowed flex items-center justify-between"
-                            title={`Not supported by ${currentModel.name} (Max resolution is ${currentModel.maxResolution})`}
+                            title={`Not supported by ${currentModel.name} (Max: ${currentModel.maxResolution})`}
                           >
                             <div>
                               <div className="text-[12px] font-bold text-neutral-400 flex items-center gap-1.5">
                                 <Lock className="w-3 h-3 text-neutral-400" />
                                 <span>{opt.label}</span>
                               </div>
-                              <div className="text-[10px] text-neutral-400 mt-0.5">
-                                Not supported on {currentModel.name}
-                              </div>
+                              <div className="text-[10px] text-neutral-400 mt-0.5">Not supported on {currentModel.name}</div>
                             </div>
-                            <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-neutral-200/80 text-neutral-500">
-                              Locked
-                            </span>
+                            <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-neutral-200/80 text-neutral-500">Locked</span>
                           </div>
                         );
                       }
@@ -1831,23 +1695,21 @@ export default function StudioPage() {
                   </div>
 
                   <div className="mt-2 pt-2 border-t border-neutral-100 px-2 text-[10px] text-neutral-400 leading-tight">
-                    <span>💡 4K Ultra is exclusive to Nano Banana 2.1, Pro & 2 models.</span>
+                    <span>ðŸ’¡ 4K Ultra is exclusive to Nano Banana 2.1, Pro & 2.</span>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Batch Count (Interactive ONLY when model supports parallel generation) */}
+            {/* Batch Count */}
             {currentModel.batchMax > 1 ? (
-              <div className="flex items-center rounded-xl bg-neutral-50 border border-neutral-200 p-0.5 h-8.5">
+              <div className="flex items-center rounded-xl bg-neutral-50 border border-neutral-200 p-0.5 h-8">
                 {[1, 2, 4].filter((c) => c <= currentModel.batchMax).map((count) => (
                   <button
                     key={count}
                     type="button"
                     onClick={() => setBatchCount(count)}
-                    className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                      batchCount === count ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-500 hover:text-neutral-900"
-                    }`}
+                    className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${batchCount === count ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-500 hover:text-neutral-900"}`}
                     title={`Generate ${count} image${count > 1 ? "s" : ""} in parallel`}
                   >
                     {count}x
@@ -1855,29 +1717,17 @@ export default function StudioPage() {
                 ))}
               </div>
             ) : (
-              <span
-                className="text-[10px] font-mono text-neutral-400 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-200 h-8.5 flex items-center"
-                title="Gemini models generate 1 high-fidelity image per inference call"
-              >
+              <span className="text-[10px] font-mono text-neutral-400 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-200 h-8 flex items-center" title="Gemini models generate 1 image per call">
                 1x
               </span>
             )}
 
-            {/* Char count + clear */}
-            <span
-              className={`text-[11px] font-mono tabular-nums ${
-                charCount > maxPromptChars ? "text-rose-600 font-bold" : "text-neutral-400"
-              }`}
-            >
+            {/* Char counter */}
+            <span className={`text-[11px] font-mono tabular-nums ${charCount > maxPromptChars ? "text-rose-600 font-bold" : "text-neutral-400"}`}>
               {charCount}/{maxPromptChars}
             </span>
             {charCount > 0 && (
-              <button
-                type="button"
-                onClick={() => setPrompt("")}
-                className="p-1 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
-                title="Clear prompt"
-              >
+              <button type="button" onClick={() => setPrompt("")} className="p-1 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer" title="Clear prompt">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
@@ -1886,10 +1736,8 @@ export default function StudioPage() {
             <button
               type="button"
               onClick={() => { setSeedLocked(!seedLocked); if (!seedLocked) handleNewSeed(); }}
-              className={`h-8.5 w-8.5 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
-                seedLocked
-                  ? "bg-amber-50 border-amber-300 text-amber-700 shadow-2xs"
-                  : "bg-white border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50"
+              className={`h-8 w-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
+                seedLocked ? "bg-amber-50 border-amber-300 text-amber-700" : "bg-white border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50"
               }`}
               title={seedLocked ? `Seed locked: ${seed}` : "Lock seed for reproducible output"}
             >
@@ -1900,10 +1748,8 @@ export default function StudioPage() {
             <button
               type="button"
               onClick={() => setSettingsOpen(!settingsOpen)}
-              className={`h-8.5 w-8.5 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
-                settingsOpen
-                  ? "bg-neutral-950 text-white border-neutral-950 shadow-2xs"
-                  : "bg-white border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50"
+              className={`h-8 w-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
+                settingsOpen ? "bg-neutral-950 text-white border-neutral-950" : "bg-white border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50"
               }`}
               title="Advanced parameters"
             >
@@ -1911,10 +1757,10 @@ export default function StudioPage() {
             </button>
           </div>
 
-          {/* Right: Credit cost badge + Generate button */}
-          <div className="flex items-center gap-2.5 ml-auto">
-            <div className="flex items-center gap-1.5 text-neutral-600 font-semibold text-xs px-2.5 py-1 rounded-lg bg-neutral-50 border border-neutral-200/80">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          {/* Right: Credit cost + Generate button */}
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-1 text-neutral-600 font-bold text-[11px] px-2.5 py-1.5 rounded-lg bg-neutral-50 border border-neutral-200/80">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                 <circle cx="7" cy="7" r="6" stroke="#94A3B8" strokeWidth="1.5"/>
                 <path d="M5 7.5l1.5 1.5L9.5 5.5" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -1941,6 +1787,7 @@ export default function StudioPage() {
             </button>
           </div>
         </div>
+
 
         {/* ── Advanced Settings Panel ── */}
         {settingsOpen && (
