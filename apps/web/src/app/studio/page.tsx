@@ -1225,88 +1225,11 @@ export default function StudioPage() {
           </div>
 
           {/* ══════════════════════════════════════════════════════════════════════
-              3. CHOOSE A STYLE
-          ══════════════════════════════════════════════════════════════════════ */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-base font-bold text-neutral-950 font-sans">
-                3. Choose a Style
-              </span>
-              <button
-                type="button"
-                onClick={() => styleScrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })}
-                className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-              >
-                <span>View All</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <div className="relative group/styles">
-              <div
-                ref={styleScrollRef}
-                className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin scroll-smooth"
-              >
-                {STYLE_PRESETS.map((style) => {
-                  const isActive = activeStyleId === style.id;
-                  return (
-                    <div
-                      key={style.id}
-                      onClick={() => handleSelectStyle(style)}
-                      className={`relative shrink-0 w-28 h-32 rounded-2xl overflow-hidden border transition-all cursor-pointer group shadow-2xs ${
-                        isActive
-                          ? "border-blue-600 ring-2 ring-blue-600/30 shadow-md scale-102"
-                          : "border-neutral-200/90 hover:border-neutral-400 hover:shadow-subtle"
-                      }`}
-                    >
-                      <img
-                        src={style.image}
-                        alt={style.label}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/85 via-neutral-950/20 to-transparent" />
-
-                      {/* Active checkmark */}
-                      {isActive && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs">
-                          <Check className="w-3 h-3 stroke-[3]" />
-                        </div>
-                      )}
-
-                      <span className="absolute bottom-2 inset-x-2 text-center text-xs font-bold text-white tracking-wide truncate">
-                        {style.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Left & Right Chevrons */}
-              <button
-                type="button"
-                onClick={() => styleScrollRef.current?.scrollBy({ left: -240, behavior: "smooth" })}
-                className="absolute -left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white border border-neutral-200/90 shadow-md text-neutral-700 hover:text-neutral-950 flex items-center justify-center cursor-pointer transition-all hover:scale-105 z-10 opacity-0 group-hover/styles:opacity-100"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => styleScrollRef.current?.scrollBy({ left: 240, behavior: "smooth" })}
-                className="absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white border border-neutral-200/90 shadow-md text-neutral-700 hover:text-neutral-950 flex items-center justify-center cursor-pointer transition-all hover:scale-105 z-10 opacity-0 group-hover/styles:opacity-100"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* ══════════════════════════════════════════════════════════════════════
-              4. GENERATION SETTINGS & ACTION BAR
+              3. GENERATION SETTINGS & ACTION BAR
           ══════════════════════════════════════════════════════════════════════ */}
           <div className="p-5 rounded-3xl bg-white border border-neutral-200/90 shadow-card-elevated space-y-5">
             <span className="text-base font-bold text-neutral-950 font-sans block border-b border-neutral-100 pb-3">
-              4. Generation Settings
+              3. Generation Settings
             </span>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
