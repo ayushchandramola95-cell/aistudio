@@ -86,9 +86,9 @@ Phase 10: Commercial Launch Hardening, Security & Stripe Billing
 ## 📌 Phase 4: Prompt Enhancement & Intelligent Model Router
 *Goal: Let beginners type simple prompts and turn them into cinematic masterpieces, with automatic model recommendation.*
 
-* [ ] **Milestone 4.1**: Build the Prompt Enhancer engine using fast, cost-effective LLMs (e.g., Gemini 1.5 Flash).
-* [ ] **Milestone 4.2**: Add one-click "✨ Enhance" button in the prompt box with live before/after diff preview.
-* [ ] **Milestone 4.3**: Implement Intelligent Router: automatically selects the best model based on prompt style, required aspect ratio, quality tier, and credit cost.
+* [x] **Milestone 4.1**: Build the Prompt Enhancer engine using fast, cost-effective LLMs (e.g., Gemini 2.5 Flash & Vertex AI GenAI SDK).
+* [x] **Milestone 4.2**: Add one-click "✨ Enhance" button in the prompt box with live before/after diff preview, animation, and undo capability.
+* [x] **Milestone 4.3**: Implement Intelligent Router: automatically selects the best model based on prompt style, required aspect ratio, quality tier, and credit cost.
 
 **Acceptance Criteria for Phase 4**:
 * Clicking "✨ Enhance" turns a simple 5-word prompt into a rich, detailed prompt with style tags.
