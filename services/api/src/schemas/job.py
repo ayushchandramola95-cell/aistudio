@@ -41,3 +41,14 @@ class JobResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class EnhancePromptRequest(BaseModel):
+    prompt: str = Field(..., min_length=1, max_length=2000)
+    style: str | None = None
+    model_id: str | None = None
+
+class EnhancePromptResponse(BaseModel):
+    original_prompt: str
+    enhanced_prompt: str
+    style_applied: str | None = None
+    suggested_model: str | None = None
+

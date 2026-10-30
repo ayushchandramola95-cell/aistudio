@@ -12,7 +12,7 @@ from services.api.src.models.model_registry import ModelRegistry
 from services.api.src.services.credit_service import CreditService
 from services.api.src.services.image_service import ImageService
 from services.api.src.routes.auth_routes import get_current_user
-from services.api.src.schemas.job import JobCreateRequest, JobResponse, JobOutputResponse
+from services.api.src.schemas.job import JobCreateRequest, JobResponse, JobOutputResponse, EnhancePromptRequest, EnhancePromptResponse
 
 router = APIRouter(prefix="/api/v1/jobs", tags=["Generation Jobs"])
 
@@ -137,3 +137,76 @@ async def get_job(
     resp = JobResponse.model_validate(job)
     resp.outputs = _enrich_outputs(job.outputs)
     return resp
+
+@router.post("/enhance-prompt", response_model=EnhancePromptResponse)
+async def enhance_prompt(payload: EnhancePromptRequest):
+    """Enriches a user's prompt using Gemini LLM or aesthetic heuristic enhancer."""
+    raw = payload.prompt.strip()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
+
+    enhanced = ""
+    suggested_model = "nano-banana-2-1"
+
+    # Intelligent model recommendation heuristics
+    lower_raw = raw.lower()
+    if any(k in lower_raw for k in ["text", "quote", "signage", "typography", "logo", "words", "chart", "diagram"]):
+        suggested_model = "nano-banana-pro"
+    elif any(k in lower_raw for k in ["rapid", "draft", "fast", "speed", "quick", "sketch"]):
+        suggested_model = "imagen-4-fast"
+    elif any(k in lower_raw for k in ["dress", "shirt", "outfit", "wearing", "garment", "suit", "jacket", "fashion model"]):
+        suggested_model = "virtual-try-on"
+    elif any(k in lower_raw for k in ["inpaint", "mask", "replace background", "outpaint", "remove background"]):
+        suggested_model = "imagen-3-capability-001"
+    else:
+        suggested_model = "nano-banana-2-1"
+
+    # Try live Gemini LLM expansion
+    client = ImageService.get_genai_client()
+    if client is not None:
+        try:
+            import asyncio
+            style_instruction = f" Incorporate the requested visual style: '{payload.style}'." if payload.style else ""
+            prompt_instruction = (
+                f"You are a master AI image prompt enhancer. Transform the following basic prompt into an exceptional, "
+                f"vivid, cinematic image generation prompt. Include precise lighting (e.g. volumetric rays, golden hour, neon rim light), "
+                f"camera parameters (e.g. 35mm lens, f/1.8, shallow depth of field), rich textures, atmospheric depth, and artistic style.{style_instruction} "
+                f"Keep it under 75 words. Do not include markdown or prefix quotes, return ONLY the raw enhanced prompt.\n\n"
+                f"Original Prompt: {raw}"
+            )
+            response = await asyncio.to_thread(
+                client.models.generate_content,
+                model="gemini-2.5-flash-image",
+                contents=prompt_instruction,
+            )
+            if response and response.text:
+                enhanced = response.text.strip().replace('"', '').replace('**', '')
+        except Exception:
+            # Fall back to algorithmic enhancer if Gemini LLM times out or fails
+            enhanced = ""
+
+    # Algorithmic aesthetic enhancer fallback
+    if not enhanced:
+        descriptors = [
+            "ultra-high-definition 8K resolution",
+            "volumetric cinematic lighting with soft diffused shadows",
+            "shot on 35mm anamorphic lens with gentle shallow depth of field",
+            "intricate hyper-detailed surface textures and subtle color grading",
+            "award-winning composition, atmospheric mist and fine micro-details"
+        ]
+        
+        style_suffix = ""
+        if payload.style:
+            style_suffix = f", styled in authentic {payload.style} aesthetic"
+        elif "photoreal" not in lower_raw and "anime" not in lower_raw and "art" not in lower_raw:
+            style_suffix = ", photorealistic studio photography"
+
+        # Combine cleanly
+        enhanced = f"{raw}{style_suffix}, {', '.join(descriptors[:3])}"
+
+    return EnhancePromptResponse(
+        original_prompt=raw,
+        enhanced_prompt=enhanced,
+        style_applied=payload.style,
+        suggested_model=suggested_model
+    )

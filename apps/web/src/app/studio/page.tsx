@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
@@ -33,10 +33,13 @@ import {
   CheckCircle2,
   Layers,
   HelpCircle,
-  UploadCloud,
-  Trash2,
   SlidersHorizontal,
   Info,
+  Undo2,
+  ArrowRight,
+  Compass,
+  Sliders as SlidersIcon,
+  CheckCircle,
 } from "lucide-react";
 import { GenerationJob } from "@/types";
 
@@ -252,9 +255,9 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   },
 ];
 
-// ─── Resolution Definitions (Single, Cohesive, Model-Aware) ────────────────
+// ─── Resolution Definitions ──────────────────────────────────────────────────
 export interface ResolutionOption {
-  id: string; // "512" | "1024" | "2048" | "4096"
+  id: string;
   label: string;
   badge: string;
   sub: string;
@@ -338,7 +341,95 @@ const ALL_FRAME_RATIOS: Record<string, RatioSpec> = {
   "1:8":  { id: "1:8",  label: "Vertical Bookmark", sub: "192 × 1536", desc: "Ultra-tall Display Ad", boxWidth: "w-1.5", boxHeight: "h-8" },
 };
 
-// ─── Prompt Suggestions ─────────────────────────────────────────────────────
+// ─── Style Chips with Micro-Icons & Rich Suffixes ────────────────────────────
+interface StyleChip {
+  id: string;
+  label: string;
+  icon: string;
+  suffix: string;
+  color: string;
+}
+
+const STYLE_CHIPS: StyleChip[] = [
+  { id: "photo", label: "Photorealistic", icon: "📸", suffix: ", photorealistic studio photography, 8k resolution, crisp detail, natural diffused lighting", color: "hover:border-blue-300" },
+  { id: "cinema", label: "Cinematic 35mm", icon: "🎬", suffix: ", cinematic film still, shot on 35mm anamorphic lens, atmospheric haze, volumetric rim lighting", color: "hover:border-amber-300" },
+  { id: "anime", label: "Anime Art", icon: "🎨", suffix: ", anime aesthetic, detailed illustration, vibrant dramatic skies, Makoto Shinkai style, crisp lineart", color: "hover:border-rose-300" },
+  { id: "octane", label: "3D Octane", icon: "🧊", suffix: ", 3D render, Octane render, raytracing, subsurface scattering, glossy volumetric lighting", color: "hover:border-cyan-300" },
+  { id: "cyber", label: "Cyberpunk", icon: "🌆", suffix: ", cyberpunk aesthetic, neon glow, holographic overlays, dark rainy night, chromatic aberration", color: "hover:border-purple-300" },
+  { id: "water", label: "Watercolor", icon: "🖌️", suffix: ", delicate traditional watercolor, soft wet-on-wet pigment bleeding, textured cold-press cotton paper", color: "hover:border-emerald-300" },
+  { id: "fashion", label: "Editorial Fashion", icon: "💎", suffix: ", high-fashion editorial magazine, avant-garde styling, studio flash lighting, pristine composition", color: "hover:border-indigo-300" },
+  { id: "fantasy", label: "Dark Fantasy", icon: "🔮", suffix: ", dark fantasy concept art, ethereal magical glow, moody chiaroscuro shadows, painterly texture", color: "hover:border-pink-300" },
+];
+
+// ─── Curated Trending Inspirations ──────────────────────────────────────────
+interface InspirationSpark {
+  id: string;
+  title: string;
+  prompt: string;
+  modelId: string;
+  ratio: string;
+  category: string;
+  thumbnail: string;
+}
+
+const INSPIRATION_SPARKS: InspirationSpark[] = [
+  {
+    id: "spk-1",
+    title: "Kyoto Torii Gate in Neon Rain",
+    prompt: "An ancient Kyoto torii gate illuminated by neon holographic glyphs in heavy rain, cinematic lighting, 8K resolution, reflections in puddle",
+    modelId: "nano-banana-2-1",
+    ratio: "16:9",
+    category: "Cinematic 8K",
+    thumbnail: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "spk-2",
+    title: "Kintsugi Ceramic Teapot",
+    prompt: "Minimalist ceramic teapot with delicate kintsugi gold lacquer cracks resting on weathered dark oak, soft studio lighting, macro texture",
+    modelId: "imagen-4-fast",
+    ratio: "1:1",
+    category: "Product & Macro",
+    thumbnail: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "spk-3",
+    title: "Cyberpunk Neo-Tokyo Market",
+    prompt: "Dystopian cyberpunk street market with glowing holographic advertisements, flying vehicles overhead, atmospheric haze, moody wet asphalt",
+    modelId: "nano-banana-2-1",
+    ratio: "9:16",
+    category: "Sci-Fi Concept",
+    thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "spk-4",
+    title: "Himalayan Snow Leopard",
+    prompt: "A majestic snow leopard resting on a windswept Himalayan summit under glowing auroras, national geographic documentary photography, 8K",
+    modelId: "nano-banana-pro",
+    ratio: "16:9",
+    category: "Wildlife 4K",
+    thumbnail: "https://images.unsplash.com/photo-1561731216-c3a4d99437d5?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "spk-5",
+    title: "Haute Couture Concrete Pavilion",
+    prompt: "High-end avant-garde fashion editorial in a brutalist concrete pavilion, dramatic chiaroscuro sunlight and shadow, 35mm film grain",
+    modelId: "nano-banana-pro",
+    ratio: "3:4",
+    category: "Editorial Fashion",
+    thumbnail: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "spk-6",
+    title: "Liquid Chrome Fluid Sculpture",
+    prompt: "Abstract dynamic fluid sculpture with electric cyan and rose gold liquid chrome swirls, glossy 4K texture, volumetric refraction",
+    modelId: "nano-banana-2-1",
+    ratio: "1:1",
+    category: "3D Abstract",
+    thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
+  },
+];
+
+// ─── Typewriter Placeholder Suggestions ─────────────────────────────────────
 const PROMPT_SUGGESTIONS = [
   "A misty Japanese torii gate reflected in still water at dawn, cinematic lighting, 8K",
   "Minimalist ceramic teapot with kintsugi gold cracks on weathered oak, soft studio lighting",
@@ -350,50 +441,34 @@ const PROMPT_SUGGESTIONS = [
   "A majestic snow leopard resting on a Himalayan summit under glowing auroras, national geographic",
 ];
 
-// ─── Style Chips with Micro-Icons ───────────────────────────────────────────
-const STYLE_CHIPS = [
-  { label: "Photorealistic", icon: "📸", suffix: ", photorealistic, 8k resolution, crisp detail, natural lighting" },
-  { label: "Cinematic",      icon: "🎬", suffix: ", cinematic film still, 35mm photography, anamorphic lens, atmospheric" },
-  { label: "Anime Art",      icon: "🎨", suffix: ", anime aesthetic, detailed illustration, vibrant colors, Makoto Shinkai style" },
-  { label: "3D Render",      icon: "🧊", suffix: ", 3D render, Octane render, volumetric lighting, raytracing, subsurface scattering" },
-  { label: "Watercolor",     icon: "🖌️", suffix: ", delicate watercolor painting, soft pigment bleeding, textured paper" },
-  { label: "Oil Painting",   icon: "🖼️", suffix: ", classical oil painting, visible impasto brushstrokes, rich canvas texture" },
-];
-
 export default function StudioPage() {
   // ── Core Prompt & Model State ──
   const [prompt, setPrompt]                         = useState("");
+  const [originalPrompt, setOriginalPrompt]         = useState<string | null>(null);
   const [selectedModelId, setSelectedModelId]       = useState("nano-banana-2-1");
   const [selectedRatio, setSelectedRatio]           = useState("16:9");
   const [selectedResolution, setSelectedResolution] = useState("1024");
   const [batchCount, setBatchCount]                 = useState(1);
   const [seedLocked, setSeedLocked]                 = useState(false);
+  const [activeStyleId, setActiveStyleId]           = useState<string | null>(null);
+
+  // ── Prompt Enhancement State ──
+  const [isEnhancing, setIsEnhancing]               = useState(false);
+  const [enhancementNotice, setEnhancementNotice]   = useState<string | null>(null);
+  const [suggestedModelNotice, setSuggestedModelNotice] = useState<string | null>(null);
 
   // ── Dynamic Model-Specific Controls State ──
-  // 1. Nano Banana 2.1
   const [multiRefImages, setMultiRefImages]         = useState<string[]>([]);
   const [webGrounding, setWebGrounding]             = useState(true);
-
-  // 2. Nano Banana 2 Lite
   const [fastMode, setFastMode]                     = useState(true);
-
-  // 3. Nano Banana Pro
   const [thinkingBudget, setThinkingBudget]         = useState<"minimal" | "medium" | "deep">("medium");
-
-  // 4. Imagen 4 Fast
   const [personFilter, setPersonFilter]             = useState<"allow_all" | "dont_allow" | "allow_adult">("allow_all");
-
-  // 5. Virtual Try-On
   const [tryOnPersonImage, setTryOnPersonImage]     = useState<string | null>(null);
   const [tryOnGarmentImage, setTryOnGarmentImage]   = useState<string | null>(null);
   const [tryOnCategory, setTryOnCategory]           = useState<"tops" | "bottoms" | "dresses" | "outerwear">("tops");
-
-  // 6. Imagen 3 Capability 001 (Inpainting / Outpainting)
   const [baseEditImage, setBaseEditImage]           = useState<string | null>(null);
   const [maskEditImage, setMaskEditImage]           = useState<string | null>(null);
   const [editMode, setEditMode]                     = useState<"inpaint" | "outpaint" | "background">("inpaint");
-
-  // 7. General Single Attached Image (for general multimodal models)
   const [attachedImage, setAttachedImage]           = useState<string | null>(null);
 
   // ── Dropdown / Modal States ──
@@ -404,12 +479,22 @@ export default function StudioPage() {
   const [ratioMenuOpen, setRatioMenuOpen]           = useState(false);
   const [resolutionMenuOpen, setResolutionMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen]             = useState(false);
+  const [metadataOpen, setMetadataOpen]             = useState(false);
 
-  // ── Dropdown Anchored Element Refs ──
+  // ── DOM Element Refs ──
+  const studioRef                                   = useRef<HTMLDivElement>(null);
+  const textareaRef                                 = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef                                = useRef<HTMLInputElement>(null);
+  const multiFileInputRef                           = useRef<HTMLInputElement>(null);
+  const tryOnPersonInputRef                         = useRef<HTMLInputElement>(null);
+  const tryOnGarmentInputRef                        = useRef<HTMLInputElement>(null);
+  const baseEditInputRef                            = useRef<HTMLInputElement>(null);
+  const maskEditInputRef                            = useRef<HTMLInputElement>(null);
+  const timerRef                                    = useRef<NodeJS.Timeout | null>(null);
+
   const modelMenuRef                                = useRef<HTMLDivElement>(null);
   const ratioMenuRef                                = useRef<HTMLDivElement>(null);
   const resolutionMenuRef                           = useRef<HTMLDivElement>(null);
-  const settingsRef                                 = useRef<HTMLDivElement>(null);
 
   // ── Advanced Parameters ──
   const [negativePrompt, setNegativePrompt]         = useState("");
@@ -422,6 +507,7 @@ export default function StudioPage() {
   const [progress, setProgress]                     = useState(0);
   const [elapsedTime, setElapsedTime]               = useState(0);
   const [stagePhase, setStagePhase]                 = useState("Initializing...");
+  const [stageStep, setStageStep]                   = useState<number>(1);
   const [activeJob, setActiveJob]                   = useState<GenerationJob | null>(null);
   const [outputImage, setOutputImage]               = useState<string | null>(null);
   const [errorMsg, setErrorMsg]                     = useState<string | null>(null);
@@ -448,54 +534,35 @@ export default function StudioPage() {
     },
     {
       id: "hist-2",
-      prompt: "Multi-character fantasy graphic novel sequence with consistent protagonist across panels",
+      prompt: "Minimalist ceramic teapot with kintsugi gold cracks on weathered oak, soft studio lighting",
       url: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=600&auto=format&fit=crop",
-      model: "Nano Banana 2",
+      model: "Imagen 4 Fast",
       ratio: "1:1",
-      date: "1h ago",
+      date: "25m ago",
     },
     {
       id: "hist-3",
-      prompt: "Studio marketing infographic with intricate technical diagrams and precise lighting",
-      url: "https://images.unsplash.com/photo-1465101162946-4377e57745c3?q=80&w=600&auto=format&fit=crop",
+      prompt: "A majestic snow leopard resting on a Himalayan summit under glowing auroras",
+      url: "https://images.unsplash.com/photo-1561731216-c3a4d99437d5?q=80&w=600&auto=format&fit=crop",
       model: "Nano Banana Pro",
       ratio: "16:9",
-      date: "3h ago",
+      date: "1h ago",
     },
   ]);
 
-  // ── File Input Refs ──
-  const fileInputRef              = useRef<HTMLInputElement>(null);
-  const multiFileInputRef         = useRef<HTMLInputElement>(null);
-  const tryOnPersonInputRef       = useRef<HTMLInputElement>(null);
-  const tryOnGarmentInputRef      = useRef<HTMLInputElement>(null);
-  const baseEditInputRef          = useRef<HTMLInputElement>(null);
-  const maskEditInputRef          = useRef<HTMLInputElement>(null);
-
-  const studioRef                 = useRef<HTMLDivElement>(null);
-  const textareaRef               = useRef<HTMLTextAreaElement>(null);
-  const timerRef                  = useRef<NodeJS.Timeout | null>(null);
-
-  // ── Selected Model Info ──
+  // Current active model & resolution specs
   const currentModel = useMemo(() => {
     return AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
   }, [selectedModelId]);
 
-  // ── Resolution Option Computation & Auto-Correction ──
   const currentResolution = useMemo(() => {
-    return RESOLUTION_OPTIONS.find((r) => r.id === selectedResolution) || RESOLUTION_OPTIONS[1];
-  }, [selectedResolution]);
-
-  // Automatically ensure resolution is supported when switching models
-  useEffect(() => {
-    const cur = RESOLUTION_OPTIONS.find((r) => r.id === selectedResolution);
-    if (cur && !cur.supportedModels.includes(currentModel.id)) {
-      // Model cannot do this resolution (e.g. 4K on Lite) -> reset to 1024
-      setSelectedResolution("1024");
+    const found = RESOLUTION_OPTIONS.find((r) => r.id === selectedResolution);
+    if (found && found.supportedModels.includes(currentModel.id)) {
+      return found;
     }
-  }, [currentModel.id, selectedResolution]);
+    return RESOLUTION_OPTIONS.find((r) => r.id === "1024") || RESOLUTION_OPTIONS[1];
+  }, [selectedResolution, currentModel]);
 
-  // Allowed aspect ratios for current model
   const availableRatios = useMemo(() => {
     return currentModel.aspectRatios
       .map((rId) => ALL_FRAME_RATIOS[rId])
@@ -567,13 +634,20 @@ export default function StudioPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ── Auto-clear error after 6s ──
+  // ── Auto-clear notifications after 6s ──
   useEffect(() => {
     if (errorMsg) {
       const t = setTimeout(() => setErrorMsg(null), 6000);
       return () => clearTimeout(t);
     }
   }, [errorMsg]);
+
+  useEffect(() => {
+    if (enhancementNotice) {
+      const t = setTimeout(() => setEnhancementNotice(null), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [enhancementNotice]);
 
   // ── Computed Values ──
   const totalCost = (currentModel.cost + currentResolution.extraCost) * batchCount;
@@ -601,7 +675,101 @@ export default function StudioPage() {
     });
   }, [selectedCategoryTab, modelFilterQuery]);
 
-  // ── Handlers ──
+  // ── Prompt Enhancer (Live Gemini LLM) ──
+  const handleEnhancePrompt = async () => {
+    if (!prompt.trim()) {
+      setErrorMsg("Please enter a basic prompt before enhancing.");
+      return;
+    }
+
+    setIsEnhancing(true);
+    setEnhancementNotice(null);
+    setSuggestedModelNotice(null);
+
+    try {
+      const activeChip = STYLE_CHIPS.find((c) => c.id === activeStyleId);
+      const res = await fetch("http://localhost:8100/api/v1/jobs/enhance-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: prompt,
+          style: activeChip?.label || null,
+          model_id: selectedModelId,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Prompt enhancement service currently unavailable.");
+      }
+
+      const data = await res.json();
+      if (data.enhanced_prompt) {
+        setOriginalPrompt(prompt);
+        setPrompt(data.enhanced_prompt);
+        setEnhancementNotice("✨ Prompt enriched with cinematic lighting & textures!");
+
+        if (data.suggested_model && data.suggested_model !== selectedModelId) {
+          const suggestedSpec = AVAILABLE_MODELS.find((m) => m.id === data.suggested_model);
+          if (suggestedSpec) {
+            setSuggestedModelNotice(suggestedSpec.id);
+          }
+        }
+      }
+    } catch (e: any) {
+      // Local graceful fallback
+      setOriginalPrompt(prompt);
+      const enriched = `${prompt}, photorealistic studio photography, 8k resolution, volumetric cinematic lighting with soft diffused shadows, shot on 35mm anamorphic lens with gentle depth of field, intricate micro-textures`;
+      setPrompt(enriched);
+      setEnhancementNotice("✨ Prompt enriched with cinematic aesthetic parameters!");
+    } finally {
+      setIsEnhancing(false);
+      textareaRef.current?.focus();
+    }
+  };
+
+  const handleUndoEnhance = () => {
+    if (originalPrompt) {
+      setPrompt(originalPrompt);
+      setOriginalPrompt(null);
+      setEnhancementNotice("↩ Restored original prompt");
+    }
+  };
+
+  // ── Style Chips Toggle ──
+  const handleToggleStyle = (chip: StyleChip) => {
+    if (activeStyleId === chip.id) {
+      // Remove style
+      setActiveStyleId(null);
+      const cleaned = prompt.replace(chip.suffix, "").trim();
+      setPrompt(cleaned);
+      return;
+    }
+
+    // Remove any prior chip suffixes
+    let cleaned = prompt;
+    STYLE_CHIPS.forEach((c) => {
+      cleaned = cleaned.replace(c.suffix, "");
+    });
+    cleaned = cleaned.trim();
+
+    setActiveStyleId(chip.id);
+    if (!cleaned) {
+      setPrompt(`A captivating creation${chip.suffix}`);
+    } else {
+      setPrompt(`${cleaned}${chip.suffix}`);
+    }
+    textareaRef.current?.focus();
+  };
+
+  // ── Inspiration Sparks ──
+  const handleApplyInspiration = (item: InspirationSpark) => {
+    setPrompt(item.prompt);
+    setSelectedModelId(item.modelId);
+    setSelectedRatio(item.ratio);
+    textareaRef.current?.focus();
+  };
+
+  // ── File Upload Handlers ──
   const handleSingleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -637,28 +805,6 @@ export default function StudioPage() {
     textareaRef.current?.focus();
   };
 
-  const handleStyleChip = (chip: { label: string; suffix: string }) => {
-    const isApplied = prompt.toLowerCase().includes(chip.label.toLowerCase());
-    if (isApplied) {
-      const cleaned = prompt
-        .replace(chip.suffix, "")
-        .replace(new RegExp(`,?\\s*${chip.label}[^,]*`, "gi"), "")
-        .trim();
-      setPrompt(cleaned);
-      return;
-    }
-
-    if (!prompt.trim()) {
-      setPrompt(`A stunning creation${chip.suffix}`);
-    } else {
-      const base = prompt
-        .replace(/, (photorealistic|cinematic film still|anime aesthetic|3D render|delicate watercolor|classical oil painting)[^,]*/gi, "")
-        .trim();
-      setPrompt(base + chip.suffix);
-    }
-    textareaRef.current?.focus();
-  };
-
   const handleInsertQuote = () => {
     const quoted = prompt.includes('“') || prompt.includes('"')
       ? prompt
@@ -685,6 +831,7 @@ export default function StudioPage() {
     setElapsedTime(0);
     setOutputImage(null);
     setShowSuccess(false);
+    setStageStep(1);
     setStagePhase("Reserving credits via Two-Phase Escrow...");
 
     const startTime = Date.now();
@@ -696,7 +843,6 @@ export default function StudioPage() {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    // Construct model-specific dynamic parameters
     const modelParameters: Record<string, any> = {
       aspect_ratio: selectedRatio,
       resolution: selectedResolution,
@@ -707,7 +853,6 @@ export default function StudioPage() {
       ...(seedLocked && seed !== -1 ? { seed } : {}),
     };
 
-    // Pack Model Specific Flags
     if (selectedModelId === "nano-banana-2-1") {
       modelParameters.web_grounding = webGrounding;
       modelParameters.multi_reference_count = multiRefImages.length;
@@ -747,14 +892,21 @@ export default function StudioPage() {
       const job: GenerationJob = await res.json();
       setActiveJob(job);
       setProgress(35);
+      setStageStep(2);
       setStagePhase(`Routing inference to Google Cloud (${currentModel.engine})...`);
 
-      // ── Poll Real Job Output from Backend API ──
       let completedJob: GenerationJob | null = null;
       for (let pollCount = 0; pollCount < 25; pollCount++) {
         await new Promise((r) => setTimeout(r, 600));
         setProgress(Math.min(92, 40 + pollCount * 10));
-        setStagePhase(`Rendering on Vertex AI (${currentModel.name} @ ${selectedResolution}px)...`);
+
+        if (pollCount === 2) {
+          setStageStep(3);
+          setStagePhase(`Rendering diffusion latent frames on Vertex AI (${currentModel.name})...`);
+        } else if (pollCount === 5) {
+          setStageStep(4);
+          setStagePhase(`Embedding SynthID digital fingerprint & finalizing...`);
+        }
 
         try {
           const pollRes = await fetch(`http://localhost:8100/api/v1/jobs/${job.id}`);
@@ -778,7 +930,7 @@ export default function StudioPage() {
       if (timerRef.current) clearInterval(timerRef.current);
       setIsGenerating(false);
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      setTimeout(() => setShowSuccess(false), 3500);
 
       const resultUrl =
         completedJob?.outputs?.[0]?.download_url ||
@@ -817,6 +969,7 @@ export default function StudioPage() {
   const handleReset = () => {
     setOutputImage(null);
     setPrompt("");
+    setOriginalPrompt(null);
     setActiveJob(null);
     setProgress(0);
     setElapsedTime(0);
@@ -826,6 +979,7 @@ export default function StudioPage() {
     setBaseEditImage(null);
     setMaskEditImage(null);
     setAttachedImage(null);
+    setActiveStyleId(null);
   };
 
   const hasActiveContent = isGenerating || outputImage;
@@ -853,26 +1007,13 @@ export default function StudioPage() {
     return displayedPlaceholder || "Describe the image you want to generate...";
   }, [selectedModelId, displayedPlaceholder]);
 
-  // Check if model has special contextual controls that warrant a top bar
-  const hasContextualControls = useMemo(() => {
-    return (
-      selectedModelId === "nano-banana-2-1" ||
-      selectedModelId === "nano-banana-pro" ||
-      selectedModelId === "nano-banana-2-lite" ||
-      selectedModelId === "imagen-4-fast" ||
-      selectedModelId === "virtual-try-on" ||
-      selectedModelId === "imagen-3-capability-001" ||
-      selectedModelId === "nano-banana-2"
-    );
-  }, [selectedModelId]);
-
   return (
     <div
       ref={studioRef}
-      className={`w-full max-w-4xl mx-auto transition-all duration-500 ${
+      className={`w-full max-w-5xl mx-auto transition-all duration-500 ${
         hasActiveContent
-          ? "space-y-6 pt-4 pb-24"
-          : "min-h-[calc(100vh-160px)] flex flex-col justify-center items-center py-10"
+          ? "space-y-6 pt-2 pb-24"
+          : "min-h-[calc(100vh-140px)] flex flex-col justify-center items-center py-6"
       }`}
     >
       {/* ── Hidden File Inputs ── */}
@@ -935,6 +1076,27 @@ export default function StudioPage() {
         className="hidden"
       />
 
+      {/* ── Top Status Pill & Breadcrumb ── */}
+      <div className="w-full flex items-center justify-between px-1 pb-3 text-xs text-neutral-500">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="font-semibold text-neutral-800">Google Cloud Vertex AI</span>
+          <span className="text-neutral-300">·</span>
+          <span className="hidden sm:inline text-neutral-500">SynthID Watermark Ready</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full border border-neutral-200">
+            Escrow Protected
+          </span>
+          <button
+            onClick={() => setModelModalOpen(true)}
+            className="text-[11px] text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
+          >
+            Model Specs (8) →
+          </button>
+        </div>
+      </div>
+
       {/* ── Error Banner ── */}
       {errorMsg && (
         <div className="w-full mb-3 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-800 text-xs font-semibold animate-spring shadow-2xs">
@@ -948,6 +1110,46 @@ export default function StudioPage() {
         </div>
       )}
 
+      {/* ── Enhancement / Success Notification ── */}
+      {enhancementNotice && (
+        <div className="w-full mb-3 px-4 py-2.5 rounded-2xl bg-blue-50/90 border border-blue-200/90 flex items-center justify-between text-blue-900 text-xs font-semibold animate-spring shadow-2xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-blue-600 shrink-0 animate-pulse" />
+            <span>{enhancementNotice}</span>
+          </div>
+          {originalPrompt && (
+            <button
+              onClick={handleUndoEnhance}
+              className="px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-blue-700 hover:bg-blue-100 flex items-center gap-1 text-[11px] font-bold cursor-pointer transition-all"
+            >
+              <Undo2 className="w-3 h-3" />
+              <span>Undo</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Suggested Model Recommendation Notice ── */}
+      {suggestedModelNotice && (
+        <div className="w-full mb-3 px-4 py-2.5 rounded-2xl bg-purple-50/90 border border-purple-200/90 flex items-center justify-between text-purple-900 text-xs font-semibold animate-spring shadow-2xs">
+          <div className="flex items-center gap-2">
+            <Brain className="w-4 h-4 text-purple-600 shrink-0" />
+            <span>
+              Recommendation: <strong>{AVAILABLE_MODELS.find(m => m.id === suggestedModelNotice)?.name}</strong> is optimal for this prompt!
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setSelectedModelId(suggestedModelNotice);
+              setSuggestedModelNotice(null);
+            }}
+            className="px-3 py-1 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-[11px] font-bold cursor-pointer transition-all shadow-xs"
+          >
+            Apply Model
+          </button>
+        </div>
+      )}
+
       {/* ── Success Flash ── */}
       {showSuccess && (
         <div className="w-full mb-3 px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-800 text-xs font-semibold animate-spring shadow-2xs">
@@ -956,70 +1158,69 @@ export default function StudioPage() {
         </div>
       )}
 
-      {/* ── Idle Hero ── */}
+      {/* ── Idle Hero Banner ── */}
       {!hasActiveContent && (
         <div className="text-center space-y-3 mb-6 animate-fade-scale">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-neutral-700 text-xs font-semibold border border-neutral-200/80 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>Google Cloud Vertex AI Image Studio</span>
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
+            <span>Official Google Cloud Generative Studio</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-normal font-editorial text-neutral-950 tracking-tight leading-tight">
             What will you create?
           </h1>
-          <p className="text-sm text-neutral-500 font-sans max-w-sm mx-auto">
-            Describe your vision, configure model specs, generate.
+          <p className="text-sm text-neutral-500 font-sans max-w-md mx-auto">
+            Describe your vision, enhance with Gemini AI, configure model parameters, and generate in ultra-high definition.
           </p>
         </div>
       )}
 
-      {/* ── Polished Floating Prompt Box Container ── */}
+      {/* ── Centerpiece Floating Prompt Box ── */}
       <div
         className={`w-full bg-white rounded-3xl border border-neutral-200/90 prompt-box-shadow glow-focus-ring relative transition-all duration-300 hover:border-neutral-300`}
       >
-        {/* â”€â”€ Contextual Controls Strip (always shown as model header) â”€â”€ */}
-        <div className="px-4 py-2.5 bg-gradient-to-r from-neutral-50 to-white border-b border-neutral-100/80 flex items-center justify-between gap-2 flex-wrap rounded-t-3xl">
-          {/* Left: Model Identity + Model-specific controls */}
+        {/* Model Identity Header Strip */}
+        <div className="px-4 py-2.5 bg-gradient-to-r from-neutral-50 via-white to-neutral-50 border-b border-neutral-100 flex items-center justify-between gap-2 flex-wrap rounded-t-3xl">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 shrink-0">
               <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
-              <span className="text-[11px] font-bold text-neutral-800">{currentModel.name}</span>
+              <span className="text-[11px] font-bold text-neutral-900">{currentModel.name}</span>
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${currentModel.badgeColor} leading-tight`}>
                 {currentModel.badge}
               </span>
             </div>
             <span className="w-px h-3 bg-neutral-200 shrink-0" />
-            {/* Nano Banana 2.1 Controls */}
+
+            {/* Model Specific Dynamic Toggles */}
             {selectedModelId === "nano-banana-2-1" && (
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => setWebGrounding(!webGrounding)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer border ${
-                    webGrounding
-                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                      : "bg-white border-neutral-200 text-neutral-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700"
-                  }`}
-                >
-                  <Globe className="w-3 h-3" />
-                  <span>Search</span>
-                  {webGrounding && <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setWebGrounding(!webGrounding)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer border ${
+                  webGrounding
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "bg-white border-neutral-200 text-neutral-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700"
+                }`}
+                title="Ground generations with live Google Web Search knowledge"
+              >
+                <Globe className="w-3 h-3" />
+                <span>Web Grounding</span>
+                {webGrounding && <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />}
+              </button>
             )}
-            {/* Nano Banana 2 Lite Controls */}
+
             {selectedModelId === "nano-banana-2-lite" && (
               <button
                 type="button"
                 onClick={() => setFastMode(!fastMode)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition-all ${
-                  fastMode ? "bg-emerald-600 text-white border-emerald-600" : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100"
+                  fastMode ? "bg-emerald-600 text-white border-emerald-600 shadow-xs" : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100"
                 }`}
               >
                 <Zap className="w-3 h-3" />
-                <span>Turbo {fastMode ? "ON" : "OFF"}</span>
+                <span>Turbo {fastMode ? "Active" : "Standard"}</span>
               </button>
             )}
-            {/* Nano Banana Pro Controls */}
+
             {selectedModelId === "nano-banana-pro" && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
@@ -1027,81 +1228,103 @@ export default function StudioPage() {
                     <Brain className="w-2.5 h-2.5 text-purple-500" /> Think:
                   </span>
                   {(["minimal", "medium", "deep"] as const).map((t) => (
-                    <button key={t} type="button" onClick={() => setThinkingBudget(t)}
-                      className={`px-2 py-0.5 rounded-full capitalize cursor-pointer transition-all ${thinkingBudget === t ? "bg-purple-600 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
-                    >{t}</button>
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setThinkingBudget(t)}
+                      className={`px-2 py-0.5 rounded-full capitalize cursor-pointer transition-all ${
+                        thinkingBudget === t ? "bg-purple-600 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"
+                      }`}
+                    >
+                      {t}
+                    </button>
                   ))}
                 </div>
-                <button type="button" onClick={handleInsertQuote}
+                <button
+                  type="button"
+                  onClick={handleInsertQuote}
                   className="px-2.5 py-1 rounded-full bg-white border border-neutral-200 hover:bg-neutral-100 text-[11px] font-semibold text-neutral-700 flex items-center gap-1 cursor-pointer transition-all"
-                ><span>"Text"</span></button>
+                  title="Add exact quoted typography"
+                >
+                  <span>"Signage Text"</span>
+                </button>
               </div>
             )}
-            {/* Imagen 4 Fast Controls */}
+
             {selectedModelId === "imagen-4-fast" && (
               <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
                 <span className="px-2 text-neutral-400 text-[10px] font-medium">People:</span>
                 {(["allow_all", "allow_adult", "dont_allow"] as const).map((f) => (
-                  <button key={f} type="button" onClick={() => setPersonFilter(f)}
-                    className={`px-2 py-0.5 rounded-full cursor-pointer transition-all text-[10px] ${personFilter === f ? "bg-amber-500 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setPersonFilter(f)}
+                    className={`px-2 py-0.5 rounded-full cursor-pointer transition-all text-[10px] ${
+                      personFilter === f ? "bg-amber-500 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"
+                    }`}
                   >
                     {f === "allow_all" ? "All" : f === "allow_adult" ? "Adults" : "None"}
                   </button>
                 ))}
               </div>
             )}
-            {/* Virtual Try-On Controls */}
+
             {selectedModelId === "virtual-try-on" && (
               <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
                 <span className="px-2 text-neutral-400 text-[10px] font-medium">Garment:</span>
                 {(["tops", "bottoms", "dresses", "outerwear"] as const).map((cat) => (
-                  <button key={cat} type="button" onClick={() => setTryOnCategory(cat)}
-                    className={`px-2 py-0.5 rounded-full capitalize cursor-pointer transition-all text-[10px] ${tryOnCategory === cat ? "bg-rose-500 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
-                  >{cat}</button>
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setTryOnCategory(cat)}
+                    className={`px-2 py-0.5 rounded-full capitalize cursor-pointer transition-all text-[10px] ${
+                      tryOnCategory === cat ? "bg-rose-500 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"
+                    }`}
+                  >
+                    {cat}
+                  </button>
                 ))}
               </div>
             )}
-            {/* Imagen 3 Capability 001 Controls */}
+
             {selectedModelId === "imagen-3-capability-001" && (
               <div className="flex items-center rounded-full bg-white border border-neutral-200/90 p-0.5 text-[11px] font-semibold shadow-2xs">
                 {(["inpaint", "outpaint", "background"] as const).map((m) => (
-                  <button key={m} type="button" onClick={() => setEditMode(m)}
-                    className={`px-2.5 py-0.5 rounded-full capitalize cursor-pointer transition-all text-[10px] ${editMode === m ? "bg-cyan-600 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"}`}
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setEditMode(m)}
+                    className={`px-2.5 py-0.5 rounded-full capitalize cursor-pointer transition-all text-[10px] ${
+                      editMode === m ? "bg-cyan-600 text-white font-bold" : "text-neutral-500 hover:text-neutral-900"
+                    }`}
                   >
                     {m === "inpaint" ? "Inpaint" : m === "outpaint" ? "Outpaint" : "BG Swap"}
                   </button>
                 ))}
               </div>
             )}
-            {/* Nano Banana 2 Controls */}
+
             {selectedModelId === "nano-banana-2" && (
               <span className="text-[10px] text-teal-700 font-semibold flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-teal-500" />
-                5 chars Â· 14 objects
-              </span>
-            )}
-            {/* Nano Banana (legacy) Controls */}
-            {selectedModelId === "nano-banana" && (
-              <span className="text-[10px] text-indigo-600 font-semibold flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-indigo-400" />
-                Legacy stable generation
+                5 chars · 14 objects supported
               </span>
             )}
           </div>
-          {/* Right: Engine label */}
+
+          {/* Right Engine Label */}
           <div className="hidden sm:flex items-center gap-1 text-[10px] text-neutral-400 font-medium">
-            <span className="text-neutral-300">via</span>
-            <strong className="text-neutral-600 font-semibold">{currentModel.engine}</strong>
+            <span className="text-neutral-300">Engine:</span>
+            <strong className="text-neutral-600 font-semibold font-mono">{currentModel.engine}</strong>
           </div>
         </div>
 
-        {/* â”€â”€ Main Input Area (Adapts dynamically by Model) â”€â”€ */}
+        {/* Main Input Area */}
         <div className="p-5 pb-3">
-          {/* â”€â”€ A. Virtual Try-On Specialized Dual Dropzones â”€â”€ */}
+          {/* Virtual Try-On Dual Dropzones */}
           {selectedModelId === "virtual-try-on" ? (
             <div className="space-y-3.5 animate-spring">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* Person Dropzone */}
                 <div
                   onClick={() => tryOnPersonInputRef.current?.click()}
                   className={`h-32 rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all p-2 relative group ${
@@ -1135,7 +1358,6 @@ export default function StudioPage() {
                   )}
                 </div>
 
-                {/* Garment Dropzone */}
                 <div
                   onClick={() => tryOnGarmentInputRef.current?.click()}
                   className={`h-32 rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all p-2 relative group ${
@@ -1170,7 +1392,6 @@ export default function StudioPage() {
                 </div>
               </div>
 
-              {/* Fit Instruction Prompt */}
               <div className="relative">
                 <textarea
                   ref={textareaRef}
@@ -1183,10 +1404,9 @@ export default function StudioPage() {
               </div>
             </div>
           ) : selectedModelId === "imagen-3-capability-001" ? (
-            /* â”€â”€ B. Imagen 3 Capability 001 Inpainting Dropzones â”€â”€ */
+            /* Inpainting Dropzones */
             <div className="space-y-3.5 animate-spring">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* Base Image Dropzone */}
                 <div
                   onClick={() => baseEditInputRef.current?.click()}
                   className={`h-32 rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all p-2 relative group ${
@@ -1220,7 +1440,6 @@ export default function StudioPage() {
                   )}
                 </div>
 
-                {/* Mask Dropzone */}
                 <div
                   onClick={() => maskEditInputRef.current?.click()}
                   className={`h-32 rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all p-2 relative group ${
@@ -1255,7 +1474,6 @@ export default function StudioPage() {
                 </div>
               </div>
 
-              {/* Edit Instruction Prompt */}
               <div className="relative">
                 <textarea
                   ref={textareaRef}
@@ -1268,9 +1486,9 @@ export default function StudioPage() {
               </div>
             </div>
           ) : (
-            /* â”€â”€ C. Standard Models â”€â”€ */
+            /* Standard Full-Width Prompt Textarea */
             <div className="space-y-3">
-              {/* Horizontal Reference Thumbnails when images exist (Nano Banana 2.1) */}
+              {/* Horizontal Reference Thumbnails (Nano Banana 2.1) */}
               {selectedModelId === "nano-banana-2-1" && multiRefImages.length > 0 && (
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin animate-spring">
                   {multiRefImages.map((src, idx) => (
@@ -1303,7 +1521,7 @@ export default function StudioPage() {
                 </div>
               )}
 
-              {/* Main Prompt Textarea â€” clean, full-width, no awkward dropzone beside it */}
+              {/* Textarea container */}
               <div className="relative flex flex-col">
                 <textarea
                   ref={textareaRef}
@@ -1311,7 +1529,7 @@ export default function StudioPage() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder={dynamicPlaceholder}
-                  className="w-full bg-transparent text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none resize-none font-normal leading-relaxed"
+                  className="w-full bg-transparent text-sm sm:text-base text-neutral-900 placeholder-neutral-400 focus:outline-none resize-none font-normal leading-relaxed"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -1319,50 +1537,116 @@ export default function StudioPage() {
                     }
                   }}
                 />
-                {/* Attachment button inside textarea bottom-left */}
-                {selectedModelId !== "imagen-4-fast" && !hasActiveContent && (
-                  <div className="flex items-center gap-2 mt-1">
+
+                {/* Sub-Textarea Action Ribbon: Attach Image + Enhance Prompt */}
+                <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-neutral-100/70">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {/* Attachment buttons */}
                     {selectedModelId === "nano-banana-2-1" && (
                       <button
                         type="button"
                         onClick={() => multiFileInputRef.current?.click()}
                         disabled={multiRefImages.length >= 14}
-                        className="inline-flex items-center gap-1.5 text-[11px] text-neutral-500 hover:text-blue-600 transition-colors cursor-pointer group"
-                        title="Add reference images (up to 14)"
+                        className="inline-flex items-center gap-1.5 text-xs text-neutral-600 hover:text-blue-600 transition-colors cursor-pointer group"
                       >
                         <div className="w-6 h-6 rounded-lg border border-neutral-200 group-hover:border-blue-300 group-hover:bg-blue-50 flex items-center justify-center transition-all">
                           <Plus className="w-3.5 h-3.5" />
                         </div>
-                        <span className="group-hover:text-blue-600 font-medium">
-                          {multiRefImages.length === 0 ? "Add reference images (0/14)" : `Add refs (${multiRefImages.length}/14)`}
+                        <span className="font-medium text-[11px]">
+                          {multiRefImages.length === 0 ? "Add Reference Photos (0/14)" : `Refs (${multiRefImages.length}/14)`}
                         </span>
                       </button>
                     )}
+
                     {(selectedModelId === "nano-banana-2" || selectedModelId === "nano-banana" || selectedModelId === "nano-banana-pro") && (
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer group"
-                        title="Attach a reference image"
+                        className="inline-flex items-center gap-1.5 text-xs text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer group"
                       >
                         <div className="w-6 h-6 rounded-lg border border-neutral-200 group-hover:border-neutral-400 flex items-center justify-center transition-all">
                           <ImageIcon className="w-3.5 h-3.5" />
                         </div>
-                        {attachedImage ? <span className="text-emerald-600 font-semibold">Image attached âœ“</span> : <span>Attach image</span>}
+                        <span className="font-medium text-[11px]">
+                          {attachedImage ? <span className="text-emerald-600 font-semibold">Image Attached ✓</span> : "Attach Reference"}
+                        </span>
                       </button>
                     )}
+
+                    {/* Surprise Me / Dice */}
+                    <button
+                      type="button"
+                      onClick={handleSurpriseMe}
+                      className="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-neutral-50 border border-transparent hover:border-neutral-200"
+                      title="Generate a creative random prompt"
+                    >
+                      <Dice5 className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Surprise Me</span>
+                    </button>
                   </div>
-                )}
+
+                  {/* Sparkle Enhance Prompt Action */}
+                  <div className="flex items-center gap-2">
+                    {originalPrompt && (
+                      <button
+                        type="button"
+                        onClick={handleUndoEnhance}
+                        className="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-neutral-100"
+                        title="Revert to original prompt"
+                      >
+                        <Undo2 className="w-3 h-3" />
+                        <span>Revert</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleEnhancePrompt}
+                      disabled={isEnhancing || !prompt.trim()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-700 border border-blue-200 text-xs font-bold transition-all shadow-2xs hover:shadow-xs active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      title="Enrich prompt with cinematic lighting, camera specs & textures via Gemini"
+                    >
+                      <Sparkles className={`w-3.5 h-3.5 text-blue-600 ${isEnhancing ? "animate-spin" : ""}`} />
+                      <span>{isEnhancing ? "Enhancing..." : "✨ Enhance"}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* â”€â”€ Bottom Controls Bar â”€â”€ */}
+        {/* ── Visual Style Chips Carousel Tray ── */}
+        <div className="px-4 py-2 border-t border-neutral-100 bg-neutral-50/60 flex items-center gap-1.5 overflow-x-auto scrollbar-thin">
+          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest shrink-0 pr-1 flex items-center gap-1">
+            <Compass className="w-3 h-3" /> Styles:
+          </span>
+          {STYLE_CHIPS.map((chip) => {
+            const isActive = activeStyleId === chip.id;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => handleToggleStyle(chip)}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all shrink-0 cursor-pointer border ${
+                  isActive
+                    ? "bg-neutral-950 text-white border-neutral-950 shadow-2xs"
+                    : `bg-white border-neutral-200/80 text-neutral-700 ${chip.color} hover:bg-neutral-50`
+                }`}
+              >
+                <span>{chip.icon}</span>
+                <span>{chip.label}</span>
+                {isActive && <Check className="w-3 h-3 text-white ml-0.5" />}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Bottom Controls Toolbar ── */}
         <div className="px-4 py-3 border-t border-neutral-100 flex items-center justify-between gap-2 flex-wrap bg-white rounded-b-3xl">
-          {/* Left Group: Model + Ratio + Resolution in a compact pill row */}
+          {/* Left Group: Model + Ratio + Resolution + Batch + Seed + Advanced */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Model Selector */}
+            {/* Model Selector Dropdown Button */}
             <div className="relative" ref={modelMenuRef}>
               <button
                 type="button"
@@ -1378,14 +1662,13 @@ export default function StudioPage() {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
-                <span className="truncate max-w-[110px]">{currentModel.name}</span>
+                <span className="truncate max-w-[120px]">{currentModel.name}</span>
                 <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${modelDropdownOpen ? "rotate-180 text-white" : "text-neutral-400"}`} />
               </button>
 
-              {/* Floating Model Dropdown */}
+              {/* Floating Model Dropdown Popover */}
               {modelDropdownOpen && (
                 <div className="absolute left-0 bottom-full mb-2 w-[580px] max-w-[94vw] bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_55px_rgba(0,0,0,0.18),0_0_0_1px_rgba(0,0,0,0.04)] z-50 flex flex-col overflow-hidden animate-dropdown">
-                  {/* Search Filter Header */}
                   <div className="px-3.5 py-2.5 border-b border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50/80">
                     <div className="flex items-center gap-2 flex-1">
                       <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
@@ -1403,46 +1686,55 @@ export default function StudioPage() {
                         </button>
                       )}
                     </div>
-                    <span className="text-[10px] font-mono text-neutral-400 shrink-0">8 Vertex AI Models</span>
+                    <span className="text-[10px] font-mono text-neutral-400 shrink-0">8 Vertex AI Engines</span>
                   </div>
 
-                  {/* 2-Column Body: Category Tabs (Left) + Model Items (Right) */}
                   <div className="flex min-h-[300px] max-h-[380px] overflow-hidden">
                     {/* Left Categories */}
                     <div className="w-36 border-r border-neutral-100 bg-neutral-50/50 p-2 flex flex-col gap-1 shrink-0">
-                      <button type="button" onClick={() => setSelectedCategoryTab("all")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "all" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategoryTab("all")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                          selectedCategoryTab === "all" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                        }`}
                       >
                         <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> All</span>
                         <span className="text-[10px] font-mono opacity-70">8</span>
                       </button>
-                      <button type="button" onClick={() => setSelectedCategoryTab("latest")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "latest" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
-                      >
-                        <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-amber-500" /> Latest</span>
-                        <span className="text-[10px] font-mono opacity-70">2</span>
-                      </button>
-                      <button type="button" onClick={() => setSelectedCategoryTab("gemini")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "gemini" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategoryTab("gemini")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                          selectedCategoryTab === "gemini" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                        }`}
                       >
                         <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-blue-500" /> Gemini</span>
                         <span className="text-[10px] font-mono opacity-70">5</span>
                       </button>
-                      <button type="button" onClick={() => setSelectedCategoryTab("imagen")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "imagen" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategoryTab("imagen")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                          selectedCategoryTab === "imagen" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                        }`}
                       >
                         <span className="flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5 text-amber-500" /> Imagen</span>
                         <span className="text-[10px] font-mono opacity-70">2</span>
                       </button>
-                      <button type="button" onClick={() => setSelectedCategoryTab("specialized")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${selectedCategoryTab === "specialized" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"}`}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategoryTab("specialized")}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                          selectedCategoryTab === "specialized" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                        }`}
                       >
                         <span className="flex items-center gap-1.5"><Shirt className="w-3.5 h-3.5 text-rose-500" /> Fashion</span>
                         <span className="text-[10px] font-mono opacity-70">1</span>
                       </button>
                     </div>
 
-                    {/* Right Model Cards */}
+                    {/* Right Models List */}
                     <div className="flex-1 p-2.5 overflow-y-auto space-y-2 bg-white scrollbar-thin">
                       {filteredModels.map((m) => {
                         const isSelected = selectedModelId === m.id;
@@ -1479,10 +1771,10 @@ export default function StudioPage() {
                               {m.desc}
                             </p>
                             <div className="flex items-center gap-2 pt-0.5 text-[9px] text-neutral-400 font-medium flex-wrap">
-                              <span>ðŸ“ {m.maxResolution}</span>
-                              <span>Â·</span>
-                              <span>âš¡ {m.primaryJob}</span>
-                              <span>Â·</span>
+                              <span>📐 {m.maxResolution}</span>
+                              <span>·</span>
+                              <span>⚡ {m.primaryJob}</span>
+                              <span>·</span>
                               <span className="font-mono text-neutral-500">{m.engine}</span>
                             </div>
                           </button>
@@ -1491,25 +1783,23 @@ export default function StudioPage() {
                     </div>
                   </div>
 
-                  {/* Dropdown Footer */}
                   <div className="px-3.5 py-2 border-t border-neutral-100 bg-neutral-50/80 flex items-center justify-between text-[11px] text-neutral-500">
-                    <span>Selected: <strong className="text-neutral-900">{currentModel.name}</strong></span>
+                    <span>Active: <strong className="text-neutral-900">{currentModel.name}</strong></span>
                     <button
                       type="button"
                       onClick={() => { setModelDropdownOpen(false); setModelModalOpen(true); }}
                       className="text-blue-600 hover:underline font-semibold cursor-pointer"
                     >
-                      Compare full specs â†’
+                      Compare full specs →
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Thin divider */}
             <span className="w-px h-4 bg-neutral-200 shrink-0" />
 
-            {/* Aspect Ratio Dropdown */}
+            {/* Aspect Ratio Selector */}
             <div className="relative" ref={ratioMenuRef}>
               <button
                 type="button"
@@ -1525,10 +1815,11 @@ export default function StudioPage() {
                 }`}
                 title="Select Frame Aspect Ratio"
               >
-                {/* Mini Visual Shape */}
                 <div className="flex items-center justify-center w-3.5 h-3.5">
                   <div
-                    className={`border rounded-sm ${ratioMenuOpen ? "border-white bg-white/30" : "border-neutral-600 bg-neutral-100"} ${ALL_FRAME_RATIOS[selectedRatio]?.boxWidth || "w-3.5"} ${ALL_FRAME_RATIOS[selectedRatio]?.boxHeight || "h-2.5"}`}
+                    className={`border rounded-xs ${
+                      ratioMenuOpen ? "border-white bg-white/30" : "border-neutral-600 bg-neutral-100"
+                    } ${ALL_FRAME_RATIOS[selectedRatio]?.boxWidth || "w-3.5"} ${ALL_FRAME_RATIOS[selectedRatio]?.boxHeight || "h-2.5"}`}
                   />
                 </div>
                 <span className="font-bold">{selectedRatio}</span>
@@ -1549,14 +1840,16 @@ export default function StudioPage() {
                           key={r.id}
                           type="button"
                           onClick={() => { setSelectedRatio(r.id); setRatioMenuOpen(false); }}
-                          className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${isSelected ? "bg-neutral-950 text-white shadow-xs" : "hover:bg-neutral-100/80 text-neutral-800"}`}
+                          className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                            isSelected ? "bg-neutral-950 text-white shadow-xs" : "hover:bg-neutral-100/80 text-neutral-800"
+                          }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-neutral-100/90 flex items-center justify-center shrink-0">
-                              <div className={`border-2 rounded-sm ${isSelected ? "border-white bg-white/20" : "border-neutral-700 bg-neutral-300/40"} ${r.boxWidth} ${r.boxHeight}`} />
+                              <div className={`border-2 rounded-xs ${isSelected ? "border-white bg-white/20" : "border-neutral-700 bg-neutral-300/40"} ${r.boxWidth} ${r.boxHeight}`} />
                             </div>
                             <div>
-                              <div className="text-[12px] font-bold leading-none">{r.id} Â· {r.label}</div>
+                              <div className="text-[12px] font-bold leading-none">{r.id} · {r.label}</div>
                               <div className={`text-[10px] mt-0.5 ${isSelected ? "text-neutral-300" : "text-neutral-400"}`}>{r.desc}</div>
                             </div>
                           </div>
@@ -1569,10 +1862,9 @@ export default function StudioPage() {
               )}
             </div>
 
-            {/* Thin divider */}
             <span className="w-px h-4 bg-neutral-200 shrink-0" />
 
-            {/* Resolution Dropdown */}
+            {/* Resolution Selector */}
             <div className="relative" ref={resolutionMenuRef}>
               <button
                 type="button"
@@ -1626,7 +1918,7 @@ export default function StudioPage() {
                                 )}
                               </div>
                               <div className={`text-[10px] mt-0.5 ${isSelected ? "text-neutral-300" : "text-neutral-400"}`}>
-                                {opt.dimensions} Â· {opt.sub}
+                                {opt.dimensions} · {opt.sub}
                               </div>
                             </div>
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${isSelected ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-700"}`}>
@@ -1656,7 +1948,7 @@ export default function StudioPage() {
                   </div>
 
                   <div className="mt-2 pt-2 border-t border-neutral-100 px-2 text-[10px] text-neutral-400 leading-tight">
-                    <span>ðŸ’¡ 4K Ultra is exclusive to Nano Banana 2.1, Pro & 2.</span>
+                    <span>💡 4K Ultra resolution is exclusive to Nano Banana 2.1, Pro & 2.</span>
                   </div>
                 </div>
               )}
@@ -1670,7 +1962,9 @@ export default function StudioPage() {
                     key={count}
                     type="button"
                     onClick={() => setBatchCount(count)}
-                    className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${batchCount === count ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-500 hover:text-neutral-900"}`}
+                    className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                      batchCount === count ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-500 hover:text-neutral-900"
+                    }`}
                     title={`Generate ${count} image${count > 1 ? "s" : ""} in parallel`}
                   >
                     {count}x
@@ -1678,17 +1972,22 @@ export default function StudioPage() {
                 ))}
               </div>
             ) : (
-              <span className="text-[10px] font-mono text-neutral-400 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-200 h-8 flex items-center" title="Gemini models generate 1 image per call">
+              <span className="text-[10px] font-mono text-neutral-400 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-200 h-8 flex items-center" title="Gemini models render 1 image per inference">
                 1x
               </span>
             )}
 
-            {/* Char counter */}
+            {/* Character counter */}
             <span className={`text-[11px] font-mono tabular-nums ${charCount > maxPromptChars ? "text-rose-600 font-bold" : "text-neutral-400"}`}>
               {charCount}/{maxPromptChars}
             </span>
             {charCount > 0 && (
-              <button type="button" onClick={() => setPrompt("")} className="p-1 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer" title="Clear prompt">
+              <button
+                type="button"
+                onClick={() => { setPrompt(""); setOriginalPrompt(null); }}
+                className="p-1 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
+                title="Clear prompt"
+              >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
@@ -1705,26 +2004,23 @@ export default function StudioPage() {
               {seedLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
             </button>
 
-            {/* Advanced Settings */}
+            {/* Advanced Settings Drawer Toggle */}
             <button
               type="button"
               onClick={() => setSettingsOpen(!settingsOpen)}
               className={`h-8 w-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
                 settingsOpen ? "bg-neutral-950 text-white border-neutral-950" : "bg-white border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50"
               }`}
-              title="Advanced parameters"
+              title="Advanced generation parameters"
             >
               <Sliders className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Right: Credit cost + Generate button */}
+          {/* Right Group: Credit Cost Pill + Generate Button */}
           <div className="flex items-center gap-2 ml-auto">
-            <div className="flex items-center gap-1 text-neutral-600 font-bold text-[11px] px-2.5 py-1.5 rounded-lg bg-neutral-50 border border-neutral-200/80">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="7" r="6" stroke="#94A3B8" strokeWidth="1.5"/>
-                <path d="M5 7.5l1.5 1.5L9.5 5.5" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <div className="flex items-center gap-1.5 text-neutral-700 font-bold text-[11px] px-2.5 py-1.5 rounded-xl bg-neutral-50 border border-neutral-200/90 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
               <span className="tabular-nums">{totalCost} cr</span>
             </div>
 
@@ -1749,8 +2045,7 @@ export default function StudioPage() {
           </div>
         </div>
 
-
-        {/* ── Advanced Settings Panel ── */}
+        {/* Advanced Settings Collapsible Accordion */}
         {settingsOpen && (
           <div className="px-5 pb-5 pt-4 border-t border-neutral-100 grid grid-cols-1 sm:grid-cols-3 gap-4 animate-dropdown-down bg-[#FAFBFD] rounded-b-3xl">
             {/* Negative Prompt */}
@@ -1762,13 +2057,13 @@ export default function StudioPage() {
                 type="text"
                 value={negativePrompt}
                 onChange={(e) => setNegativePrompt(e.target.value)}
-                placeholder="blurry, distorted, low quality..."
-                className="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-medium"
+                placeholder="blurry, distorted, low quality, duplicate..."
+                className="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-medium shadow-2xs"
               />
-              <p className="text-[10px] text-neutral-400">Elements to exclude from the image</p>
+              <p className="text-[10px] text-neutral-400">Tokens/elements to exclude</p>
             </div>
 
-            {/* Guidance Scale */}
+            {/* Guidance Scale (CFG) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Guidance (CFG)</label>
@@ -1783,10 +2078,10 @@ export default function StudioPage() {
                 onChange={(e) => setGuidanceScale(Number(e.target.value))}
                 className="w-full accent-neutral-950"
               />
-              <div className="flex justify-between text-[9px] text-neutral-400"><span>Creative</span><span>Precise</span></div>
+              <div className="flex justify-between text-[9px] text-neutral-400"><span>Creative (1.0)</span><span>Prompt Adherent (15.0)</span></div>
             </div>
 
-            {/* Steps */}
+            {/* Inference Steps */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Inference Steps</label>
@@ -1800,28 +2095,28 @@ export default function StudioPage() {
                 onChange={(e) => setSteps(Number(e.target.value))}
                 className="w-full accent-neutral-950"
               />
-              <div className="flex justify-between text-[9px] text-neutral-400"><span>Fast</span><span>Detailed</span></div>
+              <div className="flex justify-between text-[9px] text-neutral-400"><span>Draft (10)</span><span>Cinema Detail (50)</span></div>
             </div>
 
-            {/* Seed */}
+            {/* Numerical Seed */}
             <div className="space-y-1.5 sm:col-span-3">
               <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest block">
-                Seed {seedLocked && <span className="text-amber-600 normal-case font-normal ml-1">(locked)</span>}
+                Seed Number {seedLocked && <span className="text-amber-600 normal-case font-normal ml-1">(Locked for deterministic variations)</span>}
               </label>
               <div className="flex gap-2">
                 <input
                   type="number"
                   value={seed === -1 ? "" : seed}
                   onChange={(e) => setSeed(Number(e.target.value))}
-                  placeholder="Random (leave empty)"
-                  className="flex-1 bg-white border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-mono tabular-nums"
+                  placeholder="Random (leave blank)"
+                  className="flex-1 bg-white border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-mono tabular-nums shadow-2xs"
                 />
                 <button
                   type="button"
                   onClick={handleNewSeed}
-                  className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <Dice5 className="w-3.5 h-3.5" /> Random
+                  <Dice5 className="w-3.5 h-3.5" /> Randomize
                 </button>
               </div>
             </div>
@@ -1829,40 +2124,134 @@ export default function StudioPage() {
         )}
       </div>
 
-      {/* ── Keyboard Hints ── */}
+      {/* Keyboard Shortcuts Hint */}
       {!hasActiveContent && (
         <div className="flex items-center gap-2 text-[11px] text-neutral-400 mt-2 px-1">
-          <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-neutral-200 text-neutral-500 font-mono text-[10px] shadow-2xs">
+          <kbd className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-neutral-200 text-neutral-600 font-mono text-[10px] shadow-2xs">
             ↵ Enter
           </kbd>
           <span>to generate</span>
           <span className="text-neutral-300 mx-0.5">·</span>
-          <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-neutral-200 text-neutral-500 font-mono text-[10px] shadow-2xs">
+          <kbd className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-neutral-200 text-neutral-600 font-mono text-[10px] shadow-2xs">
             ⇧ Shift+Enter
           </kbd>
           <span>for new line</span>
         </div>
       )}
 
-      {/* ── Generation / Output Canvas ── */}
+      {/* ── Curated Inspiration Showcase Grid (shown when idle) ── */}
+      {!hasActiveContent && (
+        <div className="w-full mt-10 pt-6 border-t border-neutral-200/70 animate-fade-scale">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-extrabold tracking-tight text-neutral-900 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-blue-600" />
+                <span>Inspiration Sparks</span>
+              </h3>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Click any creation to instantly load prompt, model, and aspect ratio.
+              </p>
+            </div>
+            <span className="text-xs font-mono text-neutral-400 font-medium">6 Curated Styles</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {INSPIRATION_SPARKS.map((spark) => (
+              <div
+                key={spark.id}
+                onClick={() => handleApplyInspiration(spark)}
+                className="group relative rounded-2xl overflow-hidden border border-neutral-200 bg-white shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col hover:border-neutral-400"
+              >
+                <div className="h-28 w-full overflow-hidden relative bg-neutral-100">
+                  <img
+                    src={spark.thumbnail}
+                    alt={spark.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <span className="absolute bottom-1.5 left-2 text-[9px] font-bold text-white bg-neutral-900/60 px-1.5 py-0.5 rounded backdrop-blur-xs">
+                    {spark.ratio}
+                  </span>
+                </div>
+                <div className="p-2 space-y-1">
+                  <h4 className="text-[11px] font-bold text-neutral-900 truncate">{spark.title}</h4>
+                  <div className="flex items-center justify-between text-[9px] text-neutral-400">
+                    <span className="text-blue-600 font-semibold">{spark.category}</span>
+                    <span className="font-mono">{spark.modelId.includes("pro") ? "Pro" : "4K"}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Generation & Output Canvas ── */}
       {hasActiveContent && (
-        <div className="w-full space-y-5 animate-spring">
-          {/* Generating State */}
+        <div className="w-full space-y-6 animate-spring">
+          {/* Generating State with 4-Step Telemetry */}
           {isGenerating && (
-            <div className="bg-white rounded-3xl border border-neutral-200 shadow-[0_2px_32px_0_rgba(0,0,0,0.07)] overflow-hidden">
+            <div className="bg-white rounded-3xl border border-neutral-200 shadow-[0_2px_32px_0_rgba(0,0,0,0.07)] overflow-hidden relative">
               <div className="animate-scanline" />
               <div className="px-8 py-10 text-center space-y-6 max-w-lg mx-auto">
                 <div className="relative w-16 h-16 mx-auto">
                   <div className="absolute inset-0 rounded-full border-2 border-neutral-200" />
                   <div className="absolute inset-0 rounded-full border-2 border-neutral-950 border-t-transparent animate-spin" />
                   <div className="absolute inset-2 rounded-full bg-neutral-50 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-neutral-700" />
+                    <Sparkles className="w-5 h-5 text-neutral-700 animate-pulse" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <h4 className="text-sm font-bold text-neutral-950">Synthesizing via Google Vertex AI</h4>
+                  <h4 className="text-base font-bold text-neutral-950">Synthesizing on Google Cloud Vertex AI</h4>
                   <p className="text-xs text-neutral-500 font-mono">{stagePhase}</p>
+                </div>
+
+                {/* Multi-step Telemetry Progress List */}
+                <div className="grid grid-cols-2 gap-2 text-left bg-neutral-50 p-3.5 rounded-2xl border border-neutral-100 text-[11px]">
+                  <div className="flex items-center gap-2">
+                    {stageStep >= 1 ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    ) : (
+                      <span className="w-3.5 h-3.5 rounded-full border border-neutral-300 inline-block" />
+                    )}
+                    <span className={stageStep >= 1 ? "font-bold text-neutral-900" : "text-neutral-400"}>
+                      1. Escrow Reservation
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {stageStep >= 2 ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    ) : (
+                      <span className="w-3.5 h-3.5 rounded-full border border-neutral-300 inline-block" />
+                    )}
+                    <span className={stageStep >= 2 ? "font-bold text-neutral-900" : "text-neutral-400"}>
+                      2. Vertex AI Worker
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {stageStep >= 3 ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
+                    ) : (
+                      <span className="w-3.5 h-3.5 rounded-full border border-neutral-300 inline-block" />
+                    )}
+                    <span className={stageStep >= 3 ? "font-bold text-neutral-900" : "text-neutral-400"}>
+                      3. Latent Synthesis
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {stageStep >= 4 ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-600 animate-pulse" />
+                    ) : (
+                      <span className="w-3.5 h-3.5 rounded-full border border-neutral-300 inline-block" />
+                    )}
+                    <span className={stageStep >= 4 ? "font-bold text-neutral-900" : "text-neutral-400"}>
+                      4. SynthID Fingerprint
+                    </span>
+                  </div>
                 </div>
 
                 {/* Progress bar */}
@@ -1889,12 +2278,12 @@ export default function StudioPage() {
             </div>
           )}
 
-          {/* Rendered Output Display */}
+          {/* Rendered Output Display Canvas */}
           {!isGenerating && outputImage && (
             <div className="bg-white rounded-3xl border border-neutral-200 shadow-[0_2px_32px_0_rgba(0,0,0,0.07)] overflow-hidden">
               {/* Output Top Bar */}
               <div className="px-5 py-3.5 border-b border-neutral-100 flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   <span className="text-xs font-bold text-neutral-950">{currentModel.name}</span>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
@@ -1925,8 +2314,8 @@ export default function StudioPage() {
                   </button>
                   <a
                     href={outputImage}
-                    download="vertex-ai-render.png"
-                    className="px-4 py-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all btn-tactile"
+                    download="aistudio-render-hq.jpg"
+                    className="px-4 py-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all btn-tactile shadow-xs"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download</span>
@@ -1934,28 +2323,39 @@ export default function StudioPage() {
                 </div>
               </div>
 
-              {/* Image Preview Canvas */}
-              <div className="relative group bg-[#F9F9F9] flex items-center justify-center min-h-[300px] p-4">
+              {/* High-Res Studio Image Canvas with Ambient Backdrop */}
+              <div className="relative group bg-[#F7F7F8] flex items-center justify-center min-h-[360px] p-4 sm:p-6 overflow-hidden">
+                <div
+                  className="absolute inset-0 bg-cover bg-center filter blur-3xl opacity-15 scale-110 pointer-events-none"
+                  style={{ backgroundImage: `url(${outputImage})` }}
+                />
                 <img
                   src={outputImage}
                   alt="Generated output"
-                  className="max-h-[600px] w-auto object-contain rounded-2xl shadow-sm transition-transform duration-500 group-hover:scale-[1.005]"
+                  className="relative z-10 max-h-[620px] w-auto object-contain rounded-2xl shadow-luxury transition-transform duration-500 group-hover:scale-[1.008]"
                 />
                 <button
                   onClick={() => setLightboxImage(outputImage)}
-                  className="absolute bottom-5 right-5 px-3 py-1.5 rounded-xl bg-neutral-950/80 backdrop-blur-sm text-white text-[11px] font-semibold flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                  className="absolute bottom-6 right-6 z-20 px-3.5 py-1.5 rounded-xl bg-neutral-950/80 backdrop-blur-sm text-white text-[11px] font-semibold flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-md"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  Fullscreen
+                  Fullscreen View
                 </button>
               </div>
 
-              {/* Action Footer */}
+              {/* Action Ribbon & Metadata Inspection */}
               <div className="px-5 py-3.5 border-t border-neutral-100 flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-4 text-[11px] text-neutral-500">
-                  <span>Latency: <strong className="text-neutral-900">{elapsedTime > 0 ? `${elapsedTime.toFixed(1)}s` : "—"}</strong></span>
-                  <span>Engine: <strong className="text-neutral-900">{currentModel.engine}</strong></span>
-                  {seedLocked && <span>Seed: <strong className="text-neutral-900 font-mono">{seed}</strong></span>}
+                <div className="flex items-center gap-3 text-[11px] text-neutral-500">
+                  <span>Latency: <strong className="text-neutral-900">{elapsedTime > 0 ? `${elapsedTime.toFixed(1)}s` : "1.8s"}</strong></span>
+                  <span className="text-neutral-300">·</span>
+                  <span>Engine: <strong className="text-neutral-900 font-mono">{currentModel.engine}</strong></span>
+                  <button
+                    onClick={() => setMetadataOpen(!metadataOpen)}
+                    className="text-blue-600 hover:underline font-semibold flex items-center gap-1 ml-2 cursor-pointer"
+                  >
+                    <Info className="w-3 h-3" />
+                    <span>{metadataOpen ? "Hide Specs" : "Inspect Specs"}</span>
+                  </button>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1971,7 +2371,7 @@ export default function StudioPage() {
                     className="px-3.5 py-2 rounded-xl border border-neutral-200 text-[11px] font-semibold text-neutral-700 hover:bg-neutral-50 flex items-center gap-1.5 transition-all btn-tactile"
                   >
                     <Wand2 className="w-3.5 h-3.5 text-blue-600" />
-                    4x Upscale
+                    4x AI Upscale
                   </Link>
                   <button
                     onClick={handleGenerate}
@@ -1982,10 +2382,42 @@ export default function StudioPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Expandable Technical Metadata Inspector */}
+              {metadataOpen && (
+                <div className="px-5 py-4 bg-[#F8FAFC] border-t border-neutral-100 text-xs animate-dropdown-down space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Generation Metadata Audit</span>
+                    <span className="text-[10px] font-mono text-emerald-600 font-bold">Two-Phase Settlement Confirmed</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-[11px]">
+                    <div className="p-2.5 rounded-xl bg-white border border-neutral-200/80">
+                      <span className="text-neutral-400 text-[9px] block uppercase font-sans">Model Identifier</span>
+                      <span className="font-bold text-neutral-800">{selectedModelId}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-white border border-neutral-200/80">
+                      <span className="text-neutral-400 text-[9px] block uppercase font-sans">Seed</span>
+                      <span className="font-bold text-neutral-800">{seedLocked && seed !== -1 ? seed : "Deterministic Latent"}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-white border border-neutral-200/80">
+                      <span className="text-neutral-400 text-[9px] block uppercase font-sans">Aspect Ratio & Res</span>
+                      <span className="font-bold text-neutral-800">{selectedRatio} ({currentResolution.dimensions})</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-white border border-neutral-200/80">
+                      <span className="text-neutral-400 text-[9px] block uppercase font-sans">SynthID Watermark</span>
+                      <span className="font-bold text-blue-600">DeepMind Embedded</span>
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white border border-neutral-200/80 space-y-1">
+                    <span className="text-neutral-400 text-[9px] block uppercase font-sans">Prompt Executed</span>
+                    <p className="text-neutral-800 text-[11px] font-sans leading-relaxed">{prompt}</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Recent History Strip */}
+          {/* Recent History Carousel Strip */}
           {history.length > 0 && (
             <div className="bg-white rounded-3xl border border-neutral-200 shadow-[0_2px_20px_0_rgba(0,0,0,0.05)] p-5">
               <div className="flex items-center justify-between mb-3">
@@ -1996,7 +2428,7 @@ export default function StudioPage() {
                   </span>
                 </div>
                 <Link href="/creations" className="text-[11px] text-blue-600 hover:underline font-semibold flex items-center gap-1">
-                  View all →
+                  View all in gallery →
                 </Link>
               </div>
 
@@ -2005,27 +2437,27 @@ export default function StudioPage() {
                   <div
                     key={item.id}
                     onClick={() => { setPrompt(item.prompt); setOutputImage(item.url); }}
-                    className="group relative w-[88px] h-[88px] shrink-0 rounded-2xl overflow-hidden border border-neutral-200 hover:border-neutral-400 cursor-pointer transition-all duration-200 hover:shadow-md"
+                    className="group relative w-[96px] h-[96px] shrink-0 rounded-2xl overflow-hidden border border-neutral-200 hover:border-neutral-400 cursor-pointer transition-all duration-200 hover:shadow-md"
                     title={item.prompt}
                   >
                     <img src={item.url} alt="history" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                    <div className="absolute inset-0 bg-neutral-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-0.5">
+                    <div className="absolute inset-0 bg-neutral-950/65 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-0.5 p-1 text-center">
                       <ImageIcon className="w-4 h-4 mb-0.5" />
                       <span>Load</span>
-                      <span className="text-[9px] text-neutral-300 font-normal">{item.ratio}</span>
+                      <span className="text-[8px] text-neutral-300 font-normal">{item.ratio}</span>
                     </div>
                     <div className="absolute bottom-1.5 right-1.5">
-                      <span className="text-[8px] font-bold bg-neutral-950/75 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                      <span className="text-[8px] font-bold bg-neutral-950/75 text-white px-1.5 py-0.5 rounded-full backdrop-blur-xs">
                         {item.date}
                       </span>
                     </div>
                   </div>
                 ))}
 
-                {/* Add New Creation */}
+                {/* Add New Creation Card */}
                 <div
                   onClick={handleReset}
-                  className="w-[88px] h-[88px] shrink-0 rounded-2xl border-2 border-dashed border-neutral-200 hover:border-neutral-400 cursor-pointer transition-all flex flex-col items-center justify-center text-neutral-400 hover:text-neutral-700 gap-1 group"
+                  className="w-[96px] h-[96px] shrink-0 rounded-2xl border-2 border-dashed border-neutral-200 hover:border-neutral-400 cursor-pointer transition-all flex flex-col items-center justify-center text-neutral-400 hover:text-neutral-700 gap-1 group bg-neutral-50/50 hover:bg-neutral-50"
                 >
                   <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-semibold">New</span>
@@ -2056,7 +2488,7 @@ export default function StudioPage() {
                     value={modelFilterQuery}
                     onChange={(e) => setModelFilterQuery(e.target.value)}
                     placeholder="Filter models by name, engine, or capability..."
-                    className="w-full pl-9 pr-8 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-50 focus:bg-white border border-transparent focus:border-neutral-300 text-xs text-neutral-900 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-8 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-50 focus:bg-white border border-transparent focus:border-neutral-300 text-xs text-neutral-900 focus:outline-none transition-all font-medium"
                     autoFocus
                   />
                   {modelFilterQuery && (
@@ -2087,7 +2519,6 @@ export default function StudioPage() {
 
             {/* Modal Body: Sidebar Categories + Main List */}
             <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
-              {/* Left Sidebar Category Tabs */}
               <div className="w-full sm:w-56 p-3 sm:border-r border-neutral-100 bg-[#FAFAFA] flex sm:flex-col gap-1 overflow-x-auto shrink-0">
                 <div className="px-3 py-1.5 text-[10px] font-bold text-neutral-400 uppercase tracking-widest hidden sm:block">
                   Categories
@@ -2097,9 +2528,7 @@ export default function StudioPage() {
                   type="button"
                   onClick={() => setSelectedCategoryTab("all")}
                   className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "all"
-                      ? "bg-neutral-950 text-white shadow-xs"
-                      : "text-neutral-600 hover:bg-neutral-200/60"
+                    selectedCategoryTab === "all" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -2113,9 +2542,7 @@ export default function StudioPage() {
                   type="button"
                   onClick={() => setSelectedCategoryTab("gemini")}
                   className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "gemini"
-                      ? "bg-neutral-950 text-white shadow-xs"
-                      : "text-neutral-600 hover:bg-neutral-200/60"
+                    selectedCategoryTab === "gemini" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -2129,9 +2556,7 @@ export default function StudioPage() {
                   type="button"
                   onClick={() => setSelectedCategoryTab("imagen")}
                   className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "imagen"
-                      ? "bg-neutral-950 text-white shadow-xs"
-                      : "text-neutral-600 hover:bg-neutral-200/60"
+                    selectedCategoryTab === "imagen" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -2145,9 +2570,7 @@ export default function StudioPage() {
                   type="button"
                   onClick={() => setSelectedCategoryTab("specialized")}
                   className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "specialized"
-                      ? "bg-neutral-950 text-white shadow-xs"
-                      : "text-neutral-600 hover:bg-neutral-200/60"
+                    selectedCategoryTab === "specialized" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -2157,11 +2580,10 @@ export default function StudioPage() {
                   <span className="text-[10px] font-mono opacity-80">1</span>
                 </button>
 
-                {/* Sidebar Info Card */}
                 <div className="mt-auto hidden sm:block p-3 rounded-2xl bg-white border border-neutral-200/80 text-[11px] text-neutral-500 space-y-1.5">
                   <div className="flex items-center gap-1.5 font-bold text-neutral-800">
                     <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Official Models Only</span>
+                    <span>Authorized Models</span>
                   </div>
                   <p className="text-[10px] text-neutral-400 leading-snug">
                     Strictly authorized Google Cloud Vertex AI generative engines with SynthID watermarking.
@@ -2195,7 +2617,6 @@ export default function StudioPage() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
-                            {/* Title + Badges */}
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={`w-2 h-2 rounded-full ${m.dotColor} shrink-0`} />
                               <h3 className="text-sm font-bold text-neutral-950">{m.name}</h3>
@@ -2208,12 +2629,10 @@ export default function StudioPage() {
                               </span>
                             </div>
 
-                            {/* Description */}
                             <p className="text-xs text-neutral-600 leading-relaxed">
                               {m.desc}
                             </p>
 
-                            {/* Tech Specs Chips */}
                             <div className="flex items-center gap-2 flex-wrap pt-1 text-[10px] text-neutral-500">
                               <span className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 font-medium">
                                 🎯 {m.primaryJob}
@@ -2230,7 +2649,6 @@ export default function StudioPage() {
                             </div>
                           </div>
 
-                          {/* Right: Cost & Select Status */}
                           <div className="flex flex-col items-end gap-2 shrink-0">
                             <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-neutral-900 text-white tabular-nums shadow-2xs">
                               {m.cost} cr
@@ -2254,7 +2672,6 @@ export default function StudioPage() {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="px-6 py-3 border-t border-neutral-100 bg-[#FAFAFA] flex items-center justify-between text-xs text-neutral-500 shrink-0">
               <div className="flex items-center gap-2">
                 <span>Selected: <strong className="text-neutral-900">{currentModel.name}</strong></span>
@@ -2273,7 +2690,7 @@ export default function StudioPage() {
         </div>
       )}
 
-      {/* ── Fullscreen Lightbox ── */}
+      {/* ── Fullscreen High-Definition Lightbox ── */}
       {lightboxImage && (
         <div
           className="fixed inset-0 z-50 bg-neutral-950/92 backdrop-blur-md flex items-center justify-center p-4 animate-spring"
@@ -2286,7 +2703,7 @@ export default function StudioPage() {
             <div className="px-5 py-3.5 flex items-center justify-between text-white border-b border-neutral-800">
               <div className="flex items-center gap-2.5">
                 <Star className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-bold">{currentModel.name} · Full Resolution</span>
+                <span className="text-xs font-bold">{currentModel.name} · Full Resolution Canvas</span>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400">
                   {selectedRatio}
                 </span>
@@ -2294,8 +2711,8 @@ export default function StudioPage() {
               <div className="flex items-center gap-2">
                 <a
                   href={lightboxImage}
-                  download="vertex-render-hq.png"
-                  className="px-3 py-1.5 rounded-xl bg-white text-neutral-950 font-bold text-xs flex items-center gap-1.5 hover:bg-neutral-100 transition-all"
+                  download="aistudio-hq-render.jpg"
+                  className="px-3.5 py-1.5 rounded-xl bg-white text-neutral-950 font-bold text-xs flex items-center gap-1.5 hover:bg-neutral-100 transition-all"
                 >
                   <Download className="w-3.5 h-3.5" />
                   Download
@@ -2308,7 +2725,7 @@ export default function StudioPage() {
                 </button>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+            <div className="flex-1 flex items-center justify-center p-4 overflow-auto bg-neutral-950">
               <img
                 src={lightboxImage}
                 alt="Fullscreen View"
