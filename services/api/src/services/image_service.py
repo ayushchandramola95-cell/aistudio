@@ -114,21 +114,37 @@ class ImageService:
 
                         config = types.GenerateImagesConfig(**config_kwargs)
 
-                        # Call Vertex AI / Imagen 3
-                        response = await asyncio.to_thread(
-                            client.models.generate_images,
-                            model="imagen-3.0-generate-002",
-                            prompt=job.raw_prompt,
-                            config=config,
-                        )
-
-                        if response.generated_images:
-                            for idx, gen_img in enumerate(response.generated_images):
-                                filename = f"{job.id}_{idx}.jpg"
-                                filepath = OUTPUT_DIR / filename
-                                with open(filepath, "wb") as f:
-                                    f.write(gen_img.image.image_bytes)
-                                generated_files.append(filename)
+                        # Call Vertex AI / Imagen 3 or Gemini Image Engine
+                        try:
+                            response = await asyncio.to_thread(
+                                client.models.generate_images,
+                                model="imagen-3.0-generate-002",
+                                prompt=job.raw_prompt,
+                                config=config,
+                            )
+                            if response.generated_images:
+                                for idx, gen_img in enumerate(response.generated_images):
+                                    filename = f"{job.id}_{idx}.jpg"
+                                    filepath = OUTPUT_DIR / filename
+                                    with open(filepath, "wb") as f:
+                                        f.write(gen_img.image.image_bytes)
+                                    generated_files.append(filename)
+                        except Exception as img_err:
+                            logger.info(f"Trying Vertex AI Gemini Image Engine: {img_err}")
+                            # Unified fallback to Vertex AI Gemini Image Model
+                            content_res = await asyncio.to_thread(
+                                client.models.generate_content,
+                                model="gemini-2.5-flash-image",
+                                contents=job.raw_prompt,
+                            )
+                            if content_res.candidates and content_res.candidates[0].content.parts:
+                                for idx, part in enumerate(content_res.candidates[0].content.parts):
+                                    if part.inline_data and part.inline_data.data:
+                                        filename = f"{job.id}_{idx}.png"
+                                        filepath = OUTPUT_DIR / filename
+                                        with open(filepath, "wb") as f:
+                                            f.write(part.inline_data.data)
+                                        generated_files.append(filename)
 
                     except Exception as gen_err:
                         logger.warning(f"Google Imagen API call note: {gen_err}")

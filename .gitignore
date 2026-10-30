@@ -32,6 +32,9 @@ ENV/
 .env.development.local
 .env.test.local
 .env.production.local
+gcp-key.json
+*key*.json
+secrets/
 
 # IDE
 .idea/
