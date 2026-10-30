@@ -1004,16 +1004,6 @@ export default function StudioPage() {
                   <span>Search</span>
                   {webGrounding && <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => multiFileInputRef.current?.click()}
-                  disabled={multiRefImages.length >= 14}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all cursor-pointer"
-                >
-                  <Plus className="w-3 h-3 text-blue-500" />
-                  <span>Refs</span>
-                  <span className="px-1 py-0 rounded bg-blue-50 text-blue-700 font-mono text-[9px] font-bold">{multiRefImages.length}/14</span>
-                </button>
               </div>
             )}
             {/* Nano Banana 2 Lite Controls */}
@@ -1332,17 +1322,20 @@ export default function StudioPage() {
                 {/* Attachment button inside textarea bottom-left */}
                 {selectedModelId !== "imagen-4-fast" && !hasActiveContent && (
                   <div className="flex items-center gap-2 mt-1">
-                    {selectedModelId === "nano-banana-2-1" && multiRefImages.length === 0 && (
+                    {selectedModelId === "nano-banana-2-1" && (
                       <button
                         type="button"
                         onClick={() => multiFileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-blue-600 transition-colors cursor-pointer group"
+                        disabled={multiRefImages.length >= 14}
+                        className="inline-flex items-center gap-1.5 text-[11px] text-neutral-500 hover:text-blue-600 transition-colors cursor-pointer group"
                         title="Add reference images (up to 14)"
                       >
                         <div className="w-6 h-6 rounded-lg border border-neutral-200 group-hover:border-blue-300 group-hover:bg-blue-50 flex items-center justify-center transition-all">
                           <Plus className="w-3.5 h-3.5" />
                         </div>
-                        <span className="group-hover:text-blue-600">Add refs (0/14)</span>
+                        <span className="group-hover:text-blue-600 font-medium">
+                          {multiRefImages.length === 0 ? "Add reference images (0/14)" : `Add refs (${multiRefImages.length}/14)`}
+                        </span>
                       </button>
                     )}
                     {(selectedModelId === "nano-banana-2" || selectedModelId === "nano-banana" || selectedModelId === "nano-banana-pro") && (
@@ -1364,38 +1357,6 @@ export default function StudioPage() {
             </div>
           )}
         </div>
-
-        {/* â”€â”€ Style Chips (idle only, not for specialized models) â”€â”€ */}
-        {!hasActiveContent && selectedModelId !== "virtual-try-on" && selectedModelId !== "imagen-3-capability-001" && (
-          <div className="px-5 pb-3 flex flex-wrap items-center gap-1.5">
-            {STYLE_CHIPS.map((chip) => {
-              const isApplied = prompt.toLowerCase().includes(chip.label.toLowerCase());
-              return (
-                <button
-                  key={chip.label}
-                  type="button"
-                  onClick={() => handleStyleChip(chip)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isApplied
-                      ? "bg-neutral-900 text-white border-neutral-900 shadow-xs"
-                      : "bg-white border-neutral-200/90 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 hover:border-neutral-300 shadow-2xs"
-                  }`}
-                >
-                  <span className="text-xs">{chip.icon}</span>
-                  <span>{chip.label}</span>
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              onClick={handleSurpriseMe}
-              className="px-3 py-1 rounded-full text-xs font-medium border border-dashed border-neutral-300 bg-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800 hover:border-neutral-400 transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <Dice5 className="w-3.5 h-3.5 text-neutral-400" />
-              <span>Surprise me</span>
-            </button>
-          </div>
-        )}
 
         {/* â”€â”€ Bottom Controls Bar â”€â”€ */}
         <div className="px-4 py-3 border-t border-neutral-100 flex items-center justify-between gap-2 flex-wrap bg-white rounded-b-3xl">
