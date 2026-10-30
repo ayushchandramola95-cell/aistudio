@@ -47,7 +47,8 @@ class ImageService:
 
             creds = None
             if cred_path and os.path.exists(cred_path):
-                creds = service_account.Credentials.from_service_account_file(cred_path)
+                scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+                creds = service_account.Credentials.from_service_account_file(cred_path, scopes=scopes)
 
             # 1. Vertex AI Mode: Uses Google Cloud Free Credits ($200/$300)
             # Active when VERTEX_AI=true, creds are provided, or running inside Google Cloud Run
@@ -155,20 +156,26 @@ class ImageService:
                                             f.write(gen_img.image.image_bytes)
                                         generated_files.append(filename)
                             except Exception as img_err:
-                                logger.info(f"Target engine {target_engine} fallback to imagen-3.0-generate-002: {img_err}")
-                                response = await asyncio.to_thread(
-                                    client.models.generate_images,
-                                    model="imagen-3.0-generate-002",
-                                    prompt=job.raw_prompt,
-                                    config=config,
-                                )
-                                if response.generated_images:
-                                    for idx, gen_img in enumerate(response.generated_images):
-                                        filename = f"{job.id}_{idx}.jpg"
-                                        filepath = OUTPUT_DIR / filename
-                                        with open(filepath, "wb") as f:
-                                            f.write(gen_img.image.image_bytes)
-                                        generated_files.append(filename)
+                                logger.info(f"Target engine {target_engine} fallback to live Vertex AI gemini-2.5-flash-image: {img_err}")
+                                try:
+                                    content_res = await asyncio.to_thread(
+                                        client.models.generate_content,
+                                        model="gemini-2.5-flash-image",
+                                        contents=job.raw_prompt,
+                                    )
+                                    if content_res.candidates:
+                                        for cand in content_res.candidates:
+                                            if cand.content and cand.content.parts:
+                                                for idx, part in enumerate(cand.content.parts):
+                                                    if part.inline_data and part.inline_data.data:
+                                                        ext = "png" if "png" in (part.inline_data.mime_type or "") else "jpg"
+                                                        filename = f"{job.id}_{len(generated_files)}.{ext}"
+                                                        filepath = OUTPUT_DIR / filename
+                                                        with open(filepath, "wb") as f:
+                                                            f.write(part.inline_data.data)
+                                                        generated_files.append(filename)
+                                except Exception as fb_err:
+                                    logger.warning(f"Vertex AI gemini-2.5-flash-image fallback note: {fb_err}")
 
                         # 2. If Gemini Image series (Nano Banana 2 / Nano Banana Pro):
                         else:
@@ -178,45 +185,38 @@ class ImageService:
                                     model=target_engine,
                                     contents=job.raw_prompt,
                                 )
-                                if content_res.candidates and content_res.candidates[0].content.parts:
-                                    for idx, part in enumerate(content_res.candidates[0].content.parts):
-                                        if part.inline_data and part.inline_data.data:
-                                            filename = f"{job.id}_{idx}.png"
-                                            filepath = OUTPUT_DIR / filename
-                                            with open(filepath, "wb") as f:
-                                                f.write(part.inline_data.data)
-                                            generated_files.append(filename)
+                                if content_res.candidates:
+                                    for cand in content_res.candidates:
+                                        if cand.content and cand.content.parts:
+                                            for idx, part in enumerate(cand.content.parts):
+                                                if part.inline_data and part.inline_data.data:
+                                                    ext = "png" if "png" in (part.inline_data.mime_type or "") else "jpg"
+                                                    filename = f"{job.id}_{len(generated_files)}.{ext}"
+                                                    filepath = OUTPUT_DIR / filename
+                                                    with open(filepath, "wb") as f:
+                                                        f.write(part.inline_data.data)
+                                                    generated_files.append(filename)
                             except Exception as gem_err:
-                                logger.info(f"Gemini {target_engine} fallback to gemini-2.5-flash-image / imagen-3: {gem_err}")
+                                logger.info(f"Gemini {target_engine} fallback to gemini-2.5-flash-image: {gem_err}")
                                 try:
                                     content_res = await asyncio.to_thread(
                                         client.models.generate_content,
                                         model="gemini-2.5-flash-image",
                                         contents=job.raw_prompt,
                                     )
-                                    if content_res.candidates and content_res.candidates[0].content.parts:
-                                        for idx, part in enumerate(content_res.candidates[0].content.parts):
-                                            if part.inline_data and part.inline_data.data:
-                                                filename = f"{job.id}_{idx}.png"
-                                                filepath = OUTPUT_DIR / filename
-                                                with open(filepath, "wb") as f:
-                                                    f.write(part.inline_data.data)
-                                                generated_files.append(filename)
-                                except Exception:
-                                    # Final fallback to standard Imagen 3
-                                    response = await asyncio.to_thread(
-                                        client.models.generate_images,
-                                        model="imagen-3.0-generate-002",
-                                        prompt=job.raw_prompt,
-                                        config=config,
-                                    )
-                                    if response.generated_images:
-                                        for idx, gen_img in enumerate(response.generated_images):
-                                            filename = f"{job.id}_{idx}.jpg"
-                                            filepath = OUTPUT_DIR / filename
-                                            with open(filepath, "wb") as f:
-                                                f.write(gen_img.image.image_bytes)
-                                            generated_files.append(filename)
+                                    if content_res.candidates:
+                                        for cand in content_res.candidates:
+                                            if cand.content and cand.content.parts:
+                                                for idx, part in enumerate(cand.content.parts):
+                                                    if part.inline_data and part.inline_data.data:
+                                                        ext = "png" if "png" in (part.inline_data.mime_type or "") else "jpg"
+                                                        filename = f"{job.id}_{len(generated_files)}.{ext}"
+                                                        filepath = OUTPUT_DIR / filename
+                                                        with open(filepath, "wb") as f:
+                                                            f.write(part.inline_data.data)
+                                                        generated_files.append(filename)
+                                except Exception as fb_err:
+                                    logger.warning(f"Vertex AI fallback note: {fb_err}")
 
                     except Exception as gen_err:
                         logger.warning(f"Google Vertex AI generation note: {gen_err}")
