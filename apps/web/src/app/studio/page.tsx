@@ -1172,40 +1172,51 @@ export default function StudioPage() {
                   className="hidden"
                 />
 
-                {/* Image Influence & Maintain Character Controls */}
-                <div className="flex-1 min-w-[280px] p-3 rounded-2xl bg-neutral-50/90 border border-neutral-200/80 flex items-center justify-between gap-4 flex-wrap">
-                  <div className="space-y-1 flex-1">
+                {/* Compact Image Influence & Maintain Character Controls */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Sized Image Influence Card */}
+                  <div className="w-56 h-20 p-2.5 rounded-xl bg-neutral-50/90 border border-neutral-200/80 flex flex-col justify-between shrink-0 shadow-2xs">
                     <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
                       <span>Image Influence</span>
-                      <span className="font-mono text-neutral-500">{imageInfluence}%</span>
+                      <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
+                        {imageInfluence}%
+                      </span>
                     </div>
-                    <input
-                      type="range"
-                      min={10}
-                      max={100}
-                      value={imageInfluence}
-                      onChange={(e) => setImageInfluence(Number(e.target.value))}
-                      className="w-full accent-blue-600"
-                    />
+                    <div className="space-y-1">
+                      <input
+                        type="range"
+                        min={10}
+                        max={100}
+                        value={imageInfluence}
+                        onChange={(e) => setImageInfluence(Number(e.target.value))}
+                        className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <div className="flex items-center justify-between text-[9px] text-neutral-400 font-medium px-0.5">
+                        <span>Subtle</span>
+                        <span>Balanced</span>
+                        <span>Strong</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pl-3 border-l border-neutral-200">
+                  {/* Maintain Character Toggle Card */}
+                  <div className="h-20 px-3.5 py-2.5 rounded-xl bg-neutral-50/90 border border-neutral-200/80 flex items-center gap-3 shrink-0 shadow-2xs">
                     <button
                       type="button"
                       onClick={() => setMaintainCharacter(!maintainCharacter)}
-                      className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${
+                      className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${
                         maintainCharacter ? "bg-blue-600" : "bg-neutral-300"
                       }`}
                     >
                       <div
-                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                        className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${
                           maintainCharacter ? "translate-x-4" : "translate-x-0"
                         }`}
                       />
                     </button>
-                    <div>
-                      <div className="text-xs font-bold text-neutral-800">Maintain Character</div>
-                      <div className="text-[10px] text-neutral-400">Keep same subject across gens</div>
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-bold text-neutral-800 leading-tight">Maintain Character</div>
+                      <div className="text-[10px] text-neutral-400 leading-tight">Keep same subject across gens</div>
                     </div>
                   </div>
                 </div>
