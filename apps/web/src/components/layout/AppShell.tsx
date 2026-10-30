@@ -19,8 +19,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Header />
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-[#FBFBFD] p-6 md:p-8">
-          <div className="max-w-7xl mx-auto">{children}</div>
+        <main className={`flex-1 overflow-y-auto bg-[#FBFBFD] ${pathname === "/studio" ? "p-4 sm:p-6" : "p-6 md:p-8"}`}>
+          <div className={`${pathname === "/studio" ? "max-w-[1740px]" : "max-w-7xl"} mx-auto`}>{children}</div>
         </main>
       </div>
     </div>
