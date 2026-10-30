@@ -59,3 +59,4 @@ Write-Host "==========================================" -ForegroundColor Green
 Write-Host "Live API Endpoint: $serviceUrl" -ForegroundColor Cyan
 Write-Host "Health Check:      $serviceUrl/health" -ForegroundColor Cyan
 Write-Host "`nNext Step: Set NEXT_PUBLIC_API_URL=$serviceUrl in your Next.js frontend." -ForegroundColor Yellow
+

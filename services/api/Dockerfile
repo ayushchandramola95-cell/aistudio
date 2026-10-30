@@ -31,3 +31,4 @@ EXPOSE 8080
 
 # Cloud Run injects $PORT environment variable (defaults to 8080)
 CMD exec python -m uvicorn services.api.src.main:app --host 0.0.0.0 --port ${PORT:-8080}
+

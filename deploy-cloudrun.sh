@@ -40,3 +40,4 @@ echo "=========================================="
 echo "Live API Endpoint: $SERVICE_URL"
 echo "Health Check:      $SERVICE_URL/health"
 echo -e "\nNext Step: Set NEXT_PUBLIC_API_URL=$SERVICE_URL in your Next.js frontend."
+
