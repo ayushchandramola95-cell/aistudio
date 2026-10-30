@@ -36,10 +36,7 @@ import {
   SlidersHorizontal,
   Info,
   Undo2,
-  ArrowRight,
   Compass,
-  Sliders as SlidersIcon,
-  CheckCircle,
 } from "lucide-react";
 import { GenerationJob } from "@/types";
 
@@ -64,14 +61,14 @@ export interface GoogleModelSpec {
   features: string[];
 }
 
-// ─── Models (Official Google Cloud Suite - Strictly 8 Models) ────────────────
+// ─── Models Catalog (Strictly 8 High-Performance Engines) ───────────────────
 const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "nano-banana-2-1",
     name: "Nano Banana 2.1",
-    engine: "Gemini 3.1 Flash Image",
+    engine: "gemini-3.1-flash-image",
     cost: 6,
-    desc: "Our upgraded mainstream Gemini image model with stronger prompt adherence, and multi-reference consistency, enabling production quality image generation and edits from 1K to 4K.",
+    desc: "Our upgraded mainstream image engine with stronger prompt adherence, and multi-reference consistency, enabling production quality image generation and edits from 1K to 4K.",
     badge: "Flagship 4K",
     badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
     dotColor: "bg-blue-500",
@@ -93,9 +90,9 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "nano-banana-2-lite",
     name: "Nano Banana 2 Lite",
-    engine: "Gemini 3.1 Flash Lite Image",
+    engine: "gemini-3.1-flash-lite-image",
     cost: 3,
-    desc: "Class leading image generation capabilities, now optimized for high-volume, latency-sensitive asset creation.",
+    desc: "Class leading image generation capabilities, optimized for high-volume, latency-sensitive asset creation and instant drafts.",
     badge: "Ultra-Fast",
     badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     dotColor: "bg-emerald-500",
@@ -116,9 +113,9 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "nano-banana-pro",
     name: "Nano Banana Pro",
-    engine: "Gemini 3 Pro Image",
+    engine: "gemini-3-pro-image",
     cost: 10,
-    desc: "A powerful image generation model that combines high quality graphics, text rendering in multiple languages, and world knowledge",
+    desc: "A powerful image generation model that combines high quality graphics, text rendering in multiple languages, and world knowledge.",
     badge: "Pro Studio",
     badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
     dotColor: "bg-purple-500",
@@ -140,9 +137,9 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "nano-banana-2",
     name: "Nano Banana 2",
-    engine: "Gemini 3.1 Flash Image",
+    engine: "gemini-3.1-flash-image",
     cost: 5,
-    desc: "gemini-3.1-flash-image is a model designed for general image generation and editing tasks, offering high quality and low latency.",
+    desc: "Designed for general image generation and editing tasks, offering balanced high quality and low latency.",
     badge: "General & Edit",
     badgeColor: "bg-teal-50 text-teal-700 border-teal-200",
     dotColor: "bg-teal-500",
@@ -163,10 +160,10 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "nano-banana",
     name: "Nano Banana",
-    engine: "Gemini 2.5 Flash Image",
+    engine: "gemini-2.5-flash-image",
     cost: 4,
-    desc: "gemini-2.5-flash-image. State-of-the-art image generation and editing model.",
-    badge: "State-of-the-Art",
+    desc: "Stable legacy generative image model offering direct prompt-to-image synthesis with native 1K resolution.",
+    badge: "Stable Flash",
     badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
     dotColor: "bg-indigo-500",
     category: "gemini",
@@ -186,9 +183,9 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "imagen-4-fast",
     name: "Imagen 4 Fast",
-    engine: "Imagen 4 Fast",
+    engine: "imagen-4.0-fast",
     cost: 4,
-    desc: "Fast image generation with text prompts.",
+    desc: "Sub-3-second diffusion synthesis optimized for rapid text-to-photo generation with parallel batch sampling.",
     badge: "Next-Gen Fast",
     badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
     dotColor: "bg-amber-500",
@@ -210,9 +207,9 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "virtual-try-on",
     name: "Virtual try-on",
-    engine: "Google Virtual Try-On",
+    engine: "virtual-try-on-v1",
     cost: 8,
-    desc: "Specialized model to generate images of people trying on clothing.",
+    desc: "Specialized model to generate realistic images of people trying on clothing, drape matching, and body shape adaptation.",
     badge: "Fashion & Retail",
     badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
     dotColor: "bg-rose-500",
@@ -233,9 +230,9 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   {
     id: "imagen-3-capability-001",
     name: "Imagen 3 Capability 001",
-    engine: "Imagen 3 Capability 001",
+    engine: "imagen-3.0-capability-001",
     cost: 5,
-    desc: "Fast image editing.",
+    desc: "High-precision image editing with mask-based inpainting, outpainting boundary expansion, and background replacement.",
     badge: "Precision Editing",
     badgeColor: "bg-cyan-50 text-cyan-700 border-cyan-200",
     dotColor: "bg-cyan-500",
@@ -361,74 +358,6 @@ const STYLE_CHIPS: StyleChip[] = [
   { id: "fantasy", label: "Dark Fantasy", icon: "🔮", suffix: ", dark fantasy concept art, ethereal magical glow, moody chiaroscuro shadows, painterly texture", color: "hover:border-pink-300" },
 ];
 
-// ─── Curated Trending Inspirations ──────────────────────────────────────────
-interface InspirationSpark {
-  id: string;
-  title: string;
-  prompt: string;
-  modelId: string;
-  ratio: string;
-  category: string;
-  thumbnail: string;
-}
-
-const INSPIRATION_SPARKS: InspirationSpark[] = [
-  {
-    id: "spk-1",
-    title: "Kyoto Torii Gate in Neon Rain",
-    prompt: "An ancient Kyoto torii gate illuminated by neon holographic glyphs in heavy rain, cinematic lighting, 8K resolution, reflections in puddle",
-    modelId: "nano-banana-2-1",
-    ratio: "16:9",
-    category: "Cinematic 8K",
-    thumbnail: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "spk-2",
-    title: "Kintsugi Ceramic Teapot",
-    prompt: "Minimalist ceramic teapot with delicate kintsugi gold lacquer cracks resting on weathered dark oak, soft studio lighting, macro texture",
-    modelId: "imagen-4-fast",
-    ratio: "1:1",
-    category: "Product & Macro",
-    thumbnail: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "spk-3",
-    title: "Cyberpunk Neo-Tokyo Market",
-    prompt: "Dystopian cyberpunk street market with glowing holographic advertisements, flying vehicles overhead, atmospheric haze, moody wet asphalt",
-    modelId: "nano-banana-2-1",
-    ratio: "9:16",
-    category: "Sci-Fi Concept",
-    thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "spk-4",
-    title: "Himalayan Snow Leopard",
-    prompt: "A majestic snow leopard resting on a windswept Himalayan summit under glowing auroras, national geographic documentary photography, 8K",
-    modelId: "nano-banana-pro",
-    ratio: "16:9",
-    category: "Wildlife 4K",
-    thumbnail: "https://images.unsplash.com/photo-1561731216-c3a4d99437d5?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "spk-5",
-    title: "Haute Couture Concrete Pavilion",
-    prompt: "High-end avant-garde fashion editorial in a brutalist concrete pavilion, dramatic chiaroscuro sunlight and shadow, 35mm film grain",
-    modelId: "nano-banana-pro",
-    ratio: "3:4",
-    category: "Editorial Fashion",
-    thumbnail: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "spk-6",
-    title: "Liquid Chrome Fluid Sculpture",
-    prompt: "Abstract dynamic fluid sculpture with electric cyan and rose gold liquid chrome swirls, glossy 4K texture, volumetric refraction",
-    modelId: "nano-banana-2-1",
-    ratio: "1:1",
-    category: "3D Abstract",
-    thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
-  },
-];
-
 // ─── Typewriter Placeholder Suggestions ─────────────────────────────────────
 const PROMPT_SUGGESTIONS = [
   "A misty Japanese torii gate reflected in still water at dawn, cinematic lighting, 8K",
@@ -472,7 +401,6 @@ export default function StudioPage() {
   const [attachedImage, setAttachedImage]           = useState<string | null>(null);
 
   // ── Dropdown / Modal States ──
-  const [modelDropdownOpen, setModelDropdownOpen]   = useState(false);
   const [modelModalOpen, setModelModalOpen]         = useState(false);
   const [modelFilterQuery, setModelFilterQuery]     = useState("");
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>("all");
@@ -492,7 +420,6 @@ export default function StudioPage() {
   const maskEditInputRef                            = useRef<HTMLInputElement>(null);
   const timerRef                                    = useRef<NodeJS.Timeout | null>(null);
 
-  const modelMenuRef                                = useRef<HTMLDivElement>(null);
   const ratioMenuRef                                = useRef<HTMLDivElement>(null);
   const resolutionMenuRef                           = useRef<HTMLDivElement>(null);
 
@@ -583,6 +510,17 @@ export default function StudioPage() {
     }
   }, [currentModel, batchCount]);
 
+  // Keyboard shortcut for closing modal with Escape
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && modelModalOpen) {
+        setModelModalOpen(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [modelModalOpen]);
+
   // ── Animated Typewriter Placeholder ──
   useEffect(() => {
     if (prompt) return;
@@ -620,9 +558,6 @@ export default function StudioPage() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
-      if (modelMenuRef.current && !modelMenuRef.current.contains(target)) {
-        setModelDropdownOpen(false);
-      }
       if (ratioMenuRef.current && !ratioMenuRef.current.contains(target)) {
         setRatioMenuOpen(false);
       }
@@ -738,14 +673,12 @@ export default function StudioPage() {
   // ── Style Chips Toggle ──
   const handleToggleStyle = (chip: StyleChip) => {
     if (activeStyleId === chip.id) {
-      // Remove style
       setActiveStyleId(null);
       const cleaned = prompt.replace(chip.suffix, "").trim();
       setPrompt(cleaned);
       return;
     }
 
-    // Remove any prior chip suffixes
     let cleaned = prompt;
     STYLE_CHIPS.forEach((c) => {
       cleaned = cleaned.replace(c.suffix, "");
@@ -758,14 +691,6 @@ export default function StudioPage() {
     } else {
       setPrompt(`${cleaned}${chip.suffix}`);
     }
-    textareaRef.current?.focus();
-  };
-
-  // ── Inspiration Sparks ──
-  const handleApplyInspiration = (item: InspirationSpark) => {
-    setPrompt(item.prompt);
-    setSelectedModelId(item.modelId);
-    setSelectedRatio(item.ratio);
     textareaRef.current?.focus();
   };
 
@@ -808,7 +733,7 @@ export default function StudioPage() {
   const handleInsertQuote = () => {
     const quoted = prompt.includes('“') || prompt.includes('"')
       ? prompt
-      : `${prompt} with signage text “VERTEX AI”`;
+      : `${prompt} with signage text “AI STUDIO”`;
     setPrompt(quoted);
     textareaRef.current?.focus();
   };
@@ -893,7 +818,7 @@ export default function StudioPage() {
       setActiveJob(job);
       setProgress(35);
       setStageStep(2);
-      setStagePhase(`Routing inference to Google Cloud (${currentModel.engine})...`);
+      setStagePhase(`Routing inference to generative pipeline (${currentModel.engine})...`);
 
       let completedJob: GenerationJob | null = null;
       for (let pollCount = 0; pollCount < 25; pollCount++) {
@@ -902,7 +827,7 @@ export default function StudioPage() {
 
         if (pollCount === 2) {
           setStageStep(3);
-          setStagePhase(`Rendering diffusion latent frames on Vertex AI (${currentModel.name})...`);
+          setStagePhase(`Rendering diffusion latent frames on ${currentModel.name}...`);
         } else if (pollCount === 5) {
           setStageStep(4);
           setStagePhase(`Embedding SynthID digital fingerprint & finalizing...`);
@@ -993,7 +918,7 @@ export default function StudioPage() {
       return "Describe modifications to the selected area (e.g. 'Replace background with a sunny Mediterranean cafe terrace')...";
     }
     if (selectedModelId === "nano-banana-pro") {
-      return "Describe complex spatial scenes, infographic charts, or quote exact text for crisp typography e.g. Neon sign with text “VERTEX AI”...";
+      return "Describe complex spatial scenes, infographic charts, or quote exact text for crisp typography e.g. Neon sign with text “AI STUDIO”...";
     }
     if (selectedModelId === "nano-banana-2-1") {
       return "Describe your scene in detail, reference uploaded styles/characters, or enter complex multi-turn editing instructions...";
@@ -1076,27 +1001,6 @@ export default function StudioPage() {
         className="hidden"
       />
 
-      {/* ── Top Status Pill & Breadcrumb ── */}
-      <div className="w-full flex items-center justify-between px-1 pb-3 text-xs text-neutral-500">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-semibold text-neutral-800">Google Cloud Vertex AI</span>
-          <span className="text-neutral-300">·</span>
-          <span className="hidden sm:inline text-neutral-500">SynthID Watermark Ready</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full border border-neutral-200">
-            Escrow Protected
-          </span>
-          <button
-            onClick={() => setModelModalOpen(true)}
-            className="text-[11px] text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
-          >
-            Model Specs (8) →
-          </button>
-        </div>
-      </div>
-
       {/* ── Error Banner ── */}
       {errorMsg && (
         <div className="w-full mb-3 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-800 text-xs font-semibold animate-spring shadow-2xs">
@@ -1154,22 +1058,22 @@ export default function StudioPage() {
       {showSuccess && (
         <div className="w-full mb-3 px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-800 text-xs font-semibold animate-spring shadow-2xs">
           <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Generation complete — rendered via Google Vertex AI!</span>
+          <span>Generation complete — rendered in ultra-high resolution!</span>
         </div>
       )}
 
       {/* ── Idle Hero Banner ── */}
       {!hasActiveContent && (
         <div className="text-center space-y-3 mb-6 animate-fade-scale">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-neutral-700 text-xs font-semibold border border-neutral-200/80 shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-neutral-800 text-xs font-semibold border border-neutral-200/80 shadow-2xs">
             <Sparkles className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
-            <span>Official Google Cloud Generative Studio</span>
+            <span>AI Studio Omni-Canvas · 8 High-Performance Engines</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-normal font-editorial text-neutral-950 tracking-tight leading-tight">
             What will you create?
           </h1>
           <p className="text-sm text-neutral-500 font-sans max-w-md mx-auto">
-            Describe your vision, enhance with Gemini AI, configure model parameters, and generate in ultra-high definition.
+            Describe your vision, enhance prompts with AI, and generate ultra-high-definition imagery.
           </p>
         </div>
       )}
@@ -1181,13 +1085,18 @@ export default function StudioPage() {
         {/* Model Identity Header Strip */}
         <div className="px-4 py-2.5 bg-gradient-to-r from-neutral-50 via-white to-neutral-50 border-b border-neutral-100 flex items-center justify-between gap-2 flex-wrap rounded-t-3xl">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setModelModalOpen(true)}
+              className="flex items-center gap-1.5 shrink-0 px-2 py-1 rounded-lg hover:bg-neutral-100 transition-colors cursor-pointer group"
+              title="Click to view all 8 models"
+            >
               <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
-              <span className="text-[11px] font-bold text-neutral-900">{currentModel.name}</span>
+              <span className="text-[11px] font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">{currentModel.name}</span>
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${currentModel.badgeColor} leading-tight`}>
                 {currentModel.badge}
               </span>
-            </div>
+            </button>
             <span className="w-px h-3 bg-neutral-200 shrink-0" />
 
             {/* Model Specific Dynamic Toggles */}
@@ -1646,156 +1555,24 @@ export default function StudioPage() {
         <div className="px-4 py-3 border-t border-neutral-100 flex items-center justify-between gap-2 flex-wrap bg-white rounded-b-3xl">
           {/* Left Group: Model + Ratio + Resolution + Batch + Seed + Advanced */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Model Selector Dropdown Button */}
-            <div className="relative" ref={modelMenuRef}>
-              <button
-                type="button"
-                onClick={() => {
-                  setModelDropdownOpen(!modelDropdownOpen);
-                  setRatioMenuOpen(false);
-                  setResolutionMenuOpen(false);
-                }}
-                className={`h-8 px-2.5 rounded-xl border text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  modelDropdownOpen
-                    ? "bg-neutral-950 text-white border-neutral-950 shadow-sm"
-                    : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-900 hover:border-neutral-300"
-                }`}
-              >
-                <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
-                <span className="truncate max-w-[120px]">{currentModel.name}</span>
-                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${modelDropdownOpen ? "rotate-180 text-white" : "text-neutral-400"}`} />
-              </button>
-
-              {/* Floating Model Dropdown Popover */}
-              {modelDropdownOpen && (
-                <div className="absolute left-0 bottom-full mb-2 w-[580px] max-w-[94vw] bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_55px_rgba(0,0,0,0.18),0_0_0_1px_rgba(0,0,0,0.04)] z-50 flex flex-col overflow-hidden animate-dropdown">
-                  <div className="px-3.5 py-2.5 border-b border-neutral-100 flex items-center justify-between gap-3 bg-neutral-50/80">
-                    <div className="flex items-center gap-2 flex-1">
-                      <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-                      <input
-                        type="text"
-                        value={modelFilterQuery}
-                        onChange={(e) => setModelFilterQuery(e.target.value)}
-                        placeholder="Filter models by name, engine, capability..."
-                        className="w-full bg-transparent text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none font-medium"
-                        autoFocus
-                      />
-                      {modelFilterQuery && (
-                        <button onClick={() => setModelFilterQuery("")} className="p-0.5 text-neutral-400 hover:text-neutral-700 cursor-pointer">
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                    <span className="text-[10px] font-mono text-neutral-400 shrink-0">8 Vertex AI Engines</span>
-                  </div>
-
-                  <div className="flex min-h-[300px] max-h-[380px] overflow-hidden">
-                    {/* Left Categories */}
-                    <div className="w-36 border-r border-neutral-100 bg-neutral-50/50 p-2 flex flex-col gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("all")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "all" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> All</span>
-                        <span className="text-[10px] font-mono opacity-70">8</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("gemini")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "gemini" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-blue-500" /> Gemini</span>
-                        <span className="text-[10px] font-mono opacity-70">5</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("imagen")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "imagen" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5 text-amber-500" /> Imagen</span>
-                        <span className="text-[10px] font-mono opacity-70">2</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategoryTab("specialized")}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                          selectedCategoryTab === "specialized" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5"><Shirt className="w-3.5 h-3.5 text-rose-500" /> Fashion</span>
-                        <span className="text-[10px] font-mono opacity-70">1</span>
-                      </button>
-                    </div>
-
-                    {/* Right Models List */}
-                    <div className="flex-1 p-2.5 overflow-y-auto space-y-2 bg-white scrollbar-thin">
-                      {filteredModels.map((m) => {
-                        const isSelected = selectedModelId === m.id;
-                        return (
-                          <button
-                            key={m.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedModelId(m.id);
-                              setModelDropdownOpen(false);
-                            }}
-                            className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col gap-1 ${
-                              isSelected
-                                ? "bg-blue-50/50 border-blue-300 ring-1 ring-blue-500/20 shadow-2xs"
-                                : "border-neutral-100 hover:border-neutral-200 hover:bg-neutral-50/80"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${m.dotColor} shrink-0`} />
-                                <span className="text-xs font-bold text-neutral-950">{m.name}</span>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${m.badgeColor} leading-tight`}>
-                                  {m.badge}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 font-mono">
-                                  {m.cost} cr
-                                </span>
-                                {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
-                              </div>
-                            </div>
-                            <p className="text-[11px] text-neutral-600 line-clamp-2 leading-snug">
-                              {m.desc}
-                            </p>
-                            <div className="flex items-center gap-2 pt-0.5 text-[9px] text-neutral-400 font-medium flex-wrap">
-                              <span>📐 {m.maxResolution}</span>
-                              <span>·</span>
-                              <span>⚡ {m.primaryJob}</span>
-                              <span>·</span>
-                              <span className="font-mono text-neutral-500">{m.engine}</span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="px-3.5 py-2 border-t border-neutral-100 bg-neutral-50/80 flex items-center justify-between text-[11px] text-neutral-500">
-                    <span>Active: <strong className="text-neutral-900">{currentModel.name}</strong></span>
-                    <button
-                      type="button"
-                      onClick={() => { setModelDropdownOpen(false); setModelModalOpen(true); }}
-                      className="text-blue-600 hover:underline font-semibold cursor-pointer"
-                    >
-                      Compare full specs →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Model Selector Button -> Opens Big Modal Directly */}
+            <button
+              type="button"
+              onClick={() => {
+                setModelModalOpen(true);
+                setRatioMenuOpen(false);
+                setResolutionMenuOpen(false);
+              }}
+              className="h-8 px-3 rounded-xl border text-[11px] font-bold flex items-center gap-2 transition-all cursor-pointer bg-neutral-50 hover:bg-neutral-100 border-neutral-200/90 text-neutral-900 hover:border-neutral-300 shadow-2xs"
+              title="Click to select model engine"
+            >
+              <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
+              <span className="truncate max-w-[130px]">{currentModel.name}</span>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-neutral-200/70 text-neutral-700">
+                {currentModel.cost} cr
+              </span>
+              <ChevronDown className="w-3 h-3 text-neutral-400" />
+            </button>
 
             <span className="w-px h-4 bg-neutral-200 shrink-0" />
 
@@ -1805,10 +1582,9 @@ export default function StudioPage() {
                 type="button"
                 onClick={() => {
                   setRatioMenuOpen(!ratioMenuOpen);
-                  setModelDropdownOpen(false);
                   setResolutionMenuOpen(false);
                 }}
-                className={`h-8 px-2 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`h-8 px-2.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   ratioMenuOpen
                     ? "bg-neutral-950 text-white border-neutral-950"
                     : "bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300"
@@ -1870,10 +1646,9 @@ export default function StudioPage() {
                 type="button"
                 onClick={() => {
                   setResolutionMenuOpen(!resolutionMenuOpen);
-                  setModelDropdownOpen(false);
                   setRatioMenuOpen(false);
                 }}
-                className={`h-8 px-2 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`h-8 px-2.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   resolutionMenuOpen
                     ? "bg-neutral-950 text-white border-neutral-950"
                     : "bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300"
@@ -1972,7 +1747,7 @@ export default function StudioPage() {
                 ))}
               </div>
             ) : (
-              <span className="text-[10px] font-mono text-neutral-400 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-200 h-8 flex items-center" title="Gemini models render 1 image per inference">
+              <span className="text-[10px] font-mono text-neutral-400 px-2 py-1 rounded-lg bg-neutral-50 border border-neutral-200 h-8 flex items-center" title="Engine renders 1 image per inference">
                 1x
               </span>
             )}
@@ -2139,53 +1914,6 @@ export default function StudioPage() {
         </div>
       )}
 
-      {/* ── Curated Inspiration Showcase Grid (shown when idle) ── */}
-      {!hasActiveContent && (
-        <div className="w-full mt-10 pt-6 border-t border-neutral-200/70 animate-fade-scale">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-sm font-extrabold tracking-tight text-neutral-900 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-blue-600" />
-                <span>Inspiration Sparks</span>
-              </h3>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                Click any creation to instantly load prompt, model, and aspect ratio.
-              </p>
-            </div>
-            <span className="text-xs font-mono text-neutral-400 font-medium">6 Curated Styles</span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {INSPIRATION_SPARKS.map((spark) => (
-              <div
-                key={spark.id}
-                onClick={() => handleApplyInspiration(spark)}
-                className="group relative rounded-2xl overflow-hidden border border-neutral-200 bg-white shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col hover:border-neutral-400"
-              >
-                <div className="h-28 w-full overflow-hidden relative bg-neutral-100">
-                  <img
-                    src={spark.thumbnail}
-                    alt={spark.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
-                  <span className="absolute bottom-1.5 left-2 text-[9px] font-bold text-white bg-neutral-900/60 px-1.5 py-0.5 rounded backdrop-blur-xs">
-                    {spark.ratio}
-                  </span>
-                </div>
-                <div className="p-2 space-y-1">
-                  <h4 className="text-[11px] font-bold text-neutral-900 truncate">{spark.title}</h4>
-                  <div className="flex items-center justify-between text-[9px] text-neutral-400">
-                    <span className="text-blue-600 font-semibold">{spark.category}</span>
-                    <span className="font-mono">{spark.modelId.includes("pro") ? "Pro" : "4K"}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* ── Generation & Output Canvas ── */}
       {hasActiveContent && (
         <div className="w-full space-y-6 animate-spring">
@@ -2203,7 +1931,7 @@ export default function StudioPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h4 className="text-base font-bold text-neutral-950">Synthesizing on Google Cloud Vertex AI</h4>
+                  <h4 className="text-base font-bold text-neutral-950">Synthesizing via AI Studio Core Engine</h4>
                   <p className="text-xs text-neutral-500 font-mono">{stagePhase}</p>
                 </div>
 
@@ -2227,7 +1955,7 @@ export default function StudioPage() {
                       <span className="w-3.5 h-3.5 rounded-full border border-neutral-300 inline-block" />
                     )}
                     <span className={stageStep >= 2 ? "font-bold text-neutral-900" : "text-neutral-400"}>
-                      2. Vertex AI Worker
+                      2. Generative Inference Worker
                     </span>
                   </div>
 
@@ -2468,33 +2196,33 @@ export default function StudioPage() {
         </div>
       )}
 
-      {/* ── GOOGLE AI STUDIO-STYLE MODEL SELECTION MODAL ───────────────────── */}
+      {/* ── PROFESSIONAL MODEL SELECTION POPUP MODAL ───────────────────────── */}
       {modelModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-neutral-950/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fade-scale"
+          className="fixed inset-0 z-50 bg-neutral-950/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-scale"
           onClick={() => setModelModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-4xl max-h-[88vh] bg-white rounded-3xl border border-neutral-200/90 shadow-[0_24px_70px_rgba(0,0,0,0.18)] flex flex-col overflow-hidden animate-dropdown"
+            className="relative w-full max-w-4xl max-h-[88vh] bg-white rounded-3xl border border-neutral-200/90 shadow-[0_24px_80px_rgba(0,0,0,0.22)] flex flex-col overflow-hidden animate-dropdown"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header & Filter */}
             <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between gap-4 bg-white shrink-0">
-              <div className="flex items-center gap-3 flex-1 max-w-md">
+              <div className="flex items-center gap-3 flex-1 max-w-lg">
                 <div className="relative w-full">
-                  <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={modelFilterQuery}
                     onChange={(e) => setModelFilterQuery(e.target.value)}
-                    placeholder="Filter models by name, engine, or capability..."
-                    className="w-full pl-9 pr-8 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-50 focus:bg-white border border-transparent focus:border-neutral-300 text-xs text-neutral-900 focus:outline-none transition-all font-medium"
+                    placeholder="Search 8 generative engines by name, engine, or capability..."
+                    className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-neutral-100/80 hover:bg-neutral-100 focus:bg-white border border-transparent focus:border-neutral-400 text-xs text-neutral-900 focus:outline-none transition-all font-medium placeholder-neutral-400 shadow-2xs"
                     autoFocus
                   />
                   {modelFilterQuery && (
                     <button
                       onClick={() => setModelFilterQuery("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-neutral-400 hover:text-neutral-700 cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -2503,14 +2231,14 @@ export default function StudioPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Google Cloud Vertex AI</span>
-                </div>
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-neutral-700 bg-neutral-100 px-3 py-1.5 rounded-full border border-neutral-200/80 font-bold font-mono">
+                  8 Certified Models
+                </span>
                 <button
                   type="button"
                   onClick={() => setModelModalOpen(false)}
-                  className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
+                  className="p-2 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-800 transition-colors cursor-pointer"
+                  title="Close (Esc)"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -2519,19 +2247,21 @@ export default function StudioPage() {
 
             {/* Modal Body: Sidebar Categories + Main List */}
             <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
-              <div className="w-full sm:w-56 p-3 sm:border-r border-neutral-100 bg-[#FAFAFA] flex sm:flex-col gap-1 overflow-x-auto shrink-0">
+              <div className="w-full sm:w-60 p-3 sm:border-r border-neutral-100 bg-[#FAFAFA] flex sm:flex-col gap-1.5 overflow-x-auto shrink-0">
                 <div className="px-3 py-1.5 text-[10px] font-bold text-neutral-400 uppercase tracking-widest hidden sm:block">
-                  Categories
+                  Engines Suite
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setSelectedCategoryTab("all")}
-                  className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "all" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                  className={`px-3 py-2.5 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                    selectedCategoryTab === "all"
+                      ? "bg-neutral-950 text-white shadow-xs"
+                      : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <Layers className="w-4 h-4 shrink-0" />
                     <span>All Models</span>
                   </div>
@@ -2541,11 +2271,13 @@ export default function StudioPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedCategoryTab("gemini")}
-                  className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "gemini" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                  className={`px-3 py-2.5 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                    selectedCategoryTab === "gemini"
+                      ? "bg-neutral-950 text-white shadow-xs"
+                      : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
                     <span>Gemini Suite</span>
                   </div>
@@ -2555,11 +2287,13 @@ export default function StudioPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedCategoryTab("imagen")}
-                  className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "imagen" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                  className={`px-3 py-2.5 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                    selectedCategoryTab === "imagen"
+                      ? "bg-neutral-950 text-white shadow-xs"
+                      : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <ImageIcon className="w-4 h-4 text-amber-500 shrink-0" />
                     <span>Imagen Suite</span>
                   </div>
@@ -2569,30 +2303,32 @@ export default function StudioPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedCategoryTab("specialized")}
-                  className={`px-3 py-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    selectedCategoryTab === "specialized" ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-600 hover:bg-neutral-200/60"
+                  className={`px-3 py-2.5 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                    selectedCategoryTab === "specialized"
+                      ? "bg-neutral-950 text-white shadow-xs"
+                      : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <Shirt className="w-4 h-4 text-rose-500 shrink-0" />
-                    <span>Specialized</span>
+                    <span>Specialized (Try-On)</span>
                   </div>
                   <span className="text-[10px] font-mono opacity-80">1</span>
                 </button>
 
-                <div className="mt-auto hidden sm:block p-3 rounded-2xl bg-white border border-neutral-200/80 text-[11px] text-neutral-500 space-y-1.5">
-                  <div className="flex items-center gap-1.5 font-bold text-neutral-800">
-                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Authorized Models</span>
+                <div className="mt-auto hidden sm:block p-3.5 rounded-2xl bg-white border border-neutral-200/80 text-[11px] text-neutral-500 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center gap-1.5 font-bold text-neutral-900">
+                    <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    <span>AI Studio Verified</span>
                   </div>
-                  <p className="text-[10px] text-neutral-400 leading-snug">
-                    Strictly authorized Google Cloud Vertex AI generative engines with SynthID watermarking.
+                  <p className="text-[10px] text-neutral-400 leading-relaxed">
+                    Zero hardware overhead. Built-in SynthID digital watermarking with two-phase transactional escrow protection.
                   </p>
                 </div>
               </div>
 
               {/* Right Models List */}
-              <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3 bg-white">
+              <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-3 bg-white scrollbar-thin">
                 {filteredModels.length === 0 ? (
                   <div className="text-center py-16 space-y-2">
                     <Filter className="w-8 h-8 text-neutral-300 mx-auto" />
@@ -2611,8 +2347,8 @@ export default function StudioPage() {
                         }}
                         className={`group relative p-4 rounded-2xl border transition-all cursor-pointer ${
                           isSelected
-                            ? "border-blue-500 bg-blue-50/30 shadow-sm ring-1 ring-blue-500/20"
-                            : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50/60 hover:shadow-xs"
+                            ? "border-neutral-950 bg-neutral-50/80 shadow-sm ring-1 ring-neutral-950"
+                            : "border-neutral-200/90 hover:border-neutral-400 hover:bg-neutral-50/50 hover:shadow-2xs"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -2650,17 +2386,17 @@ export default function StudioPage() {
                           </div>
 
                           <div className="flex flex-col items-end gap-2 shrink-0">
-                            <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-neutral-900 text-white tabular-nums shadow-2xs">
+                            <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-neutral-900 text-white tabular-nums shadow-2xs font-mono">
                               {m.cost} cr
                             </span>
                             {isSelected ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600">
-                                <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-neutral-900 bg-white border border-neutral-300 px-2.5 py-0.5 rounded-lg shadow-2xs">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>Active</span>
                               </span>
                             ) : (
-                              <span className="text-[11px] text-neutral-400 group-hover:text-neutral-700 font-semibold transition-colors">
-                                Select →
+                              <span className="text-[11px] text-neutral-500 group-hover:text-neutral-950 font-bold transition-colors">
+                                Select Model →
                               </span>
                             )}
                           </div>
@@ -2672,18 +2408,21 @@ export default function StudioPage() {
               </div>
             </div>
 
-            <div className="px-6 py-3 border-t border-neutral-100 bg-[#FAFAFA] flex items-center justify-between text-xs text-neutral-500 shrink-0">
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 border-t border-neutral-100 bg-neutral-50/90 flex items-center justify-between text-xs text-neutral-600 shrink-0">
               <div className="flex items-center gap-2">
-                <span>Selected: <strong className="text-neutral-900">{currentModel.name}</strong></span>
+                <span className={`w-2 h-2 rounded-full ${currentModel.dotColor}`} />
+                <span>Active Model: <strong className="text-neutral-950 font-bold">{currentModel.name}</strong></span>
                 <span className="text-neutral-300">·</span>
                 <span>Max Resolution: <strong className="text-neutral-900">{currentModel.maxResolution}</strong></span>
               </div>
               <button
                 type="button"
                 onClick={() => setModelModalOpen(false)}
-                className="px-4 py-1.5 rounded-xl bg-neutral-950 text-white font-bold text-xs hover:bg-neutral-800 transition-all cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-neutral-950 text-white font-bold text-xs hover:bg-neutral-800 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
               >
-                Done
+                <Check className="w-3.5 h-3.5" />
+                <span>Confirm & Close</span>
               </button>
             </div>
           </div>
