@@ -79,7 +79,7 @@ async def submit_job(
     await session.commit()
 
     # 5. Dispatch async processing pipeline
-    if payload.task_type == "image_generation":
+    if payload.task_type in ("image_generation", "text-to-image", "image-to-image", "inpainting", "outpainting"):
         background_tasks.add_task(ImageService.process_job_async, job_id)
     
     # Reload with outputs eagerly loaded
