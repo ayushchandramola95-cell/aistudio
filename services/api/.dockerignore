@@ -1,0 +1,16 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+*.db
+*.sqlite3
+aistudio.db
+storage/outputs/*
+!storage/outputs/.gitkeep
+.env
+.git
+.gitignore

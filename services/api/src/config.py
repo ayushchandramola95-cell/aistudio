@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     # Initial free signup credits
     NEW_USER_CREDITS: float = 100.0
 
+    # Google GenAI / Vertex AI configuration
+    GEMINI_API_KEY: str | None = None
+    GOOGLE_GENAI_API_KEY: str | None = None
+    GOOGLE_CLOUD_PROJECT: str | None = None
+    GOOGLE_CLOUD_REGION: str = "us-central1"
+    VERTEX_AI: bool = False
+
+    # Output storage
+    STORAGE_DIR: str = "services/api/storage"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

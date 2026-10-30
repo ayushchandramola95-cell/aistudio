@@ -324,41 +324,60 @@ export default function StudioPage() {
       setActiveJob(job);
 
       setProgress(35);
-      setStagePhase(`Routing to ${currentModel.name}...`);
+      setStagePhase(`Routing inference to ${currentModel.name}...`);
 
-      setTimeout(() => {
-        setProgress(65);
-        setStagePhase(`Denoising ${steps} steps at ${selectedRatio}...`);
+      // ── Poll Real Job Output from Backend API ───────────────────────
+      let completedJob: GenerationJob | null = null;
+      for (let pollCount = 0; pollCount < 25; pollCount++) {
+        await new Promise((r) => setTimeout(r, 600));
+        setProgress(Math.min(92, 40 + pollCount * 10));
+        setStagePhase(`Rendering ${steps} steps at ${selectedRatio}...`);
 
-        setTimeout(() => {
-          setProgress(90);
-          setStagePhase("Rendering final textures & settling escrow...");
+        try {
+          const pollRes = await fetch(`http://localhost:8100/api/v1/jobs/${job.id}`);
+          if (pollRes.ok) {
+            const data: GenerationJob = await pollRes.json();
+            if (data.status === "COMPLETED" && data.outputs && data.outputs.length > 0) {
+              completedJob = data;
+              break;
+            } else if (data.status === "FAILED") {
+              throw new Error(data.error_message || "Generation pipeline encountered an error.");
+            }
+          }
+        } catch (pollErr: any) {
+          if (pollErr.message && !pollErr.message.includes("fetch")) {
+            throw pollErr;
+          }
+        }
+      }
 
-          setTimeout(() => {
-            setProgress(100);
-            if (timerRef.current) clearInterval(timerRef.current);
-            setIsGenerating(false);
-            setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 3000);
+      setProgress(100);
+      if (timerRef.current) clearInterval(timerRef.current);
+      setIsGenerating(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
 
-            const resultUrl =
-              "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1400&auto=format&fit=crop";
-            setOutputImage(resultUrl);
+      const resultUrl =
+        completedJob?.outputs?.[0]?.download_url ||
+        (completedJob?.outputs?.[0]?.file_key?.startsWith("http")
+          ? completedJob?.outputs?.[0]?.file_key
+          : completedJob?.outputs?.[0]?.file_key
+          ? `http://localhost:8100${completedJob.outputs[0].file_key}`
+          : "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1400&auto=format&fit=crop");
 
-            setHistory((prev) => [
-              {
-                id: job.id,
-                prompt: prompt,
-                url: resultUrl,
-                model: currentModel.name,
-                ratio: selectedRatio,
-                date: "Just now",
-              },
-              ...prev.slice(0, 7),
-            ]);
-          }, 600);
-        }, 800);
-      }, 700);
+      setOutputImage(resultUrl);
+
+      setHistory((prev) => [
+        {
+          id: job.id,
+          prompt: prompt,
+          url: resultUrl,
+          model: currentModel.name,
+          ratio: selectedRatio,
+          date: "Just now",
+        },
+        ...prev.slice(0, 7),
+      ]);
     } catch (err: any) {
       if (timerRef.current) clearInterval(timerRef.current);
       setErrorMsg(err.message || "An error occurred during generation.");

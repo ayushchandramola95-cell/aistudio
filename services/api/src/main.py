@@ -1,6 +1,9 @@
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
 from services.api.src.config import settings
 from services.api.src.database import engine, Base, AsyncSessionLocal
 from services.api.src.services.model_service import ModelService
@@ -32,7 +35,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration allowing our unique frontend localhost:3100
+# CORS configuration
 origins = [
     "http://localhost:3100",
     "http://127.0.0.1:3100",
@@ -47,6 +50,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Ensure output storage directory exists and mount static route
+output_dir = Path(settings.STORAGE_DIR) / "outputs"
+output_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/outputs", StaticFiles(directory=str(output_dir)), name="outputs")
+
 # Include routers
 app.include_router(health_router)
 app.include_router(auth_router)
@@ -57,4 +65,3 @@ app.include_router(job_router)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("services.api.src.main:app", host="0.0.0.0", port=settings.API_PORT, reload=True)
-
