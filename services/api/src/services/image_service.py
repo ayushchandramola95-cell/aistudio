@@ -36,15 +36,30 @@ class ImageService:
 
         try:
             from google import genai
+            from google.oauth2 import service_account
+
+            cred_path = (
+                settings.GOOGLE_APPLICATION_CREDENTIALS 
+                or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+            )
+            if not cred_path and os.path.exists("gcp-key.json"):
+                cred_path = os.path.abspath("gcp-key.json")
+
+            creds = None
+            if cred_path and os.path.exists(cred_path):
+                creds = service_account.Credentials.from_service_account_file(cred_path)
 
             # 1. Vertex AI Mode: Uses Google Cloud Free Credits ($200/$300)
-            # Active when VERTEX_AI=true or when running inside Google Cloud Run
-            if settings.VERTEX_AI or (project and os.environ.get("K_SERVICE")):
-                return genai.Client(
-                    vertexai=True,
-                    project=project,
-                    location=settings.GOOGLE_CLOUD_REGION,
-                )
+            # Active when VERTEX_AI=true, creds are provided, or running inside Google Cloud Run
+            if settings.VERTEX_AI or creds is not None or (project and os.environ.get("K_SERVICE")):
+                client_kwargs = {
+                    "vertexai": True,
+                    "project": project,
+                    "location": settings.GOOGLE_CLOUD_REGION,
+                }
+                if creds is not None:
+                    client_kwargs["credentials"] = creds
+                return genai.Client(**client_kwargs)
 
             # 2. Direct API Key (Google AI Studio)
             if api_key and not api_key.startswith("test"):

@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     GOOGLE_GENAI_API_KEY: str | None = None
     GOOGLE_CLOUD_PROJECT: str | None = None
     GOOGLE_CLOUD_REGION: str = "us-central1"
+    GOOGLE_APPLICATION_CREDENTIALS: str | None = None
     VERTEX_AI: bool = False
 
     # Output storage
@@ -38,3 +39,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()
+
+# Propagate credentials to OS environment for GCP SDKs
+if settings.GOOGLE_APPLICATION_CREDENTIALS and os.path.exists(settings.GOOGLE_APPLICATION_CREDENTIALS):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.GOOGLE_APPLICATION_CREDENTIALS
+elif os.path.exists("gcp-key.json"):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath("gcp-key.json")
+
+if settings.GOOGLE_CLOUD_PROJECT:
+    os.environ["GOOGLE_CLOUD_PROJECT"] = settings.GOOGLE_CLOUD_PROJECT
+
