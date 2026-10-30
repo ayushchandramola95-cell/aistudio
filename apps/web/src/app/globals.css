@@ -119,6 +119,60 @@ body {
 }
 
 /* ==========================================================================
+   Smooth Dropdown & Popover Motion System
+   ========================================================================== */
+@keyframes dropdownSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdownSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom left;
+}
+
+@keyframes dropdownSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown-down {
+  animation: dropdownSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top left;
+}
+
+/* Prompt Box Luxury Elevation & Focus Ring */
+.prompt-box-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 20px 48px -10px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prompt-box-shadow:focus-within {
+  box-shadow: 0 8px 32px -4px rgba(37, 99, 235, 0.1), 0 28px 64px -12px rgba(0, 0, 0, 0.09), 0 0 0 2px rgba(59, 130, 246, 0.4);
+  border-color: rgba(147, 197, 253, 0.8);
+}
+
+.glow-focus-ring {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-focus-ring:focus-within {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08), 0 16px 40px -4px rgba(0, 0, 0, 0.09);
+  border-color: #93C5FD;
+}
+
+/* ==========================================================================
    Laser Scanning Beam for AI Synthesis
    ========================================================================== */
 @keyframes scanline {
