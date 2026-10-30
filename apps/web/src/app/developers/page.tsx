@@ -111,17 +111,17 @@ const DEFAULT_MODELS: ModelItem[] = [
     backend: "Google Vertex AI",
     status: "ACTIVE",
     category: "google-image",
-    type: "Gemini 3.1 Flash Image (Upgraded)",
+    type: "Gemini 3.1 Flash Image",
     cost: 6,
     latency: "1.4s",
     region: "us-central1",
     enabled: true,
     desc: "Our upgraded mainstream Gemini image model with stronger prompt adherence, and multi-reference consistency, enabling production quality image generation and edits from 1K to 4K.",
-    version: "gemini-3.1-flash-image",
+    version: "gemini-nano-banana-2.1",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
-      maxPromptLength: 5000,
-      maxBatchCount: 4,
+      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "4:1", "1:4", "8:1", "1:8"],
+      maxPromptLength: 1000000,
+      maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -153,17 +153,17 @@ const DEFAULT_MODELS: ModelItem[] = [
     backend: "Google Vertex AI",
     status: "ACTIVE",
     category: "google-image",
-    type: "Gemini 2.5 Flash Image",
+    type: "Gemini 3.1 Flash Lite Image",
     cost: 3,
     latency: "0.8s",
     region: "us-central1",
     enabled: true,
     desc: "Class leading image generation capabilities, now optimized for high-volume, latency-sensitive asset creation.",
-    version: "gemini-2.5-flash-image",
+    version: "gemini-3.1-flash-lite-image",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3"],
-      maxPromptLength: 4000,
-      maxBatchCount: 4,
+      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+      maxPromptLength: 1000000,
+      maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -203,9 +203,9 @@ const DEFAULT_MODELS: ModelItem[] = [
     desc: "A powerful image generation model that combines high quality graphics, text rendering in multiple languages, and world knowledge",
     version: "gemini-3-pro-image",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
-      maxPromptLength: 5000,
-      maxBatchCount: 2,
+      allowedAspectRatios: ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4", "8:1", "1:8"],
+      maxPromptLength: 1000000,
+      maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -245,9 +245,9 @@ const DEFAULT_MODELS: ModelItem[] = [
     desc: "gemini-3.1-flash-image is a model designed for general image generation and editing tasks, offering high quality and low latency.",
     version: "gemini-3.1-flash-image",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
-      maxPromptLength: 5000,
-      maxBatchCount: 4,
+      allowedAspectRatios: ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4"],
+      maxPromptLength: 1000000,
+      maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -288,8 +288,8 @@ const DEFAULT_MODELS: ModelItem[] = [
     version: "gemini-2.5-flash-image",
     requirements: {
       allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
-      maxPromptLength: 4000,
-      maxBatchCount: 4,
+      maxPromptLength: 1000000,
+      maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -326,14 +326,14 @@ const DEFAULT_MODELS: ModelItem[] = [
     latency: "0.9s",
     region: "us-central1",
     enabled: true,
-    desc: "Fast image generation with text prompts.",
+    desc: "Fast image generation with text prompts. Sub-3-second diffusion model.",
     version: "imagen-4.0-fast",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3"],
-      maxPromptLength: 2000,
+      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+      maxPromptLength: 1000,
       maxBatchCount: 4,
       safetyFilterLevel: "block_medium_and_above",
-      personGeneration: "allow_adult",
+      personGeneration: "allow_all",
       synthIdWatermark: true,
       minCreditBalance: 4,
       stepsMin: 0,
@@ -371,9 +371,9 @@ const DEFAULT_MODELS: ModelItem[] = [
     desc: "Specialized model to generate images of people trying on clothing.",
     version: "virtual-try-on-v1",
     requirements: {
-      allowedAspectRatios: ["3:4", "9:16", "1:1"],
+      allowedAspectRatios: ["1:1", "3:4", "9:16"],
       maxPromptLength: 2500,
-      maxBatchCount: 2,
+      maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -410,12 +410,12 @@ const DEFAULT_MODELS: ModelItem[] = [
     latency: "1.8s",
     region: "us-central1",
     enabled: true,
-    desc: "Fast image editing.",
+    desc: "Fast image editing, targeted inpainting and outpainting.",
     version: "imagen-3.0-capability-001",
     requirements: {
       allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3"],
       maxPromptLength: 2000,
-      maxBatchCount: 2,
+      maxBatchCount: 4,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -870,17 +870,20 @@ export default function DedicatedDeveloperConsolePage() {
                             <div className="text-[11px] text-neutral-400 mt-0.5">{model.region}</div>
                           </td>
 
-                          {/* Active Guardrails Pills */}
+                          {/* Technical Specs & Guardrails */}
                           <td className="py-4 px-4">
-                            <div className="flex flex-wrap gap-1 max-w-xs">
+                            <div className="flex flex-wrap gap-1 max-w-sm">
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                                {model.requirements.maxPromptLength >= 1000000 ? "1M Tokens" : `${model.requirements.maxPromptLength} chars`}
+                              </span>
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-800 font-mono">
+                                {model.id.includes("2-1") || model.id.includes("pro") ? "Up to 4K" : model.id.includes("lite") ? "512px / 1K" : model.id.includes("fast") ? "1MP Fast" : "Native 1K"}
+                              </span>
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700">
                                 {model.requirements.allowedAspectRatios.length} Ratios
                               </span>
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700">
                                 {model.requirements.maxBatchCount}x Batch
-                              </span>
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700">
-                                {model.requirements.safetyFilterLevel.replace("block_", "")}
                               </span>
                               {model.requirements.synthIdWatermark && (
                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">

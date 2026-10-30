@@ -250,6 +250,65 @@ const AVAILABLE_MODELS: GoogleModelSpec[] = [
   },
 ];
 
+// ─── Resolution Definitions (Single, Cohesive, Model-Aware) ────────────────
+export interface ResolutionOption {
+  id: string; // "512" | "1024" | "2048" | "4096"
+  label: string;
+  sub: string;
+  dimensions: string;
+  extraCost: number;
+  tag: string;
+  supportedModels: string[];
+}
+
+const RESOLUTION_OPTIONS: ResolutionOption[] = [
+  {
+    id: "512",
+    label: "512px Fast Draft",
+    sub: "0.5K Fast Iteration",
+    dimensions: "512 × 512",
+    extraCost: 0,
+    tag: "Fastest",
+    supportedModels: ["nano-banana-2-1", "nano-banana-2-lite", "nano-banana-2"],
+  },
+  {
+    id: "1024",
+    label: "1K Standard HD",
+    sub: "Native High Quality",
+    dimensions: "1024 × 1024",
+    extraCost: 0,
+    tag: "Included",
+    supportedModels: [
+      "nano-banana-2-1",
+      "nano-banana-2-lite",
+      "nano-banana-pro",
+      "nano-banana-2",
+      "nano-banana",
+      "imagen-4-fast",
+      "virtual-try-on",
+      "imagen-3-capability-001",
+    ],
+  },
+  {
+    id: "2048",
+    label: "2K High Definition",
+    sub: "Double Pixel Density",
+    dimensions: "2048 × 2048",
+    extraCost: 2,
+    tag: "+2 cr",
+    supportedModels: ["nano-banana-2-1", "nano-banana-pro", "nano-banana-2"],
+  },
+  {
+    id: "4096",
+    label: "4K Ultra Studio",
+    sub: "Maximum 16MP Detail",
+    dimensions: "4096 × 4096",
+    extraCost: 4,
+    tag: "+4 cr",
+    supportedModels: ["nano-banana-2-1", "nano-banana-pro", "nano-banana-2"],
+  },
+];
+
 // ─── Frame Ratios Catalog ───────────────────────────────────────────────────
 interface RatioSpec {
   id: string;
@@ -270,13 +329,6 @@ const ALL_FRAME_RATIOS: Record<string, RatioSpec> = {
   "8:1":  { id: "8:1",  label: "Panoramic Ribbon", sub: "1536 × 192", icon: "—", desc: "Ultra-wide Header" },
   "1:8":  { id: "1:8",  label: "Vertical Bookmark", sub: "192 × 1536", icon: "┆", desc: "Ultra-tall Banner" },
 };
-
-// ─── Quality Presets ────────────────────────────────────────────────────────
-const QUALITY_PRESETS = [
-  { id: "standard", label: "Standard HD", res: "1080p", extraCost: 0, tag: "Included" },
-  { id: "high",     label: "High 2K",     res: "1440p", extraCost: 2, tag: "+2 cr" },
-  { id: "ultra",    label: "Ultra 4K",    res: "4K",    extraCost: 4, tag: "+4 cr" },
-];
 
 // ─── Prompt Suggestions ─────────────────────────────────────────────────────
 const PROMPT_SUGGESTIONS = [
@@ -305,7 +357,7 @@ export default function StudioPage() {
   const [prompt, setPrompt]                         = useState("");
   const [selectedModelId, setSelectedModelId]       = useState("nano-banana-2-1");
   const [selectedRatio, setSelectedRatio]           = useState("16:9");
-  const [selectedQuality, setSelectedQuality]       = useState("standard");
+  const [selectedResolution, setSelectedResolution] = useState("1024");
   const [batchCount, setBatchCount]                 = useState(1);
   const [seedLocked, setSeedLocked]                 = useState(false);
 
@@ -313,15 +365,12 @@ export default function StudioPage() {
   // 1. Nano Banana 2.1
   const [multiRefImages, setMultiRefImages]         = useState<string[]>([]);
   const [webGrounding, setWebGrounding]             = useState(true);
-  const [flagshipResolution, setFlagshipResolution] = useState("1024");
 
   // 2. Nano Banana 2 Lite
   const [fastMode, setFastMode]                     = useState(true);
-  const [liteResolution, setLiteResolution]         = useState<"512" | "1024">("1024");
 
   // 3. Nano Banana Pro
   const [thinkingBudget, setThinkingBudget]         = useState<"minimal" | "medium" | "deep">("medium");
-  const [proResolution, setProResolution]           = useState<"1024" | "2048" | "4096">("2048");
 
   // 4. Imagen 4 Fast
   const [personFilter, setPersonFilter]             = useState<"allow_all" | "dont_allow" | "allow_adult">("allow_all");
@@ -336,7 +385,7 @@ export default function StudioPage() {
   const [maskEditImage, setMaskEditImage]           = useState<string | null>(null);
   const [editMode, setEditMode]                     = useState<"inpaint" | "outpaint" | "background">("inpaint");
 
-  // 7. General Single Attached Image (for models 2, legacy, etc.)
+  // 7. General Single Attached Image (for general multimodal models)
   const [attachedImage, setAttachedImage]           = useState<string | null>(null);
 
   // ── Dropdown / Modal States ──
@@ -344,7 +393,7 @@ export default function StudioPage() {
   const [modelFilterQuery, setModelFilterQuery]     = useState("");
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>("all");
   const [ratioMenuOpen, setRatioMenuOpen]           = useState(false);
-  const [qualityMenuOpen, setQualityMenuOpen]       = useState(false);
+  const [resolutionMenuOpen, setResolutionMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen]             = useState(false);
 
   // ── Advanced Parameters ──
@@ -417,6 +466,20 @@ export default function StudioPage() {
     return AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
   }, [selectedModelId]);
 
+  // ── Resolution Option Computation & Auto-Correction ──
+  const currentResolution = useMemo(() => {
+    return RESOLUTION_OPTIONS.find((r) => r.id === selectedResolution) || RESOLUTION_OPTIONS[1];
+  }, [selectedResolution]);
+
+  // Automatically ensure resolution is valid when switching models
+  useEffect(() => {
+    const cur = RESOLUTION_OPTIONS.find((r) => r.id === selectedResolution);
+    if (cur && !cur.supportedModels.includes(currentModel.id)) {
+      // Current model cannot do this resolution (e.g. 4K on Lite) -> reset to 1024
+      setSelectedResolution("1024");
+    }
+  }, [currentModel.id, selectedResolution]);
+
   // Allowed aspect ratios for current model
   const availableRatios = useMemo(() => {
     return currentModel.aspectRatios
@@ -476,7 +539,7 @@ export default function StudioPage() {
     function handleClickOutside(event: MouseEvent) {
       if (studioRef.current && !studioRef.current.contains(event.target as Node)) {
         setRatioMenuOpen(false);
-        setQualityMenuOpen(false);
+        setResolutionMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -492,8 +555,7 @@ export default function StudioPage() {
   }, [errorMsg]);
 
   // ── Computed Values ──
-  const currentQuality = QUALITY_PRESETS.find((q) => q.id === selectedQuality) || QUALITY_PRESETS[0];
-  const totalCost = (currentModel.cost + currentQuality.extraCost) * batchCount;
+  const totalCost = (currentModel.cost + currentResolution.extraCost) * batchCount;
   const charCount = prompt.length;
 
   // ── Filtered Models for Popup ──
@@ -599,7 +661,7 @@ export default function StudioPage() {
     // Construct model-specific dynamic parameters
     const modelParameters: Record<string, any> = {
       aspect_ratio: selectedRatio,
-      quality: selectedQuality,
+      resolution: selectedResolution,
       sample_count: batchCount,
       guidance_scale: guidanceScale,
       steps,
@@ -610,14 +672,11 @@ export default function StudioPage() {
     // Pack Model Specific Flags
     if (selectedModelId === "nano-banana-2-1") {
       modelParameters.web_grounding = webGrounding;
-      modelParameters.resolution = flagshipResolution;
       modelParameters.multi_reference_count = multiRefImages.length;
     } else if (selectedModelId === "nano-banana-2-lite") {
       modelParameters.fast_mode = fastMode;
-      modelParameters.resolution = liteResolution;
     } else if (selectedModelId === "nano-banana-pro") {
       modelParameters.thinking_budget = thinkingBudget;
-      modelParameters.resolution = proResolution;
     } else if (selectedModelId === "imagen-4-fast") {
       modelParameters.person_generation = personFilter;
     } else if (selectedModelId === "virtual-try-on") {
@@ -657,7 +716,7 @@ export default function StudioPage() {
       for (let pollCount = 0; pollCount < 25; pollCount++) {
         await new Promise((r) => setTimeout(r, 600));
         setProgress(Math.min(92, 40 + pollCount * 10));
-        setStagePhase(`Rendering on Vertex AI (${currentModel.name})...`);
+        setStagePhase(`Rendering on Vertex AI (${currentModel.name} @ ${selectedResolution}px)...`);
 
         try {
           const pollRes = await fetch(`http://localhost:8100/api/v1/jobs/${job.id}`);
@@ -756,6 +815,19 @@ export default function StudioPage() {
     return displayedPlaceholder || "Describe the image you want to generate...";
   }, [selectedModelId, displayedPlaceholder]);
 
+  // Check if model has special contextual controls that warrant a top bar
+  const hasContextualControls = useMemo(() => {
+    return (
+      selectedModelId === "nano-banana-2-1" ||
+      selectedModelId === "nano-banana-pro" ||
+      selectedModelId === "nano-banana-2-lite" ||
+      selectedModelId === "imagen-4-fast" ||
+      selectedModelId === "virtual-try-on" ||
+      selectedModelId === "imagen-3-capability-001" ||
+      selectedModelId === "nano-banana-2"
+    );
+  }, [selectedModelId]);
+
   return (
     <div
       ref={studioRef}
@@ -849,203 +921,180 @@ export default function StudioPage() {
       {/* ── Idle Hero ── */}
       {!hasActiveContent && (
         <div className="text-center space-y-4 mb-6 animate-fade-scale">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-600 text-xs font-medium border border-neutral-200 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-100 text-neutral-700 text-xs font-medium border border-neutral-200 shadow-2xs">
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
             <span>Google Cloud Vertex AI Image Studio</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-normal font-editorial text-neutral-950 tracking-tight leading-tight">
             What will you create?
           </h1>
-          <p className="text-sm text-neutral-400 font-sans max-w-sm mx-auto">
+          <p className="text-sm text-neutral-500 font-sans max-w-sm mx-auto">
             Describe your vision, configure model specs, generate.
           </p>
         </div>
       )}
 
-      {/* ── Dynamic Prompt Box Container ── */}
+      {/* ── Prompt Box Container ── */}
       <div
         className={`w-full bg-white rounded-2xl border transition-all duration-300
-          border-neutral-200 shadow-[0_2px_24px_0_rgba(0,0,0,0.06)]
+          border-neutral-200 shadow-[0_4px_24px_0_rgba(0,0,0,0.06)]
           hover:border-neutral-300
-          focus-within:border-neutral-400 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.05),0_2px_24px_0_rgba(0,0,0,0.08)]`}
+          focus-within:border-neutral-400 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04),0_6px_28px_0_rgba(0,0,0,0.08)]`}
       >
-        {/* ── Top Model Indicator & Specific Controls Strip ── */}
-        <div className="px-4 py-2 bg-neutral-50/80 rounded-t-2xl border-b border-neutral-100 flex items-center justify-between gap-2 flex-wrap text-xs">
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setModelModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-neutral-200 hover:border-neutral-300 text-neutral-800 font-bold shadow-2xs cursor-pointer transition-all"
-            >
-              <span className={`w-2 h-2 rounded-full ${currentModel.dotColor}`} />
-              <span>{currentModel.name}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded border font-semibold ${currentModel.badgeColor}`}>
-                {currentModel.badge}
-              </span>
-              <ChevronDown className="w-3 h-3 text-neutral-400 ml-0.5" />
-            </button>
-
-            <span className="text-[11px] text-neutral-400 hidden sm:inline">·</span>
-            <span className="text-[11px] font-mono text-neutral-500 hidden sm:inline">
-              Engine: <strong className="text-neutral-700">{currentModel.engine}</strong>
-            </span>
-          </div>
-
-          {/* Model-Specific Feature Badges / Toggles */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Nano Banana 2.1 Web Grounding */}
-            {selectedModelId === "nano-banana-2-1" && (
-              <button
-                type="button"
-                onClick={() => setWebGrounding(!webGrounding)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
-                  webGrounding
-                    ? "bg-blue-50 border-blue-200 text-blue-700"
-                    : "bg-white border-neutral-200 text-neutral-500 hover:bg-neutral-50"
-                }`}
-                title="Ground image generation with real-time Google Web Search"
-              >
-                <Globe className="w-3 h-3 text-blue-600" />
-                <span>Web Grounding {webGrounding ? "ON" : "OFF"}</span>
-              </button>
-            )}
-
-            {/* Nano Banana 2.1 Resolution Quick Selector */}
-            {selectedModelId === "nano-banana-2-1" && (
-              <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[10px] font-bold">
-                {["512", "1024", "2048", "4096"].map((res) => (
+        {/* ── Contextual Controls Strip (Only shows when model has special features - NO redundant model button!) ── */}
+        {hasContextualControls && (
+          <div className="px-4 py-2 bg-neutral-50/90 rounded-t-2xl border-b border-neutral-100 flex items-center justify-between gap-2 flex-wrap text-xs">
+            {/* Model-Specific Contextual Controls */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Nano Banana 2.1 Controls */}
+              {selectedModelId === "nano-banana-2-1" && (
+                <>
                   <button
-                    key={res}
                     type="button"
-                    onClick={() => setFlagshipResolution(res)}
-                    className={`px-1.5 py-0.5 rounded cursor-pointer transition-all ${
-                      flagshipResolution === res ? "bg-neutral-950 text-white" : "text-neutral-500 hover:text-neutral-800"
+                    onClick={() => setWebGrounding(!webGrounding)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
+                      webGrounding
+                        ? "bg-blue-50 border-blue-200 text-blue-700 shadow-2xs"
+                        : "bg-white border-neutral-200 text-neutral-500 hover:bg-neutral-50"
+                    }`}
+                    title="Ground generation with real-time Google Web Search"
+                  >
+                    <Globe className="w-3 h-3 text-blue-600" />
+                    <span>Google Search Grounding {webGrounding ? "ON" : "OFF"}</span>
+                  </button>
+                  <span className="text-[11px] text-neutral-500 font-medium hidden sm:inline">
+                    Multi-ref character consistency (up to 14 photos)
+                  </span>
+                </>
+              )}
+
+              {/* Nano Banana 2 Lite Controls */}
+              {selectedModelId === "nano-banana-2-lite" && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFastMode(!fastMode)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border cursor-pointer transition-all ${
+                      fastMode
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-2xs"
+                        : "bg-white border-neutral-200 text-neutral-500"
                     }`}
                   >
-                    {res === "4096" ? "4K" : res === "2048" ? "2K" : res === "1024" ? "1K" : "0.5K"}
+                    <Zap className="w-3 h-3 text-emerald-600" />
+                    <span>Turbo Draft Mode {fastMode ? "Active" : "Standard"}</span>
                   </button>
-                ))}
-              </div>
-            )}
+                  <span className="text-[11px] text-neutral-400 font-medium hidden sm:inline">
+                    Latency-sensitive asset creation (Max 1K)
+                  </span>
+                </div>
+              )}
 
-            {/* Nano Banana 2 Lite Fast Switch */}
-            {selectedModelId === "nano-banana-2-lite" && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setFastMode(!fastMode)}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border cursor-pointer ${
-                    fastMode
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                      : "bg-white border-neutral-200 text-neutral-500"
-                  }`}
-                >
-                  <Zap className="w-3 h-3 text-emerald-600" />
-                  <span>Turbo Drafts</span>
-                </button>
-                <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[10px] font-bold">
-                  {(["512", "1024"] as const).map((r) => (
+              {/* Nano Banana Pro Controls */}
+              {selectedModelId === "nano-banana-pro" && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[11px] font-bold">
+                    <span className="px-2 text-neutral-400 font-normal">Reasoning:</span>
+                    {(["minimal", "medium", "deep"] as const).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setThinkingBudget(t)}
+                        className={`px-2 py-0.5 rounded capitalize cursor-pointer transition-all ${
+                          thinkingBudget === t ? "bg-purple-600 text-white shadow-2xs" : "text-neutral-500 hover:text-neutral-900"
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleInsertQuote}
+                    className="px-2.5 py-1 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-50 text-[11px] font-semibold text-neutral-700 flex items-center gap-1 cursor-pointer"
+                    title="Click to quote exact text for crisp typography"
+                  >
+                    <span>“Quote Typography”</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Imagen 4 Fast Controls */}
+              {selectedModelId === "imagen-4-fast" && (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[11px] font-bold">
+                    <span className="px-2 text-neutral-400 font-normal">People Filter:</span>
+                    {(["allow_all", "allow_adult", "dont_allow"] as const).map((f) => (
+                      <button
+                        key={f}
+                        type="button"
+                        onClick={() => setPersonFilter(f)}
+                        className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+                          personFilter === f ? "bg-amber-600 text-white shadow-2xs" : "text-neutral-500 hover:text-neutral-900"
+                        }`}
+                      >
+                        {f === "allow_all" ? "All People" : f === "allow_adult" ? "Adults Only" : "No People"}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-[11px] text-neutral-400 font-medium hidden sm:inline">
+                    Sub-3s pure diffusion (~1MP screen-optimized)
+                  </span>
+                </div>
+              )}
+
+              {/* Virtual Try-On Controls */}
+              {selectedModelId === "virtual-try-on" && (
+                <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[11px] font-bold">
+                  <span className="px-2 text-neutral-400 font-normal">Garment Category:</span>
+                  {(["tops", "bottoms", "dresses", "outerwear"] as const).map((cat) => (
                     <button
-                      key={r}
+                      key={cat}
                       type="button"
-                      onClick={() => setLiteResolution(r)}
-                      className={`px-2 py-0.5 rounded cursor-pointer ${
-                        liteResolution === r ? "bg-neutral-950 text-white" : "text-neutral-500"
+                      onClick={() => setTryOnCategory(cat)}
+                      className={`px-2.5 py-0.5 rounded capitalize cursor-pointer transition-all ${
+                        tryOnCategory === cat ? "bg-rose-600 text-white shadow-2xs" : "text-neutral-500 hover:text-neutral-900"
                       }`}
                     >
-                      {r === "512" ? "512px" : "1K"}
+                      {cat}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Nano Banana Pro Thinking Budget & Typography */}
-            {selectedModelId === "nano-banana-pro" && (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[10px] font-bold">
-                  <span className="px-1.5 text-neutral-400 font-normal">Reasoning:</span>
-                  {(["minimal", "medium", "deep"] as const).map((t) => (
+              {/* Imagen 3 Capability 001 Controls */}
+              {selectedModelId === "imagen-3-capability-001" && (
+                <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[11px] font-bold">
+                  {(["inpaint", "outpaint", "background"] as const).map((m) => (
                     <button
-                      key={t}
+                      key={m}
                       type="button"
-                      onClick={() => setThinkingBudget(t)}
-                      className={`px-1.5 py-0.5 rounded capitalize cursor-pointer ${
-                        thinkingBudget === t ? "bg-purple-600 text-white" : "text-neutral-500 hover:text-neutral-800"
+                      onClick={() => setEditMode(m)}
+                      className={`px-2.5 py-0.5 rounded capitalize cursor-pointer transition-all ${
+                        editMode === m ? "bg-cyan-600 text-white shadow-2xs" : "text-neutral-500 hover:text-neutral-900"
                       }`}
                     >
-                      {t}
+                      {m === "inpaint" ? "Inpainting" : m === "outpaint" ? "Outpainting" : "BG Swap"}
                     </button>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={handleInsertQuote}
-                  className="px-2 py-1 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-50 text-[10px] font-semibold text-neutral-700 flex items-center gap-1 cursor-pointer"
-                  title="Click to quote exact text for crisp typography"
-                >
-                  <span>“Quote Typography”</span>
-                </button>
-              </div>
-            )}
+              )}
 
-            {/* Imagen 4 Fast Person Filter */}
-            {selectedModelId === "imagen-4-fast" && (
-              <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[10px] font-bold">
-                <span className="px-1.5 text-neutral-400 font-normal">People:</span>
-                {(["allow_all", "allow_adult", "dont_allow"] as const).map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => setPersonFilter(f)}
-                    className={`px-2 py-0.5 rounded cursor-pointer ${
-                      personFilter === f ? "bg-amber-600 text-white" : "text-neutral-500"
-                    }`}
-                  >
-                    {f === "allow_all" ? "All" : f === "allow_adult" ? "Adults Only" : "None"}
-                  </button>
-                ))}
-              </div>
-            )}
+              {/* Nano Banana 2 Controls */}
+              {selectedModelId === "nano-banana-2" && (
+                <span className="text-[11px] text-neutral-600 font-medium flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                  <span>Maintains consistency across up to 5 characters & 14 objects</span>
+                </span>
+              )}
+            </div>
 
-            {/* Virtual Try-On Category */}
-            {selectedModelId === "virtual-try-on" && (
-              <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[10px] font-bold">
-                <span className="px-1.5 text-neutral-400 font-normal">Garment:</span>
-                {(["tops", "bottoms", "dresses", "outerwear"] as const).map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setTryOnCategory(cat)}
-                    className={`px-2 py-0.5 rounded capitalize cursor-pointer ${
-                      tryOnCategory === cat ? "bg-rose-600 text-white" : "text-neutral-500"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Imagen 3 Capability 001 Mode */}
-            {selectedModelId === "imagen-3-capability-001" && (
-              <div className="flex items-center rounded-lg bg-white border border-neutral-200 p-0.5 text-[10px] font-bold">
-                {(["inpaint", "outpaint", "background"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setEditMode(m)}
-                    className={`px-2 py-0.5 rounded capitalize cursor-pointer ${
-                      editMode === m ? "bg-cyan-600 text-white" : "text-neutral-500"
-                    }`}
-                  >
-                    {m === "inpaint" ? "Inpainting" : m === "outpaint" ? "Outpainting" : "BG Swap"}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Model Engine Tag */}
+            <div className="hidden md:flex items-center gap-1.5 text-[11px] text-neutral-400">
+              <span>Engine:</span>
+              <strong className="text-neutral-700 font-mono font-medium">{currentModel.engine}</strong>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ── Main Input Area (Adapts dynamically by Model) ── */}
         <div className="p-4 pb-3">
@@ -1110,7 +1159,7 @@ export default function StudioPage() {
                     </div>
                   ) : (
                     <>
-                      <Shirt className="w-6 h-6 text-rose-400 mb-1" />
+                      <Shirt className="w-6 h-6 text-rose-500 mb-1" />
                       <span className="text-xs font-bold text-neutral-700">2. Upload Clothing / Garment Photo</span>
                       <span className="text-[10px] text-neutral-400">Click to select apparel item</span>
                     </>
@@ -1126,12 +1175,12 @@ export default function StudioPage() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder={dynamicPlaceholder}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-400 resize-none font-normal"
+                  className="w-full bg-neutral-50/60 border border-neutral-200 rounded-xl p-3 text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-400 resize-none font-normal leading-relaxed"
                 />
               </div>
             </div>
           ) : selectedModelId === "imagen-3-capability-001" ? (
-            /* ── B. Imagen 3 Capability 001 Inpainting / Masking Dropzones ── */
+            /* ── B. Imagen 3 Capability 001 Inpainting Dropzones ── */
             <div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Base Image Dropzone */}
@@ -1207,7 +1256,7 @@ export default function StudioPage() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder={dynamicPlaceholder}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-400 resize-none font-normal"
+                  className="w-full bg-neutral-50/60 border border-neutral-200 rounded-xl p-3 text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-400 resize-none font-normal leading-relaxed"
                 />
               </div>
             </div>
@@ -1221,7 +1270,7 @@ export default function StudioPage() {
                   type="button"
                   onClick={() => multiFileInputRef.current?.click()}
                   disabled={multiRefImages.length >= 14}
-                  className="shrink-0 h-18 w-24 rounded-xl border-2 border-dashed border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 flex flex-col items-center justify-center transition-all cursor-pointer disabled:opacity-40"
+                  className="shrink-0 h-16 w-22 rounded-xl border-2 border-dashed border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 flex flex-col items-center justify-center transition-all cursor-pointer disabled:opacity-40"
                   title="Upload reference images for character or style consistency (up to 14)"
                 >
                   <Plus className="w-4 h-4 text-blue-600 mb-0.5" />
@@ -1231,7 +1280,7 @@ export default function StudioPage() {
 
                 {/* Uploaded Thumbnails */}
                 {multiRefImages.map((src, idx) => (
-                  <div key={idx} className="relative shrink-0 h-18 w-18 rounded-xl overflow-hidden border border-neutral-200 group">
+                  <div key={idx} className="relative shrink-0 h-16 w-16 rounded-xl overflow-hidden border border-neutral-200 group">
                     <img src={src} alt={`Ref ${idx + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -1241,7 +1290,7 @@ export default function StudioPage() {
                       <X className="w-3 h-3" />
                     </button>
                     <span className="absolute bottom-0 inset-x-0 bg-neutral-950/70 text-white text-[8px] font-mono text-center py-0.5">
-                      Ref #{idx + 1}
+                      #{idx + 1}
                     </span>
                   </div>
                 ))}
@@ -1279,7 +1328,7 @@ export default function StudioPage() {
               {selectedModelId !== "imagen-4-fast" && (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className={`shrink-0 w-[88px] h-[88px] rounded-xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all group mr-4 ${
+                  className={`shrink-0 w-[84px] h-[84px] rounded-xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all group mr-4 ${
                     attachedImage
                       ? "border-neutral-300 bg-neutral-50"
                       : "border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50"
@@ -1301,7 +1350,7 @@ export default function StudioPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="w-9 h-10 mb-1 opacity-25 group-hover:opacity-40 transition-opacity">
+                      <div className="w-8 h-9 mb-1 opacity-25 group-hover:opacity-40 transition-opacity">
                         <svg viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect x="2" y="1" width="26" height="34" rx="3" stroke="#555" strokeWidth="2" fill="#F5F5F5"/>
                           <rect x="6" y="8" width="18" height="14" rx="2" fill="#D4D4D4"/>
@@ -1347,7 +1396,7 @@ export default function StudioPage() {
                 key={chip.label}
                 type="button"
                 onClick={() => handleStyleChip(chip.suffix)}
-                className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-neutral-200 bg-white text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800 hover:border-neutral-300 transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 hover:border-neutral-300 transition-all cursor-pointer"
               >
                 {chip.label}
               </button>
@@ -1363,19 +1412,22 @@ export default function StudioPage() {
           </div>
         )}
 
-        {/* ── Bottom Controls Bar ── */}
+        {/* ── Bottom Controls Bar (Single Source of Truth) ── */}
         <div className="px-4 py-2.5 border-t border-neutral-100 flex items-center justify-between gap-2 flex-wrap">
-          {/* Left: Model Picker, Ratio, Quality, Batch, Seed, Settings */}
+          {/* Left: Model Selector, Ratio, Model-Aware Resolution, Batch, Seed, Settings */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Model Selector Button */}
+            {/* The ONE and ONLY Model Selector Button */}
             <button
               type="button"
-              onClick={() => setModelModalOpen(true)}
-              className="h-8 px-3 rounded-lg bg-white hover:bg-neutral-50 border border-neutral-200 text-[11px] font-semibold text-neutral-800 flex items-center gap-1.5 transition-all cursor-pointer"
+              onClick={() => { setModelModalOpen(true); setRatioMenuOpen(false); setResolutionMenuOpen(false); }}
+              className="h-8 px-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-[11px] font-bold text-neutral-800 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${currentModel.dotColor} shrink-0`} />
+              <span className={`w-2 h-2 rounded-full ${currentModel.dotColor} shrink-0`} />
               <span>{currentModel.name}</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${currentModel.badgeColor}`}>
+                {currentModel.badge}
+              </span>
+              <ChevronDown className="w-3 h-3 text-neutral-400 ml-0.5" />
             </button>
 
             {/* Divider */}
@@ -1385,7 +1437,7 @@ export default function StudioPage() {
             <div className="relative">
               <button
                 type="button"
-                onClick={() => { setRatioMenuOpen(!ratioMenuOpen); setQualityMenuOpen(false); }}
+                onClick={() => { setRatioMenuOpen(!ratioMenuOpen); setResolutionMenuOpen(false); }}
                 className="h-8 px-2.5 rounded-lg bg-white hover:bg-neutral-50 border border-neutral-200 text-[11px] font-semibold text-neutral-700 flex items-center gap-1 transition-all cursor-pointer"
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-neutral-500">
@@ -1399,9 +1451,9 @@ export default function StudioPage() {
 
               {ratioMenuOpen && (
                 <div className="absolute left-0 bottom-full mb-2 w-[260px] max-h-[360px] overflow-y-auto bg-white rounded-2xl border border-neutral-200 shadow-[0_8px_40px_rgba(0,0,0,0.12)] p-2 z-40 animate-spring">
-                  <div className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between">
+                  <div className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between border-b border-neutral-100 mb-1">
                     <span>Aspect Ratios</span>
-                    <span className="text-neutral-400 font-mono text-[9px]">{availableRatios.length} available</span>
+                    <span className="text-neutral-400 font-mono text-[9px]">{availableRatios.length} supported</span>
                   </div>
                   {availableRatios.map((r) => (
                     <button
@@ -1426,6 +1478,138 @@ export default function StudioPage() {
               )}
             </div>
 
+            {/* Divider */}
+            <span className="w-px h-4 bg-neutral-200 shrink-0" />
+
+            {/* Model-Aware Resolution Dropdown (Clearly Shows Supported vs Locked) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setResolutionMenuOpen(!resolutionMenuOpen); setRatioMenuOpen(false); }}
+                className="h-8 px-2.5 rounded-lg bg-white hover:bg-neutral-50 border border-neutral-200 text-[11px] font-semibold text-neutral-700 flex items-center gap-1.5 transition-all cursor-pointer"
+                title={`Resolution: ${currentResolution.label}`}
+              >
+                <span className="text-neutral-400 font-mono text-[10px]">RES</span>
+                <span className="font-bold text-neutral-900">
+                  {currentResolution.id === "4096"
+                    ? "4K Ultra"
+                    : currentResolution.id === "2048"
+                    ? "2K HD"
+                    : currentResolution.id === "1024"
+                    ? "1K (1024px)"
+                    : "512px Draft"}
+                </span>
+                <ChevronDown className={`w-3 h-3 text-neutral-400 transition-transform ${resolutionMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {resolutionMenuOpen && (
+                <div className="absolute left-0 bottom-full mb-2 w-[290px] bg-white rounded-2xl border border-neutral-200 shadow-[0_8px_40px_rgba(0,0,0,0.12)] p-2 z-40 animate-spring">
+                  <div className="px-3 pb-2 pt-1 border-b border-neutral-100 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                    <span>Output Resolution</span>
+                    <span className="font-mono text-[9px] text-neutral-500 font-semibold">{currentModel.name}</span>
+                  </div>
+
+                  <div className="space-y-1 pt-1.5">
+                    {RESOLUTION_OPTIONS.map((opt) => {
+                      const isSupported = opt.supportedModels.includes(currentModel.id);
+                      const isSelected = selectedResolution === opt.id;
+
+                      if (isSupported) {
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => { setSelectedResolution(opt.id); setResolutionMenuOpen(false); }}
+                            className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
+                              isSelected ? "bg-neutral-950 text-white shadow-xs" : "hover:bg-neutral-50 text-neutral-800"
+                            }`}
+                          >
+                            <div>
+                              <div className="text-[12px] font-bold flex items-center gap-1.5">
+                                <span>{opt.label}</span>
+                                {opt.id === "4096" && (
+                                  <span
+                                    className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
+                                      isSelected
+                                        ? "bg-neutral-800 text-blue-200 border-neutral-700"
+                                        : "bg-blue-50 text-blue-700 border-blue-200"
+                                    }`}
+                                  >
+                                    4K Ultra
+                                  </span>
+                                )}
+                              </div>
+                              <div className={`text-[10px] mt-0.5 ${isSelected ? "text-neutral-300" : "text-neutral-400"}`}>
+                                {opt.dimensions} · {opt.sub}
+                              </div>
+                            </div>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
+                                isSelected ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-700"
+                              }`}
+                            >
+                              {opt.tag}
+                            </span>
+                          </button>
+                        );
+                      } else {
+                        return (
+                          <div
+                            key={opt.id}
+                            className="w-full text-left px-3 py-2 rounded-xl bg-neutral-50/60 border border-neutral-100/80 opacity-50 cursor-not-allowed flex items-center justify-between"
+                            title={`Not supported by ${currentModel.name} (Max resolution is ${currentModel.maxResolution})`}
+                          >
+                            <div>
+                              <div className="text-[12px] font-bold text-neutral-400 flex items-center gap-1.5">
+                                <Lock className="w-3 h-3 text-neutral-400" />
+                                <span>{opt.label}</span>
+                              </div>
+                              <div className="text-[10px] text-neutral-400 mt-0.5">
+                                Not supported by {currentModel.name}
+                              </div>
+                            </div>
+                            <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-neutral-200/80 text-neutral-500">
+                              Locked
+                            </span>
+                          </div>
+                        );
+                      }
+                    })}
+                  </div>
+
+                  <div className="mt-2 pt-2 border-t border-neutral-100 px-2 text-[10px] text-neutral-400 leading-tight">
+                    <span>💡 4K Ultra is supported on Nano Banana 2.1, Pro & 2 models.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Batch Count (Interactive ONLY when model supports parallel generation) */}
+            {currentModel.batchMax > 1 ? (
+              <div className="flex items-center rounded-lg bg-neutral-50 border border-neutral-200 p-0.5 h-8">
+                {[1, 2, 4].filter((c) => c <= currentModel.batchMax).map((count) => (
+                  <button
+                    key={count}
+                    type="button"
+                    onClick={() => setBatchCount(count)}
+                    className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                      batchCount === count ? "bg-neutral-950 text-white shadow-xs" : "text-neutral-500 hover:text-neutral-900"
+                    }`}
+                    title={`Generate ${count} image${count > 1 ? "s" : ""} in parallel`}
+                  >
+                    {count}x
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <span
+                className="text-[10px] font-mono text-neutral-400 px-2 py-1 rounded bg-neutral-50 border border-neutral-200"
+                title="Gemini models generate 1 high-fidelity image per inference call"
+              >
+                1x
+              </span>
+            )}
+
             {/* Char count + clear */}
             <span className="text-[11px] text-neutral-400 font-mono tabular-nums">{charCount}/3000</span>
             {charCount > 0 && (
@@ -1439,76 +1623,13 @@ export default function StudioPage() {
               </button>
             )}
 
-            {/* Divider */}
-            <span className="w-px h-4 bg-neutral-200 shrink-0" />
-
-            {/* Quality Preset */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => { setQualityMenuOpen(!qualityMenuOpen); setRatioMenuOpen(false); }}
-                className="h-8 px-2.5 rounded-lg bg-white hover:bg-neutral-50 border border-neutral-200 text-[11px] font-semibold text-neutral-700 flex items-center gap-1 transition-all cursor-pointer"
-              >
-                <span className="text-neutral-400 text-[10px]">HD</span>
-                <span>{currentQuality.res}</span>
-                <ChevronDown className={`w-3 h-3 text-neutral-400 transition-transform ${qualityMenuOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              {qualityMenuOpen && (
-                <div className="absolute left-0 bottom-full mb-2 w-[210px] bg-white rounded-2xl border border-neutral-200 shadow-[0_8px_40px_rgba(0,0,0,0.12)] p-2 z-40 animate-spring">
-                  <div className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                    Resolution Quality
-                  </div>
-                  {QUALITY_PRESETS.map((q) => (
-                    <button
-                      key={q.id}
-                      type="button"
-                      onClick={() => { setSelectedQuality(q.id); setQualityMenuOpen(false); }}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center justify-between cursor-pointer ${
-                        selectedQuality === q.id ? "bg-neutral-950 text-white" : "hover:bg-neutral-50 text-neutral-800"
-                      }`}
-                    >
-                      <div>
-                        <div className="text-[12px] font-bold">{q.label}</div>
-                        <div className={`text-[10px] ${selectedQuality === q.id ? "text-neutral-300" : "text-neutral-400"}`}>{q.res}</div>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
-                        selectedQuality === q.id ? "bg-neutral-800 text-white" : "bg-neutral-100 text-neutral-700"
-                      }`}>{q.tag}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Batch Count (For models supporting multi-sample like Imagen 4 Fast & Capability 001) */}
-            {currentModel.batchMax > 1 ? (
-              <div className="flex items-center rounded-lg bg-neutral-50 border border-neutral-200 p-0.5 h-8">
-                {[1, 2, 4].filter((c) => c <= currentModel.batchMax).map((count) => (
-                  <button
-                    key={count}
-                    type="button"
-                    onClick={() => setBatchCount(count)}
-                    className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                      batchCount === count ? "bg-neutral-950 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-900"
-                    }`}
-                    title={`Generate ${count} image${count > 1 ? "s" : ""} in parallel`}
-                  >
-                    {count}x
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <span className="text-[10px] font-mono text-neutral-400 px-1">1x</span>
-            )}
-
             {/* Seed Lock */}
             <button
               type="button"
               onClick={() => { setSeedLocked(!seedLocked); if (!seedLocked) handleNewSeed(); }}
               className={`h-8 w-8 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
                 seedLocked
-                  ? "bg-amber-50 border-amber-300 text-amber-700"
+                  ? "bg-amber-50 border-amber-300 text-amber-700 shadow-2xs"
                   : "bg-white border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50"
               }`}
               title={seedLocked ? `Seed locked: ${seed}` : "Lock seed for reproducible output"}
@@ -1522,7 +1643,7 @@ export default function StudioPage() {
               onClick={() => setSettingsOpen(!settingsOpen)}
               className={`h-8 w-8 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
                 settingsOpen
-                  ? "bg-neutral-950 text-white border-neutral-950"
+                  ? "bg-neutral-950 text-white border-neutral-950 shadow-2xs"
                   : "bg-white border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50"
               }`}
               title="Advanced parameters"
@@ -1533,7 +1654,7 @@ export default function StudioPage() {
 
           {/* Right: Credit cost badge + Generate button */}
           <div className="flex items-center gap-2.5 ml-auto">
-            <div className="flex items-center gap-1 text-neutral-500">
+            <div className="flex items-center gap-1 text-neutral-500 font-medium">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <circle cx="7" cy="7" r="6" stroke="#A3A3A3" strokeWidth="1.5"/>
                 <path d="M5 7.5l1.5 1.5L9.5 5.5" stroke="#A3A3A3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1564,7 +1685,7 @@ export default function StudioPage() {
 
         {/* ── Advanced Settings Panel ── */}
         {settingsOpen && (
-          <div className="px-4 pb-4 pt-3 border-t border-neutral-100 grid grid-cols-1 sm:grid-cols-3 gap-4 animate-spring">
+          <div className="px-4 pb-4 pt-3 border-t border-neutral-100 grid grid-cols-1 sm:grid-cols-3 gap-4 animate-spring bg-neutral-50/50 rounded-b-2xl">
             {/* Negative Prompt */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest block">
@@ -1575,7 +1696,7 @@ export default function StudioPage() {
                 value={negativePrompt}
                 onChange={(e) => setNegativePrompt(e.target.value)}
                 placeholder="blurry, distorted, low quality..."
-                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-medium"
+                className="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-medium"
               />
               <p className="text-[10px] text-neutral-400">Elements to exclude from the image</p>
             </div>
@@ -1626,7 +1747,7 @@ export default function StudioPage() {
                   value={seed === -1 ? "" : seed}
                   onChange={(e) => setSeed(Number(e.target.value))}
                   placeholder="Random (leave empty)"
-                  className="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-mono tabular-nums"
+                  className="flex-1 bg-white border border-neutral-200 rounded-xl px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:border-neutral-800 placeholder-neutral-400 font-mono tabular-nums"
                 />
                 <button
                   type="button"
@@ -1644,12 +1765,12 @@ export default function StudioPage() {
       {/* ── Keyboard Hints ── */}
       {!hasActiveContent && (
         <div className="flex items-center gap-2 text-[11px] text-neutral-400 mt-1 px-1">
-          <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-neutral-200 text-neutral-500 font-mono text-[10px] shadow-sm">
+          <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-neutral-200 text-neutral-500 font-mono text-[10px] shadow-xs">
             ↵ Enter
           </kbd>
           <span>to generate</span>
           <span className="text-neutral-300 mx-0.5">·</span>
-          <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-neutral-200 text-neutral-500 font-mono text-[10px] shadow-sm">
+          <kbd className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-neutral-200 text-neutral-500 font-mono text-[10px] shadow-xs">
             ⇧ Shift+Enter
           </kbd>
           <span>for new line</span>
@@ -1710,7 +1831,7 @@ export default function StudioPage() {
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   <span className="text-xs font-bold text-neutral-950">{currentModel.name}</span>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200">
-                    {selectedRatio} · {currentQuality.res}
+                    {selectedRatio} · {currentResolution.dimensions}
                   </span>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                     {totalCost} cr settled
