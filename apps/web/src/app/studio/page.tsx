@@ -71,6 +71,16 @@ interface ModelDef {
   isRecommended?: boolean;
   avatarIcon?: string;
   iconBg?: string;
+
+  // Dynamic engine capabilities
+  maxPromptLength: number;
+  maxReferences: number;
+  supportedResolutions: ("1K" | "2K" | "4K")[];
+  maxOutputs: number;
+  supportedQualityTiers: ("draft" | "standard" | "high")[];
+  supportsNegativePrompt: boolean;
+  estimatedRenderTime: string;
+  supportedCreationModes: string[];
 }
 
 interface StylePreset {
@@ -107,7 +117,122 @@ interface GenerationJob {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MODELS REPOSITORY
+// ASPECT RATIO VECTOR PREVIEWS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const ASPECT_RATIO_PREVIEWS = [
+  {
+    id: "1:1",
+    name: "Square",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="2"
+          y="2"
+          width="12"
+          height="12"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "16:9",
+    name: "Landscape",
+    svg: (active: boolean) => (
+      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 18 14" fill="none">
+        <rect
+          x="1"
+          y="2.5"
+          width="16"
+          height="9"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "9:16",
+    name: "Portrait",
+    svg: (active: boolean) => (
+      <svg className="w-3 h-4 shrink-0" viewBox="0 0 14 18" fill="none">
+        <rect
+          x="2.5"
+          y="1"
+          width="9"
+          height="16"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "4:3",
+    name: "Classic",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
+        <rect
+          x="1.5"
+          y="1.5"
+          width="13"
+          height="11"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "3:2",
+    name: "Photo",
+    svg: (active: boolean) => (
+      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
+        <rect
+          x="1"
+          y="2"
+          width="14"
+          height="10"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "3:4",
+    name: "Vertical",
+    svg: (active: boolean) => (
+      <svg className="w-3 h-3.5 shrink-0" viewBox="0 0 14 16" fill="none">
+        <rect
+          x="1.5"
+          y="1.5"
+          width="11"
+          height="13"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+        />
+      </svg>
+    ),
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODELS REPOSITORY (With Dynamic Engine Capabilities)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STUDIO_MODELS: ModelDef[] = [
@@ -126,6 +251,14 @@ const STUDIO_MODELS: ModelDef[] = [
     isRecommended: true,
     avatarIcon: "🍌",
     iconBg: "bg-amber-50 border-amber-200 text-amber-600",
+    maxPromptLength: 3000,
+    maxReferences: 4,
+    supportedResolutions: ["1K", "2K", "4K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "6–12s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "character-consistency"],
   },
   {
     id: "flux-1-dev",
@@ -142,6 +275,14 @@ const STUDIO_MODELS: ModelDef[] = [
     isRecommended: true,
     avatarIcon: "⚡",
     iconBg: "bg-zinc-100 border-zinc-300 text-zinc-800",
+    maxPromptLength: 2000,
+    maxReferences: 1,
+    supportedResolutions: ["1K", "2K", "4K"],
+    maxOutputs: 2,
+    supportedQualityTiers: ["standard", "high"],
+    supportsNegativePrompt: false,
+    estimatedRenderTime: "15–25s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "character-consistency"],
   },
   {
     id: "qwen-image",
@@ -152,12 +293,20 @@ const STUDIO_MODELS: ModelDef[] = [
     badgeColor: "bg-neutral-100 text-neutral-800 border-neutral-200",
     cost: 4,
     desc: "Excellent for anime, illustrative art, and creative styles.",
-    maxResolution: "2048×2048 (4K)",
+    maxResolution: "2048×2048 (2K)",
     aspectRatios: ["1:1", "16:9", "9:16", "3:4"],
     category: "local",
     isRecommended: true,
     avatarIcon: "🎨",
     iconBg: "bg-rose-50 border-rose-200 text-rose-600",
+    maxPromptLength: 1500,
+    maxReferences: 3,
+    supportedResolutions: ["1K", "2K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "8–14s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "character-consistency"],
   },
   {
     id: "sdxl",
@@ -174,6 +323,14 @@ const STUDIO_MODELS: ModelDef[] = [
     isRecommended: true,
     avatarIcon: "🌌",
     iconBg: "bg-purple-50 border-purple-200 text-purple-600",
+    maxPromptLength: 500,
+    maxReferences: 2,
+    supportedResolutions: ["1K", "2K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "8–15s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "character-consistency"],
   },
   {
     id: "nano-banana-pro",
@@ -190,6 +347,14 @@ const STUDIO_MODELS: ModelDef[] = [
     isRecommended: false,
     avatarIcon: "💎",
     iconBg: "bg-indigo-50 border-indigo-200 text-indigo-600",
+    maxPromptLength: 4000,
+    maxReferences: 4,
+    supportedResolutions: ["1K", "2K", "4K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "18–30s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "character-consistency"],
   },
   {
     id: "nano-banana-2-lite",
@@ -206,6 +371,14 @@ const STUDIO_MODELS: ModelDef[] = [
     isRecommended: false,
     avatarIcon: "⚡",
     iconBg: "bg-emerald-50 border-emerald-200 text-emerald-600",
+    maxPromptLength: 1000,
+    maxReferences: 1,
+    supportedResolutions: ["1K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard"],
+    supportsNegativePrompt: false,
+    estimatedRenderTime: "3–6s",
+    supportedCreationModes: ["text-to-image", "image-to-image"],
   },
   {
     id: "realvis-xl",
@@ -222,6 +395,14 @@ const STUDIO_MODELS: ModelDef[] = [
     isRecommended: true,
     avatarIcon: "📷",
     iconBg: "bg-amber-50 border-amber-200 text-amber-700",
+    maxPromptLength: 600,
+    maxReferences: 2,
+    supportedResolutions: ["1K", "2K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "10–18s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting"],
   },
   {
     id: "juggernaut-xl",
@@ -238,6 +419,14 @@ const STUDIO_MODELS: ModelDef[] = [
     isRecommended: true,
     avatarIcon: "⚔️",
     iconBg: "bg-slate-100 border-slate-300 text-slate-800",
+    maxPromptLength: 600,
+    maxReferences: 2,
+    supportedResolutions: ["1K", "2K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "10–16s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting"],
   },
 ];
 
@@ -632,6 +821,7 @@ export default function StudioPage() {
   const [selectedResolution, setSelectedResolution] = useState<string>("2K");
   const [outputsCount, setOutputsCount] = useState<number>(1);
   const [qualityTier, setQualityTier] = useState<string>("standard");
+  const [inlineMoreOpen, setInlineMoreOpen] = useState<boolean>(false);
 
   // Advanced Settings panel state (Collapsible Split-View)
   const [advancedPanelOpen, setAdvancedPanelOpen] = useState<boolean>(false);
@@ -675,6 +865,31 @@ export default function StudioPage() {
   const currentModel = useMemo(() => {
     return STUDIO_MODELS.find((m) => m.id === selectedModelId) || STUDIO_MODELS[0];
   }, [selectedModelId]);
+
+  // Auto-normalize settings when selectedModelId changes based on model capabilities
+  useEffect(() => {
+    // 1. Ratio
+    if (!currentModel.aspectRatios.includes(selectedRatio)) {
+      setSelectedRatio(currentModel.aspectRatios[0] || "1:1");
+    }
+    // 2. Resolution
+    if (!currentModel.supportedResolutions.includes(selectedResolution as "1K" | "2K" | "4K")) {
+      const highest = currentModel.supportedResolutions[currentModel.supportedResolutions.length - 1];
+      setSelectedResolution(highest || "1K");
+    }
+    // 3. Outputs
+    if (outputsCount > currentModel.maxOutputs) {
+      setOutputsCount(currentModel.maxOutputs);
+    }
+    // 4. Quality Tier
+    if (!currentModel.supportedQualityTiers.includes(qualityTier as "draft" | "standard" | "high")) {
+      setQualityTier(currentModel.supportedQualityTiers[0] || "standard");
+    }
+    // 5. Reference Images count limit
+    if (referenceImages.length > currentModel.maxReferences) {
+      setReferenceImages((prev) => prev.slice(0, currentModel.maxReferences));
+    }
+  }, [selectedModelId, currentModel]);
 
   // Filtered models
   const visibleModels = useMemo(() => {
@@ -1474,8 +1689,16 @@ export default function StudioPage() {
               <div className="flex items-center justify-between text-xs text-neutral-500">
                 <div className="flex items-center gap-2">
                   <label className="font-bold text-neutral-800">Prompt</label>
-                  <span className="text-[10px] font-mono text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
-                    {prompt.length}/3000 chars
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-semibold transition-colors ${
+                      prompt.length > currentModel.maxPromptLength
+                        ? "bg-rose-100 text-rose-700 border border-rose-300 font-bold"
+                        : prompt.length > currentModel.maxPromptLength * 0.85
+                        ? "bg-amber-50 text-amber-700 border border-amber-200"
+                        : "bg-neutral-100 text-neutral-500 border border-neutral-200/60"
+                    }`}
+                  >
+                    {prompt.length} / {currentModel.maxPromptLength} chars
                   </span>
                 </div>
 
@@ -1674,126 +1897,159 @@ export default function StudioPage() {
             {/* Reference Images Row */}
             <div className="pt-2 border-t border-neutral-100 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-neutral-700">
-                  Reference Images <span className="text-neutral-400 font-normal">(Optional)</span>
-                </span>
-                <span className="text-xs text-neutral-400 font-mono">
-                  {referenceImages.length}/4
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-neutral-700">
+                    Reference Images <span className="text-neutral-400 font-normal">(Optional guidance)</span>
+                  </span>
+                  {currentModel.maxReferences === 0 && (
+                    <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      Not supported by {currentModel.name}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-neutral-500 font-mono bg-neutral-100 px-2 py-0.5 rounded-md border border-neutral-200/60 font-semibold">
+                  {currentModel.maxReferences === 0 ? "0/0" : `${referenceImages.length}/${currentModel.maxReferences}`}
                 </span>
               </div>
 
               <div className="flex items-center justify-between gap-4 flex-wrap">
-                {/* Left Side: Reference Thumbnails & Upload Button */}
+                {/* Left Side: Reference Thumbnails & Dynamic Upload Button */}
                 <div className="flex items-center gap-3 flex-wrap">
-                  {referenceImages.map((ref) => (
-                    <div
-                      key={ref.id}
-                      className="relative w-28 h-20 rounded-xl overflow-hidden border border-neutral-200 group shadow-2xs shrink-0"
-                    >
-                      <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveReference(ref.id)}
-                        className="absolute top-1 right-1 p-1 rounded-full bg-neutral-950/80 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-neutral-950"
-                        title="Remove reference"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                      <span className="absolute bottom-0 inset-x-0 bg-neutral-950/70 text-white text-[9px] font-bold text-center py-0.5 truncate px-1">
-                        {ref.name}
+                  {currentModel.maxReferences === 0 ? (
+                    <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/80 text-xs text-neutral-500 flex items-center gap-2.5 max-w-lg">
+                      <Info className="w-4 h-4 text-neutral-400 shrink-0" />
+                      <span>
+                        <strong>{currentModel.name}</strong> operates exclusively as a pure text-to-image synthesis engine and does not accept reference image inputs.
                       </span>
                     </div>
-                  ))}
+                  ) : (
+                    <>
+                      {referenceImages.map((ref) => (
+                        <div
+                          key={ref.id}
+                          className="relative w-28 h-20 rounded-xl overflow-hidden border border-neutral-200 group shadow-2xs shrink-0 animate-fadeIn"
+                        >
+                          <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveReference(ref.id)}
+                            className="absolute top-1 right-1 p-1 rounded-full bg-neutral-950/80 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-neutral-950"
+                            title="Remove reference"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <span className="absolute bottom-0 inset-x-0 bg-neutral-950/70 text-white text-[9px] font-bold text-center py-0.5 truncate px-1">
+                            {ref.name}
+                          </span>
+                        </div>
+                      ))}
 
-                  {/* Upload Button */}
-                  {referenceImages.length < 4 && (
-                    <button
-                      type="button"
-                      onClick={() => refFileInputRef.current?.click()}
-                      className="w-28 h-20 rounded-xl border-2 border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/60 hover:bg-neutral-100/60 flex flex-col items-center justify-center transition-all cursor-pointer text-neutral-500 hover:text-neutral-900 group shrink-0"
-                    >
-                      <Plus className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform mb-1" />
-                      <span className="text-xs font-bold">Add Reference</span>
-                      <span className="text-[10px] text-neutral-400 font-mono">({referenceImages.length}/4)</span>
-                    </button>
+                      {/* Upload Button: dynamically disabled when limit reached */}
+                      {referenceImages.length < currentModel.maxReferences && (
+                        <button
+                          type="button"
+                          onClick={() => refFileInputRef.current?.click()}
+                          className="w-28 h-20 rounded-xl border-2 border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/60 hover:bg-neutral-100/60 flex flex-col items-center justify-center transition-all cursor-pointer text-neutral-500 hover:text-neutral-900 group shrink-0"
+                        >
+                          <Plus className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform mb-1" />
+                          <span className="text-xs font-bold">Add Reference</span>
+                          <span className="text-[10px] text-neutral-400 font-mono">
+                            ({referenceImages.length}/{currentModel.maxReferences})
+                          </span>
+                        </button>
+                      )}
+                      <input
+                        ref={refFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAddReference}
+                        className="hidden"
+                      />
+                    </>
                   )}
-                  <input
-                    ref={refFileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAddReference}
-                    className="hidden"
-                  />
                 </div>
 
                 {/* Right-most Side: Image Influence & Maintain Character Controls */}
-                <div className="flex items-center gap-3 ml-auto shrink-0 flex-wrap">
-                  {/* Sized Image Influence Card */}
-                  <div className="w-56 h-20 p-2.5 rounded-xl bg-neutral-50/90 border border-neutral-200/80 flex flex-col justify-between shrink-0 shadow-2xs">
-                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
-                      <span>Image Influence</span>
-                      <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
-                        {imageInfluence}%
-                      </span>
+                {/* HIDE completely if there are NO reference images! */}
+                {referenceImages.length > 0 && (
+                  <div className="flex items-center gap-3 ml-auto shrink-0 flex-wrap animate-fadeIn">
+                    {/* Sized Image Influence Card */}
+                    <div className="w-56 h-20 p-2.5 rounded-xl bg-neutral-50/90 border border-neutral-200/80 flex flex-col justify-between shrink-0 shadow-2xs">
+                      <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
+                        <span>Image Influence</span>
+                        <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
+                          {imageInfluence}%
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <input
+                          type="range"
+                          min={10}
+                          max={100}
+                          value={imageInfluence}
+                          onChange={(e) => setImageInfluence(Number(e.target.value))}
+                          className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        />
+                        <div className="flex items-center justify-between text-[9px] text-neutral-400 font-medium px-0.5">
+                          <span>Subtle</span>
+                          <span>Balanced</span>
+                          <span>Strong</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <input
-                        type="range"
-                        min={10}
-                        max={100}
-                        value={imageInfluence}
-                        onChange={(e) => setImageInfluence(Number(e.target.value))}
-                        className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                      />
-                      <div className="flex items-center justify-between text-[9px] text-neutral-400 font-medium px-0.5">
-                        <span>Subtle</span>
-                        <span>Balanced</span>
-                        <span>Strong</span>
+
+                    {/* Maintain Character Toggle Card */}
+                    <div className="h-20 px-3.5 py-2.5 rounded-xl bg-neutral-50/90 border border-neutral-200/80 flex items-center gap-3 shrink-0 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setMaintainCharacter(!maintainCharacter)}
+                        className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${
+                          maintainCharacter ? "bg-blue-600" : "bg-neutral-300"
+                        }`}
+                      >
+                        <div
+                          className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${
+                            maintainCharacter ? "translate-x-4" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold text-neutral-800 leading-tight">Maintain Character</div>
+                        <div className="text-[10px] text-neutral-400 leading-tight">Keep same subject across gens</div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Maintain Character Toggle Card */}
-                  <div className="h-20 px-3.5 py-2.5 rounded-xl bg-neutral-50/90 border border-neutral-200/80 flex items-center gap-3 shrink-0 shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => setMaintainCharacter(!maintainCharacter)}
-                      className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${
-                        maintainCharacter ? "bg-blue-600" : "bg-neutral-300"
-                      }`}
-                    >
-                      <div
-                        className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${
-                          maintainCharacter ? "translate-x-4" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-neutral-800 leading-tight">Maintain Character</div>
-                      <div className="text-[10px] text-neutral-400 leading-tight">Keep same subject across gens</div>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* ══════════════════════════════════════════════════════════════════════
-          {/* ══════════════════════════════════════════════════════════════════════
-              3. GENERATION SETTINGS & ACTION BAR
+              3. GENERATION SETTINGS & ACTION BAR (One-Line Segmented Toolbar)
           ══════════════════════════════════════════════════════════════════════ */}
-          <div className="p-5 rounded-3xl bg-white border border-neutral-200/90 shadow-card-elevated space-y-5">
+          <div className="p-5 rounded-3xl bg-white border border-neutral-200/90 shadow-card-elevated space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="text-base font-bold text-neutral-950 font-sans">
                   3. Generation Settings
                 </span>
                 <span className="text-xs text-neutral-400 font-medium hidden sm:inline">
                   • Engine: <span className="font-semibold text-neutral-700">{currentModel.name}</span>
                 </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">
+                    Max {currentModel.maxResolution}
+                  </span>
+                  <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200/60">
+                    {currentModel.maxReferences} Ref{currentModel.maxReferences === 1 ? "" : "s"}
+                  </span>
+                  <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                    Up to {currentModel.maxOutputs} Output{currentModel.maxOutputs === 1 ? "" : "s"}
+                  </span>
+                </div>
               </div>
 
-              {/* Advanced Settings Toggle aligned in Section Header */}
+              {/* Advanced Split Drawer Toggle */}
               <button
                 type="button"
                 onClick={() => setAdvancedPanelOpen(!advancedPanelOpen)}
@@ -1802,10 +2058,10 @@ export default function StudioPage() {
                     ? "bg-blue-50 border-blue-300 text-blue-700 shadow-2xs font-bold"
                     : "bg-neutral-50/80 border-neutral-200/90 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/70"
                 }`}
-                title="Toggle fine-grained sampling steps, seed, CFG scale, and negative prompt"
+                title="Toggle split-view drawer for fine-grained engine parameters"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-500" />
-                <span>Advanced Settings</span>
+                <span>Advanced Drawer</span>
                 <span
                   className={`w-2 h-2 rounded-full transition-colors ${
                     advancedPanelOpen ? "bg-blue-600 animate-pulse" : "bg-neutral-300"
@@ -1814,166 +2070,68 @@ export default function StudioPage() {
               </button>
             </div>
 
-            {/* Row 1: Aspect Ratio Proportional Controls */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <label className="font-bold text-neutral-800">Aspect Ratio</label>
-                  <span className="text-[11px] text-neutral-400 font-normal">
-                    (Framing & Proportions)
-                  </span>
+            {/* ── THE ONE-LINE SETTINGS TOOLBAR (Quick Settings + Toggable More) ── */}
+            <div className="p-2 rounded-2xl bg-neutral-100/75 border border-neutral-200/75 flex flex-wrap items-center justify-between gap-2.5">
+              {/* Quick Setting 1: Aspect Ratio */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-bold text-neutral-700 pl-1 shrink-0">Ratio:</span>
+                <div className="flex items-center gap-1 bg-white/95 p-1 rounded-xl border border-neutral-200/70 shadow-2xs">
+                  {ASPECT_RATIO_PREVIEWS
+                    .filter((r) => currentModel.aspectRatios.includes(r.id))
+                    .map((ratio) => {
+                      const isSelected = selectedRatio === ratio.id;
+                      return (
+                        <button
+                          key={ratio.id}
+                          type="button"
+                          onClick={() => setSelectedRatio(ratio.id)}
+                          className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                            isSelected
+                              ? "bg-blue-50 text-blue-900 border-blue-200 shadow-2xs font-bold ring-1 ring-blue-500/20"
+                              : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 border-transparent"
+                          }`}
+                          title={`${ratio.name} (${ratio.id})`}
+                        >
+                          {ratio.svg(isSelected)}
+                          <span>{ratio.id}</span>
+                        </button>
+                      );
+                    })}
                 </div>
-                <span className="text-[11px] font-mono font-bold text-blue-600 bg-blue-50/70 border border-blue-200/60 px-2 py-0.5 rounded-md">
-                  {selectedRatio}
-                </span>
               </div>
-              <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1 overflow-x-auto scrollbar-none">
-                {[
-                  {
-                    id: "1:1",
-                    name: "Square",
-                    svg: (active: boolean) => (
-                      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
-                        <rect
-                          x="2"
-                          y="2"
-                          width="12"
-                          height="12"
-                          rx="2"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
-                        />
-                      </svg>
-                    ),
-                  },
-                  {
-                    id: "16:9",
-                    name: "Landscape",
-                    svg: (active: boolean) => (
-                      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 18 14" fill="none">
-                        <rect
-                          x="1"
-                          y="2.5"
-                          width="16"
-                          height="9"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
-                        />
-                      </svg>
-                    ),
-                  },
-                  {
-                    id: "9:16",
-                    name: "Portrait",
-                    svg: (active: boolean) => (
-                      <svg className="w-3 h-4 shrink-0" viewBox="0 0 14 18" fill="none">
-                        <rect
-                          x="2.5"
-                          y="1"
-                          width="9"
-                          height="16"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
-                        />
-                      </svg>
-                    ),
-                  },
-                  {
-                    id: "4:3",
-                    name: "Classic",
-                    svg: (active: boolean) => (
-                      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
-                        <rect
-                          x="1.5"
-                          y="1.5"
-                          width="13"
-                          height="11"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
-                        />
-                      </svg>
-                    ),
-                  },
-                  {
-                    id: "3:2",
-                    name: "Photo",
-                    svg: (active: boolean) => (
-                      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
-                        <rect
-                          x="1"
-                          y="2"
-                          width="14"
-                          height="10"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
-                        />
-                      </svg>
-                    ),
-                  },
-                ].map((ratio) => {
-                  const isSelected = selectedRatio === ratio.id;
-                  return (
-                    <button
-                      key={ratio.id}
-                      type="button"
-                      onClick={() => setSelectedRatio(ratio.id)}
-                      className={`flex-1 min-w-[85px] py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 flex items-center justify-center gap-1.5 cursor-pointer border ${
-                        isSelected
-                          ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
-                          : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
-                      }`}
-                    >
-                      {ratio.svg(isSelected)}
-                      <span>{ratio.id}</span>
-                      <span className="text-[10px] text-neutral-400 font-normal hidden sm:inline">
-                        ({ratio.name})
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
-            {/* Row 2: Resolution, Outputs Count, and Quality Tier in 3 Balanced Columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Resolution */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <label className="font-bold text-neutral-800">Resolution</label>
-                  <span className="text-[10px] font-mono text-neutral-500 font-medium">
-                    {dynamicDimensions}
-                  </span>
+              {/* Vertical Divider */}
+              <div className="h-6 w-px bg-neutral-200 hidden md:block shrink-0" />
+
+              {/* Quick Setting 2: Resolution */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-col pl-1">
+                  <span className="text-xs font-bold text-neutral-700 leading-none">Res:</span>
+                  <span className="text-[9px] font-mono text-neutral-400 font-medium leading-tight">{dynamicDimensions}</span>
                 </div>
-                <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1">
-                  {[
-                    { id: "1K", label: "1K", badge: "Standard" },
-                    { id: "2K", label: "2K", badge: "+1 cr" },
-                    { id: "4K", label: "4K", badge: "+2 cr" },
-                  ].map((res) => {
-                    const isSelected = selectedResolution === res.id;
+                <div className="flex items-center gap-1 bg-white/95 p-1 rounded-xl border border-neutral-200/70 shadow-2xs">
+                  {(["1K", "2K", "4K"] as const).map((res) => {
+                    const isSupported = currentModel.supportedResolutions.includes(res);
+                    const isSelected = selectedResolution === res;
+                    const badge = res === "1K" ? "Std" : res === "2K" ? "+1cr" : "+2cr";
                     return (
                       <button
-                        key={res.id}
+                        key={res}
                         type="button"
-                        onClick={() => setSelectedResolution(res.id)}
-                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
-                          isSelected
-                            ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
-                            : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                        disabled={!isSupported}
+                        onClick={() => setSelectedResolution(res)}
+                        className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 border ${
+                          !isSupported
+                            ? "opacity-35 cursor-not-allowed text-neutral-400 border-transparent bg-neutral-50/50"
+                            : isSelected
+                            ? "bg-blue-50 text-blue-900 border-blue-200 shadow-2xs font-bold ring-1 ring-blue-500/20 cursor-pointer"
+                            : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 border-transparent cursor-pointer"
                         }`}
+                        title={isSupported ? `${res} (${badge})` : `4K not supported by ${currentModel.name}`}
                       >
-                        <span>{res.label}</span>
-                        <span className={`text-[10px] font-normal ${isSelected ? "text-blue-600 font-bold" : "text-neutral-400"}`}>
-                          {res.badge}
+                        <span>{res}</span>
+                        <span className={`text-[9px] ${isSelected ? "text-blue-600 font-bold" : "text-neutral-400"}`}>
+                          {badge}
                         </span>
                       </button>
                     );
@@ -1981,27 +2139,30 @@ export default function StudioPage() {
                 </div>
               </div>
 
-              {/* Outputs Count */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <label className="font-bold text-neutral-800">Outputs</label>
-                  <span className="text-[10px] text-neutral-400 font-medium">
-                    {outputsCount} image{outputsCount > 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1">
+              {/* Vertical Divider */}
+              <div className="h-6 w-px bg-neutral-200 hidden md:block shrink-0" />
+
+              {/* Quick Setting 3: Outputs */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-bold text-neutral-700 pl-1 shrink-0">Outputs:</span>
+                <div className="flex items-center gap-1 bg-white/95 p-1 rounded-xl border border-neutral-200/70 shadow-2xs">
                   {[1, 2, 3, 4].map((num) => {
+                    const isAllowed = num <= currentModel.maxOutputs;
                     const isSelected = outputsCount === num;
                     return (
                       <button
                         key={num}
                         type="button"
+                        disabled={!isAllowed}
                         onClick={() => setOutputsCount(num)}
-                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center cursor-pointer border ${
-                          isSelected
-                            ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
-                            : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                        className={`w-7 h-6 rounded-lg text-xs font-semibold transition-all flex items-center justify-center border ${
+                          !isAllowed
+                            ? "opacity-30 cursor-not-allowed text-neutral-400 border-transparent bg-neutral-50/50"
+                            : isSelected
+                            ? "bg-blue-50 text-blue-900 border-blue-200 shadow-2xs font-bold ring-1 ring-blue-500/20 cursor-pointer"
+                            : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 border-transparent cursor-pointer"
                         }`}
+                        title={isAllowed ? `${num} output image${num > 1 ? "s" : ""}` : `Max ${currentModel.maxOutputs} on ${currentModel.name}`}
                       >
                         {num}
                       </button>
@@ -2010,42 +2171,197 @@ export default function StudioPage() {
                 </div>
               </div>
 
-              {/* Quality Tier */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <label className="font-bold text-neutral-800">Quality Tier</label>
-                  <span className="text-[10px] text-neutral-400 font-medium capitalize">
-                    {qualityTier} mode
+              {/* Toggable More Settings Button */}
+              <button
+                type="button"
+                onClick={() => setInlineMoreOpen(!inlineMoreOpen)}
+                className={`ml-auto px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs ${
+                  inlineMoreOpen
+                    ? "bg-blue-600 text-white border-blue-600 shadow-xs font-bold"
+                    : "bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:text-neutral-900"
+                }`}
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>More Settings</span>
+                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold capitalize ${
+                  inlineMoreOpen ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-600"
+                }`}>
+                  {qualityTier}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${inlineMoreOpen ? "rotate-180" : ""}`} />
+              </button>
+            </div>
+
+            {/* ── EXPANDABLE INLINE FINE-TUNING PANEL ── */}
+            {inlineMoreOpen && (
+              <div className="p-4 rounded-2xl bg-neutral-50/90 border border-neutral-200/80 space-y-3.5 animate-fadeIn">
+                <div className="flex items-center justify-between text-xs border-b border-neutral-200/60 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Sliders className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="font-bold text-neutral-900">Fine-Tuning & Quality Controls</span>
+                    <span className="text-[10px] text-neutral-400 font-mono">({currentModel.engine})</span>
+                  </div>
+                  <span className="text-[10px] text-neutral-500">
+                    Changes apply immediately to this generation
                   </span>
                 </div>
-                <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1">
-                  {[
-                    { id: "draft", label: "Draft", hint: "Fast" },
-                    { id: "standard", label: "Standard", hint: "Optimal" },
-                    { id: "high", label: "High", hint: "Ultra" },
-                  ].map((q) => {
-                    const isSelected = qualityTier === q.id;
-                    return (
+
+                {/* Quality Tier Selector inside More Settings */}
+                <div className="bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-neutral-800">Quality Mode</span>
+                    <span className="text-[10px] text-neutral-400 capitalize">{qualityTier} render tier</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-neutral-100/70 p-1 rounded-xl border border-neutral-200/60">
+                    {[
+                      { id: "draft", label: "Draft", hint: "Fast & lightweight" },
+                      { id: "standard", label: "Standard", hint: "Optimal balance" },
+                      { id: "high", label: "High", hint: "Ultra high fidelity" },
+                    ].map((q) => {
+                      const isSupported = currentModel.supportedQualityTiers.includes(q.id as any);
+                      const isSelected = qualityTier === q.id;
+                      return (
+                        <button
+                          key={q.id}
+                          type="button"
+                          disabled={!isSupported}
+                          onClick={() => setQualityTier(q.id)}
+                          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border ${
+                            !isSupported
+                              ? "opacity-30 cursor-not-allowed text-neutral-400 border-transparent bg-neutral-50/50"
+                              : isSelected
+                              ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5 cursor-pointer"
+                              : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent cursor-pointer"
+                          }`}
+                        >
+                          <span>{q.label}</span>
+                          <span className={`text-[10px] ${isSelected ? "text-blue-600 font-bold" : "text-neutral-400"}`}>
+                            ({q.hint})
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                  {/* Sampling Steps */}
+                  <div className="space-y-1.5 bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-neutral-700">Sampling Steps</span>
+                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[11px]">{steps}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={15}
+                      max={50}
+                      value={steps}
+                      onChange={(e) => setSteps(Number(e.target.value))}
+                      className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                    <div className="flex justify-between text-[9px] text-neutral-400">
+                      <span>15 (Fast)</span>
+                      <span>30 (Standard)</span>
+                      <span>50 (Max)</span>
+                    </div>
+                  </div>
+
+                  {/* CFG Guidance Scale */}
+                  <div className="space-y-1.5 bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-neutral-700">Guidance Scale (CFG)</span>
+                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[11px]">{cfgScale}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={15}
+                      step={0.5}
+                      value={cfgScale}
+                      onChange={(e) => setCfgScale(Number(e.target.value))}
+                      className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                    <div className="flex justify-between text-[9px] text-neutral-400">
+                      <span>Creative (3.0)</span>
+                      <span>Balanced (7.5)</span>
+                      <span>Strict (12.0)</span>
+                    </div>
+                  </div>
+
+                  {/* Seed Control */}
+                  <div className="space-y-1.5 bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-neutral-700">Generation Seed</span>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        {seedMode === "random" ? "Randomized" : `#${seedValue}`}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <button
-                        key={q.id}
                         type="button"
-                        onClick={() => setQualityTier(q.id)}
-                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
-                          isSelected
-                            ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
-                            : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                        onClick={() => setSeedMode("random")}
+                        className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                          seedMode === "random"
+                            ? "bg-blue-50 text-blue-700 border-blue-200 font-bold"
+                            : "bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100"
                         }`}
                       >
-                        <span>{q.label}</span>
-                        <span className={`text-[10px] font-normal ${isSelected ? "text-purple-600 font-bold" : "text-neutral-400"}`}>
-                          {q.hint}
-                        </span>
+                        🎲 Random
                       </button>
-                    );
-                  })}
+                      <button
+                        type="button"
+                        onClick={() => setSeedMode("custom")}
+                        className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                          seedMode === "custom"
+                            ? "bg-blue-50 text-blue-700 border-blue-200 font-bold"
+                            : "bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100"
+                        }`}
+                      >
+                        Fixed
+                      </button>
+                      {seedMode === "custom" && (
+                        <input
+                          type="number"
+                          value={seedValue}
+                          onChange={(e) => setSeedValue(Number(e.target.value))}
+                          className="w-20 px-2 py-0.5 text-xs border border-neutral-200 rounded-lg font-mono"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Negative Prompt Row (Dynamically adapts if model does not use negative prompts) */}
+                <div className="bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 font-semibold text-neutral-700">
+                      <span>Negative Prompt (Avoid in image):</span>
+                      {!currentModel.supportsNegativePrompt && (
+                        <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                          Not applicable for {currentModel.name}
+                        </span>
+                      )}
+                    </div>
+                    {currentModel.supportsNegativePrompt && (
+                      <span className="text-[10px] text-neutral-400">Optional unwanted elements</span>
+                    )}
+                  </div>
+                  {currentModel.supportsNegativePrompt ? (
+                    <input
+                      type="text"
+                      value={negativePrompt}
+                      onChange={(e) => setNegativePrompt(e.target.value)}
+                      placeholder="e.g. blurry, low quality, bad anatomy, deformed limbs, artifacts..."
+                      className="w-full px-3 py-1.5 text-xs rounded-lg bg-neutral-50 border border-neutral-200 focus:outline-none focus:bg-white focus:border-neutral-400"
+                    />
+                  ) : (
+                    <p className="text-[11px] text-neutral-400 italic">
+                      This flow-matching engine applies guidance directly through the positive prompt without negative conditioning.
+                    </p>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Bottom Generation Action Ribbon */}
             <div className="pt-4 border-t border-neutral-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
@@ -2062,7 +2378,7 @@ export default function StudioPage() {
 
                 <div className="flex items-center gap-1.5 text-neutral-500 font-medium">
                   <Clock className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-                  <span>~10–20s render</span>
+                  <span>~{currentModel.estimatedRenderTime} render</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 text-neutral-500 font-medium">
@@ -2518,9 +2834,22 @@ export default function StudioPage() {
                             <span className="text-xs text-neutral-400 font-mono">({m.provider})</span>
                           </div>
                           <p className="text-xs text-neutral-600">{m.desc}</p>
-                          <div className="flex items-center gap-2 pt-1 text-[10px] text-neutral-500 font-mono">
-                            <span className="bg-neutral-100 px-2 py-0.5 rounded">📐 {m.maxResolution}</span>
-                            <span className="bg-neutral-100 px-2 py-0.5 rounded">🔒 SynthID Fingerprint</span>
+                          <div className="flex items-center gap-2 pt-1.5 text-[10px] text-neutral-500 font-mono flex-wrap">
+                            <span className="bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200/60 font-semibold text-neutral-700">
+                              📐 {m.maxResolution}
+                            </span>
+                            <span className="bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200/60 font-semibold text-neutral-700">
+                              🖼️ {m.maxReferences} Ref{m.maxReferences === 1 ? "" : "s"}
+                            </span>
+                            <span className="bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200/60 font-semibold text-neutral-700">
+                              ✍️ {m.maxPromptLength} chars
+                            </span>
+                            <span className="bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200/60 font-semibold text-neutral-700">
+                              ⚡ {m.estimatedRenderTime}
+                            </span>
+                            <span className="bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200/60 font-semibold text-neutral-700">
+                              🎯 Up to {m.maxOutputs} output{m.maxOutputs === 1 ? "" : "s"}
+                            </span>
                           </div>
                         </div>
                       </div>
