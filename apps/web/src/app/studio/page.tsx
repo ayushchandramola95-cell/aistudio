@@ -67,7 +67,7 @@ interface ModelDef {
   desc: string;
   maxResolution: string;
   aspectRatios: string[];
-  category: "google" | "local" | "custom" | "all";
+  category: "nano" | "imagen" | "specialized" | "all";
   isRecommended?: boolean;
   avatarIcon?: string;
   iconBg?: string;
@@ -239,194 +239,194 @@ const STUDIO_MODELS: ModelDef[] = [
   {
     id: "nano-banana-2-1",
     name: "Nano Banana 2.1",
-    provider: "Google",
+    provider: "Google Vertex AI",
     engine: "gemini-3.1-flash-image",
     badge: "Flagship",
     badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
     cost: 6,
-    desc: "Best for realistic, creative and ultra-coherent images.",
+    desc: "Upgraded mainstream Gemini model with stronger prompt adherence and multi-reference consistency from 1K to 4K.",
     maxResolution: "Up to 4096×4096 (4K)",
     aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
-    category: "google",
+    category: "nano",
     isRecommended: true,
     avatarIcon: "🍌",
-    iconBg: "bg-amber-50 border-amber-200 text-amber-600",
-    maxPromptLength: 3000,
-    maxReferences: 4,
+    iconBg: "bg-blue-50 border-blue-200 text-blue-600",
+    maxPromptLength: 5000,
+    maxReferences: 6,
     supportedResolutions: ["1K", "2K", "4K"],
     maxOutputs: 4,
     supportedQualityTiers: ["draft", "standard", "high"],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "6–12s",
-    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "character-consistency"],
-  },
-  {
-    id: "flux-1-dev",
-    name: "FLUX.1 Dev",
-    provider: "Black Forest Labs",
-    engine: "flux-1-dev-fp8",
-    badge: "Local",
-    badgeColor: "bg-neutral-100 text-neutral-800 border-neutral-200",
-    cost: 4,
-    desc: "High quality, versatile, open model for premier generation.",
-    maxResolution: "2048×2048 (4K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:2"],
-    category: "local",
-    isRecommended: true,
-    avatarIcon: "⚡",
-    iconBg: "bg-zinc-100 border-zinc-300 text-zinc-800",
-    maxPromptLength: 2000,
-    maxReferences: 1,
-    supportedResolutions: ["1K", "2K", "4K"],
-    maxOutputs: 2,
-    supportedQualityTiers: ["standard", "high"],
-    supportsNegativePrompt: false,
-    estimatedRenderTime: "15–25s",
-    supportedCreationModes: ["text-to-image", "image-to-image", "character-consistency"],
-  },
-  {
-    id: "qwen-image",
-    name: "Qwen Image",
-    provider: "Alibaba",
-    engine: "qwen-image-2.5",
-    badge: "Local",
-    badgeColor: "bg-neutral-100 text-neutral-800 border-neutral-200",
-    cost: 4,
-    desc: "Excellent for anime, illustrative art, and creative styles.",
-    maxResolution: "2048×2048 (2K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "3:4"],
-    category: "local",
-    isRecommended: true,
-    avatarIcon: "🎨",
-    iconBg: "bg-rose-50 border-rose-200 text-rose-600",
-    maxPromptLength: 1500,
-    maxReferences: 3,
-    supportedResolutions: ["1K", "2K"],
-    maxOutputs: 4,
-    supportedQualityTiers: ["draft", "standard", "high"],
-    supportsNegativePrompt: true,
-    estimatedRenderTime: "8–14s",
-    supportedCreationModes: ["text-to-image", "image-to-image", "character-consistency"],
-  },
-  {
-    id: "sdxl",
-    name: "SDXL",
-    provider: "Stability AI",
-    engine: "stable-diffusion-xl-base-1.0",
-    badge: "Local",
-    badgeColor: "bg-neutral-100 text-neutral-800 border-neutral-200",
-    cost: 3,
-    desc: "Versatile foundational model with vast community styles.",
-    maxResolution: "1024×1024 (2K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:2"],
-    category: "local",
-    isRecommended: true,
-    avatarIcon: "🌌",
-    iconBg: "bg-purple-50 border-purple-200 text-purple-600",
-    maxPromptLength: 500,
-    maxReferences: 2,
-    supportedResolutions: ["1K", "2K"],
-    maxOutputs: 4,
-    supportedQualityTiers: ["draft", "standard", "high"],
-    supportsNegativePrompt: true,
-    estimatedRenderTime: "8–15s",
-    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "character-consistency"],
-  },
-  {
-    id: "nano-banana-pro",
-    name: "Nano Banana Pro",
-    provider: "Google",
-    engine: "gemini-3-pro-image",
-    badge: "Pro Studio",
-    badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
-    cost: 10,
-    desc: "Thinking Process reasoning budget with crisp embedded text.",
-    maxResolution: "Up to 4096×4096 (4K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:2"],
-    category: "google",
-    isRecommended: false,
-    avatarIcon: "💎",
-    iconBg: "bg-indigo-50 border-indigo-200 text-indigo-600",
-    maxPromptLength: 4000,
-    maxReferences: 4,
-    supportedResolutions: ["1K", "2K", "4K"],
-    maxOutputs: 4,
-    supportedQualityTiers: ["standard", "high"],
-    supportsNegativePrompt: true,
-    estimatedRenderTime: "18–30s",
-    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "character-consistency"],
+    estimatedRenderTime: "1.6s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "style-transfer", "character-consistency"],
   },
   {
     id: "nano-banana-2-lite",
     name: "Nano Banana 2 Lite",
-    provider: "Google",
+    provider: "Google Vertex AI",
     engine: "gemini-3.1-flash-lite-image",
     badge: "Ultra-Fast",
     badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     cost: 3,
-    desc: "High volume, latency-sensitive rapid generation drafts.",
+    desc: "Class-leading generation optimized for high-volume creation and rapid drafting with sub-second latency.",
     maxResolution: "1024×1024 (1K)",
     aspectRatios: ["1:1", "16:9", "9:16", "4:3"],
-    category: "google",
-    isRecommended: false,
+    category: "nano",
+    isRecommended: true,
     avatarIcon: "⚡",
     iconBg: "bg-emerald-50 border-emerald-200 text-emerald-600",
-    maxPromptLength: 1000,
-    maxReferences: 1,
+    maxPromptLength: 4000,
+    maxReferences: 2,
     supportedResolutions: ["1K"],
     maxOutputs: 4,
     supportedQualityTiers: ["draft", "standard"],
-    supportsNegativePrompt: false,
-    estimatedRenderTime: "3–6s",
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "0.9s",
     supportedCreationModes: ["text-to-image", "image-to-image"],
   },
   {
-    id: "realvis-xl",
-    name: "RealVisXL",
-    provider: "Local",
-    engine: "realvis-xl-v4.0",
-    badge: "Local",
-    badgeColor: "bg-neutral-100 text-neutral-800 border-neutral-200",
-    cost: 5,
-    desc: "Specialized photographic realism and organic skin textures.",
-    maxResolution: "2048×2048 (2K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "3:2"],
-    category: "local",
+    id: "nano-banana-pro",
+    name: "Nano Banana Pro",
+    provider: "Google Vertex AI",
+    engine: "gemini-3-pro-image",
+    badge: "Pro Studio",
+    badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+    cost: 10,
+    desc: "Internal Thinking Process reasoning budget, multilingual crisp typography, and complex infographics in studio 4K.",
+    maxResolution: "Up to 4096×4096 (4K)",
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+    category: "nano",
     isRecommended: true,
-    avatarIcon: "📷",
-    iconBg: "bg-amber-50 border-amber-200 text-amber-700",
-    maxPromptLength: 600,
-    maxReferences: 2,
-    supportedResolutions: ["1K", "2K"],
-    maxOutputs: 4,
+    avatarIcon: "💎",
+    iconBg: "bg-purple-50 border-purple-200 text-purple-600",
+    maxPromptLength: 5000,
+    maxReferences: 4,
+    supportedResolutions: ["1K", "2K", "4K"],
+    maxOutputs: 2,
     supportedQualityTiers: ["standard", "high"],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "10–18s",
-    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting"],
+    estimatedRenderTime: "2.8s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "style-transfer", "character-consistency"],
   },
   {
-    id: "juggernaut-xl",
-    name: "Juggernaut",
-    provider: "Local",
-    engine: "juggernaut-xl-v9",
-    badge: "Local",
-    badgeColor: "bg-neutral-100 text-neutral-800 border-neutral-200",
-    cost: 4,
-    desc: "Cinematic architecture, vehicles, and fantasy portraits.",
-    maxResolution: "2048×2048 (2K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "3:2"],
-    category: "local",
-    isRecommended: true,
-    avatarIcon: "⚔️",
-    iconBg: "bg-slate-100 border-slate-300 text-slate-800",
-    maxPromptLength: 600,
-    maxReferences: 2,
-    supportedResolutions: ["1K", "2K"],
+    id: "nano-banana-2",
+    name: "Nano Banana 2",
+    provider: "Google Vertex AI",
+    engine: "gemini-3.1-flash-image",
+    badge: "Balanced",
+    badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
+    cost: 5,
+    desc: "General image generation and editing tasks offering balanced high visual quality and low latency.",
+    maxResolution: "1024×1024 (1K)",
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+    category: "nano",
+    isRecommended: false,
+    avatarIcon: "🌟",
+    iconBg: "bg-amber-50 border-amber-200 text-amber-600",
+    maxPromptLength: 5000,
+    maxReferences: 4,
+    supportedResolutions: ["1K"],
     maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "1.4s",
+    supportedCreationModes: ["text-to-image", "image-to-image", "character-consistency"],
+  },
+  {
+    id: "nano-banana",
+    name: "Nano Banana",
+    provider: "Google Vertex AI",
+    engine: "gemini-2.5-flash-image",
+    badge: "Foundation",
+    badgeColor: "bg-neutral-100 text-neutral-700 border-neutral-200",
+    cost: 4,
+    desc: "State-of-the-art native multimodal image generation with direct prompt synthesis baseline.",
+    maxResolution: "1024×1024 (1K)",
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+    category: "nano",
+    isRecommended: false,
+    avatarIcon: "🍌",
+    iconBg: "bg-yellow-50 border-yellow-200 text-yellow-600",
+    maxPromptLength: 4000,
+    maxReferences: 3,
+    supportedResolutions: ["1K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "1.2s",
+    supportedCreationModes: ["text-to-image", "image-to-image"],
+  },
+  {
+    id: "imagen-4-fast",
+    name: "Imagen 4 Fast",
+    provider: "Google Vertex AI",
+    engine: "imagen-4.0-fast",
+    badge: "Rapid Diffusion",
+    badgeColor: "bg-sky-50 text-sky-700 border-sky-200",
+    cost: 4,
+    desc: "Sub-second diffusion generation for rapid pure text-to-image concepting and exploration.",
+    maxResolution: "1408×768 (1K Fast)",
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3"],
+    category: "imagen",
+    isRecommended: true,
+    avatarIcon: "⚡",
+    iconBg: "bg-sky-50 border-sky-200 text-sky-600",
+    maxPromptLength: 1000,
+    maxReferences: 0,
+    supportedResolutions: ["1K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "1.0s",
+    supportedCreationModes: ["text-to-image"],
+  },
+  {
+    id: "virtual-try-on",
+    name: "Virtual try-on",
+    provider: "Google Vertex AI",
+    engine: "virtual-try-on-v1",
+    badge: "Specialized Apparel",
+    badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+    cost: 8,
+    desc: "Generates realistic apparel on people with accurate fabric drape, lighting, and body shape adaptation.",
+    maxResolution: "1024×1024 (1K Portrait)",
+    aspectRatios: ["1:1", "3:4", "9:16"],
+    category: "specialized",
+    isRecommended: false,
+    avatarIcon: "👗",
+    iconBg: "bg-rose-50 border-rose-200 text-rose-600",
+    maxPromptLength: 2500,
+    maxReferences: 2,
+    supportedResolutions: ["1K"],
+    maxOutputs: 1,
     supportedQualityTiers: ["standard", "high"],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "10–16s",
-    supportedCreationModes: ["text-to-image", "image-to-image", "inpainting"],
+    estimatedRenderTime: "3.5s",
+    supportedCreationModes: ["image-to-image", "character-consistency"],
+  },
+  {
+    id: "imagen-3-capability-001",
+    name: "Imagen 3 Capability 001",
+    provider: "Google Vertex AI",
+    engine: "imagen-3.0-capability-001",
+    badge: "Inpainting & Edits",
+    badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    cost: 5,
+    desc: "Fast precision targeted inpainting with visual brush mask editor, outpainting boundary expansion, and background replacement.",
+    maxResolution: "1024×1024 (1K)",
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3"],
+    category: "imagen",
+    isRecommended: false,
+    avatarIcon: "🖌️",
+    iconBg: "bg-indigo-50 border-indigo-200 text-indigo-600",
+    maxPromptLength: 2000,
+    maxReferences: 2,
+    supportedResolutions: ["1K"],
+    maxOutputs: 4,
+    supportedQualityTiers: ["draft", "standard", "high"],
+    supportsNegativePrompt: true,
+    estimatedRenderTime: "1.9s",
+    supportedCreationModes: ["image-to-image", "inpainting", "outpainting"],
   },
 ];
 
@@ -594,8 +594,8 @@ const INITIAL_FEED_ITEMS: FeedItem[] = [
     id: "feed-2",
     title: "Cyberpunk Supercar Nocturne",
     prompt: "Futuristic sports supercar racing through rainy neo-Tokyo street, neon reflections on wet asphalt, volumetric fog, 8k cinematic",
-    modelName: "FLUX.1 Dev",
-    cost: 4,
+    modelName: "Nano Banana Pro",
+    cost: 10,
     image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=900&auto=format&fit=crop&q=85",
     timestamp: "5 hours ago",
     aspectRatio: "16:9",
@@ -604,57 +604,41 @@ const INITIAL_FEED_ITEMS: FeedItem[] = [
   {
     id: "feed-3",
     title: "Cherry Blossom Spirit",
-    prompt: "Ethereal anime girl with long flowing pastel hair amidst falling cherry blossom petals, golden hour light leaks, masterpiece",
-    modelName: "Qwen Image",
+    prompt: "Ethereal portrait with long flowing pastel hair amidst falling cherry blossom petals, golden hour light leaks, masterpiece",
+    modelName: "Imagen 4 Fast",
     cost: 4,
     image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=900&auto=format&fit=crop&q=85",
     timestamp: "1 day ago",
     aspectRatio: "1:1",
-    resolution: "4K",
+    resolution: "1K",
     isFavorite: true,
   },
   {
     id: "feed-4",
     title: "Meadow Blossom Feline",
     prompt: "Fluffy white kitten with vivid sapphire eyes sitting in spring wildflowers meadow, soft morning dew, macro portrait photography",
-    modelName: "SDXL",
+    modelName: "Nano Banana 2 Lite",
     cost: 3,
     image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=900&auto=format&fit=crop&q=85",
     timestamp: "1 day ago",
     aspectRatio: "1:1",
-    resolution: "2K",
+    resolution: "1K",
   },
   {
     id: "feed-5",
     title: "Nordic Glass Villa Sunset",
     prompt: "Ultra modern minimalist luxury architectural house with infinity reflection pool, floor to ceiling glass, twilight sky glow",
-    modelName: "RealVisXL",
+    modelName: "Nano Banana 2",
     cost: 5,
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&auto=format&fit=crop&q=85",
     timestamp: "2 days ago",
     aspectRatio: "16:9",
-    resolution: "2K",
+    resolution: "1K",
   },
 ];
 
-// Sample Reference Photos
-const INITIAL_REFERENCES = [
-  {
-    id: "ref-1",
-    name: "Dragon Concept",
-    url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "ref-2",
-    name: "Alpine Peaks",
-    url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "ref-3",
-    name: "Sunrise Cloudscape",
-    url: "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=300&auto=format&fit=crop&q=80",
-  },
-];
+// Sample Reference Photos (Initially empty so right-side influence controls remain cleanly hidden until user adds a reference)
+const INITIAL_REFERENCES: { id: string; name: string; url: string }[] = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OFFICIAL MODEL LOGO RENDERER
@@ -662,9 +646,9 @@ const INITIAL_REFERENCES = [
 
 function renderOfficialLogo(modelId: string, className = "w-8 h-8") {
   if (modelId.startsWith("nano-banana")) {
-    // Official Google 'G' Logo
+    // Official Google 4-Color 'G' Logo
     return (
-      <div className={`${className} rounded-xl bg-white border border-neutral-200/90 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
+      <div className={`${className} rounded-xl bg-white border border-neutral-200/90 shadow-2xs flex items-center justify-center shrink-0 p-1.5 relative`}>
         <svg viewBox="0 0 24 24" className="w-full h-full">
           <path
             fill="#4285F4"
@@ -687,63 +671,46 @@ function renderOfficialLogo(modelId: string, className = "w-8 h-8") {
     );
   }
 
-  if (modelId === "flux-1-dev") {
-    // Official Black Forest Labs (BFL) FLUX Logo
+  if (modelId === "imagen-4-fast") {
+    // Official Google Imagen 4 Fast Icon (Sub-second diffusion)
     return (
-      <div className={`${className} rounded-xl bg-black border border-neutral-900 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
-        <svg viewBox="0 0 24 24" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 4h7v7H3V4zm11 0h7v7h-7V4zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z" fill="#FFFFFF" fillOpacity="0.8" />
-          <path d="M12 7.5L16.5 12L12 16.5L7.5 12L12 7.5Z" fill="#38BDF8" />
+      <div className={`${className} rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 shadow-2xs flex items-center justify-center shrink-0 p-1.5 text-white border border-sky-400/30`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          <circle cx="12" cy="12" r="3" fill="currentColor" />
         </svg>
       </div>
     );
   }
 
-  if (modelId === "qwen-image") {
-    // Official Alibaba / Qwen Logo
+  if (modelId === "virtual-try-on") {
+    // Official Google Virtual Try-On Fashion AI Icon
     return (
-      <div className={`${className} rounded-xl bg-gradient-to-tr from-[#615CED] to-[#8C52FF] shadow-2xs flex items-center justify-center shrink-0 p-1.5 border border-indigo-400/30`}>
-        <svg viewBox="0 0 24 24" className="w-full h-full text-white" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="12 2 2 7 12 12 22 7 12 2" fill="white" fillOpacity="0.25" />
-          <polyline points="2 17 12 22 22 17" />
-          <polyline points="2 12 12 17 22 12" />
+      <div className={`${className} rounded-xl bg-gradient-to-tr from-rose-500 to-pink-600 shadow-2xs flex items-center justify-center shrink-0 p-1.5 text-white border border-rose-400/30`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
         </svg>
       </div>
     );
   }
 
-  if (modelId === "sdxl") {
-    // Official Stability AI Logo
+  if (modelId === "imagen-3-capability-001") {
+    // Official Google Imagen 3 Capability Brush & Inpainting Icon
     return (
-      <div className={`${className} rounded-xl bg-[#0B0F19] border border-neutral-800 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
-        <svg viewBox="0 0 24 24" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="8" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="3 3"/>
-          <circle cx="12" cy="12" r="5" stroke="#EC4899" strokeWidth="2"/>
-          <circle cx="12" cy="12" r="2" fill="#38BDF8"/>
+      <div className={`${className} rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 shadow-2xs flex items-center justify-center shrink-0 p-1.5 text-white border border-indigo-400/30`}>
+        <svg viewBox="0 0 24 24" className="w-full h-full fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9" />
+          <path d="M15 13 9 7l4-4 6 6-4 4Z" />
+          <path d="m18 3 3 3" />
         </svg>
       </div>
     );
   }
 
-  if (modelId === "realvis-xl") {
-    // RealVisXL Photographic Aperture Logo
-    return (
-      <div className={`${className} rounded-xl bg-neutral-900 border border-neutral-800 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
-        <svg viewBox="0 0 24 24" className="w-full h-full text-amber-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
-      </div>
-    );
-  }
-
-  // Juggernaut & other engines
+  // Fallback Google icon
   return (
-    <div className={`${className} rounded-xl bg-gradient-to-tr from-slate-900 to-slate-800 border border-slate-700 shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
-      <svg viewBox="0 0 24 24" className="w-full h-full text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <path d="m9 12 2 2 4-4"/>
-      </svg>
+    <div className={`${className} rounded-xl bg-neutral-900 text-white shadow-2xs flex items-center justify-center shrink-0 p-1.5`}>
+      <Sparkles className="w-full h-full text-blue-400" />
     </div>
   );
 }
@@ -754,9 +721,9 @@ function renderOfficialLogo(modelId: string, className = "w-8 h-8") {
 
 export default function StudioPage() {
   // Model state
-  const [modelFilter, setModelFilter] = useState<string>("recommended");
+  const [modelFilter, setModelFilter] = useState<string>("all");
   const [selectedModelId, setSelectedModelId] = useState<string>("nano-banana-2-1");
-  const [favoriteModels, setFavoriteModels] = useState<string[]>(["nano-banana-2-1", "flux-1-dev", "sdxl"]);
+  const [favoriteModels, setFavoriteModels] = useState<string[]>(["nano-banana-2-1", "nano-banana-pro", "imagen-4-fast"]);
 
   // Creation mode
   const [creationMode, setCreationMode] = useState<string>("text-to-image");
@@ -855,6 +822,8 @@ export default function StudioPage() {
   const [promptGuideOpen, setPromptGuideOpen] = useState<boolean>(false);
   const [shortcutsOpen, setShortcutsOpen] = useState<boolean>(false);
   const [modelModalOpen, setModelModalOpen] = useState<boolean>(false);
+  const [modalSearch, setModalSearch] = useState<string>("");
+  const [modalCategory, setModalCategory] = useState<"all" | "nano" | "imagen" | "specialized">("all");
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -885,18 +854,25 @@ export default function StudioPage() {
     if (!currentModel.supportedQualityTiers.includes(qualityTier as "draft" | "standard" | "high")) {
       setQualityTier(currentModel.supportedQualityTiers[0] || "standard");
     }
-    // 5. Reference Images count limit
-    if (referenceImages.length > currentModel.maxReferences) {
+    // 5. Creation Mode
+    if (!currentModel.supportedCreationModes.includes(creationMode)) {
+      setCreationMode(currentModel.supportedCreationModes[0] || "text-to-image");
+    }
+    // 6. Reference Images count limit
+    if (currentModel.maxReferences === 0) {
+      setReferenceImages([]);
+    } else if (referenceImages.length > currentModel.maxReferences) {
       setReferenceImages((prev) => prev.slice(0, currentModel.maxReferences));
     }
   }, [selectedModelId, currentModel]);
 
   // Filtered models
   const visibleModels = useMemo(() => {
-    if (modelFilter === "recommended") return STUDIO_MODELS.filter((m) => m.isRecommended);
-    if (modelFilter === "google") return STUDIO_MODELS.filter((m) => m.category === "google");
-    if (modelFilter === "local") return STUDIO_MODELS.filter((m) => m.category === "local");
+    if (modelFilter === "nano") return STUDIO_MODELS.filter((m) => m.category === "nano");
+    if (modelFilter === "imagen") return STUDIO_MODELS.filter((m) => m.category === "imagen");
+    if (modelFilter === "specialized") return STUDIO_MODELS.filter((m) => m.category === "specialized");
     if (modelFilter === "favorites") return STUDIO_MODELS.filter((m) => favoriteModels.includes(m.id));
+    if (modelFilter === "recommended") return STUDIO_MODELS.filter((m) => m.isRecommended);
     return STUDIO_MODELS;
   }, [modelFilter, favoriteModels]);
 
@@ -1339,10 +1315,10 @@ export default function StudioPage() {
               <div className="flex items-center gap-2.5">
                 <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
                   {[
-                    { id: "recommended", label: "Recommended" },
                     { id: "all", label: "All Models" },
-                    { id: "google", label: "Google" },
-                    { id: "local", label: "Local" },
+                    { id: "nano", label: "Nano Banana" },
+                    { id: "imagen", label: "Imagen Suite" },
+                    { id: "specialized", label: "Specialized (Try-On)" },
                     { id: "favorites", label: "★ Favorites" },
                   ].map((tab) => (
                     <button
@@ -1421,7 +1397,7 @@ export default function StudioPage() {
                             {m.name}
                           </div>
                           <div className="text-[10px] text-neutral-400 font-medium truncate flex items-center gap-1">
-                            <span>{m.provider}</span>
+                            <span className="font-semibold text-neutral-600">{m.badge}</span>
                             <span>•</span>
                             <span className="text-amber-600 font-bold">{m.cost} cr</span>
                           </div>
@@ -1487,22 +1463,29 @@ export default function StudioPage() {
                 {CREATION_MODES.map((mode) => {
                   const Icon = mode.icon;
                   const isActive = creationMode === mode.id;
+                  const isSupported = currentModel.supportedCreationModes.includes(mode.id);
                   return (
                     <button
                       key={mode.id}
                       type="button"
-                      onClick={() => handleSelectCreationMode(mode.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer border ${
-                        isActive
-                          ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
-                          : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                      disabled={!isSupported}
+                      onClick={() => isSupported && handleSelectCreationMode(mode.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 border ${
+                        !isSupported
+                          ? "opacity-35 cursor-not-allowed border-transparent text-neutral-400"
+                          : isActive
+                          ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5 cursor-pointer"
+                          : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent cursor-pointer"
                       }`}
-                      title={mode.desc}
+                      title={isSupported ? mode.desc : `${mode.label} is not supported by ${currentModel.name}`}
                     >
                       <Icon className={`w-3.5 h-3.5 ${isActive ? mode.color : "text-neutral-400"}`} />
                       <span>{mode.label}</span>
                       {isActive && (
                         <span className={`w-1.5 h-1.5 rounded-full ${mode.color.replace("text-", "bg-")}`}></span>
+                      )}
+                      {!isSupported && (
+                        <span className="text-[9px] font-mono text-neutral-400 bg-neutral-200/60 px-1 rounded">N/A</span>
                       )}
                     </button>
                   );
@@ -1849,7 +1832,17 @@ export default function StudioPage() {
                   rows={3}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe your scene in detail, camera lighting, textures, composition..."
+                  placeholder={
+                    currentModel.id === "virtual-try-on"
+                      ? "Describe apparel styling, fabric drape, fit adjustments or model pose (e.g. 'Slim fit navy wool blazer with tailored cuffs')..."
+                      : currentModel.id === "imagen-3-capability-001"
+                      ? "Describe precision edits or inpainting to apply to the masked region (e.g. 'Replace background with sunlit Parisian cafe terrace')..."
+                      : currentModel.id === "imagen-4-fast"
+                      ? "Enter rapid diffusion text prompt (e.g. 'Golden hour portrait in glass studio, sharp focus, 8k cinematic lighting')..."
+                      : currentModel.id === "nano-banana-pro"
+                      ? "Enter detailed studio prompt with complex typography in quotes, reasoning, or layout composition..."
+                      : "Describe your scene in detail, camera lighting, textures, composition..."
+                  }
                   className="w-full bg-neutral-50/70 border border-neutral-200/90 rounded-2xl p-4 pr-24 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none leading-relaxed font-sans"
                 />
 
@@ -2779,35 +2772,74 @@ export default function StudioPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header with Search and count */}
-            <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between gap-4 bg-white shrink-0">
-              <div className="flex items-center gap-3 flex-1 max-w-lg">
-                <div className="relative w-full">
-                  <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search generative engines by name, engine, or capability..."
-                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-xs text-neutral-900 focus:outline-none focus:bg-white focus:border-neutral-400 border border-transparent transition-all"
-                  />
+            <div className="px-6 py-4 border-b border-neutral-100 flex flex-col gap-3 bg-white shrink-0">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1 max-w-lg">
+                  <div className="relative w-full">
+                    <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={modalSearch}
+                      onChange={(e) => setModalSearch(e.target.value)}
+                      placeholder="Search engines by name, engine, or capability..."
+                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-neutral-100 text-xs text-neutral-900 focus:outline-none focus:bg-white focus:border-neutral-400 border border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-neutral-700 bg-neutral-100 px-3 py-1.5 rounded-full font-mono font-bold">
+                    8 Certified Google Models
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setModelModalOpen(false)}
+                    className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-800 transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-neutral-700 bg-neutral-100 px-3 py-1.5 rounded-full font-mono font-bold">
-                  8 Certified Models
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setModelModalOpen(false)}
-                  className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-800 transition-colors cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              {/* Modal Filter Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
+                {[
+                  { id: "all", label: "All Models (8)" },
+                  { id: "nano", label: "Nano Banana (5)" },
+                  { id: "imagen", label: "Imagen Suite (2)" },
+                  { id: "specialized", label: "Specialized Try-On (1)" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setModalCategory(tab.id as any)}
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      modalCategory === tab.id
+                        ? "bg-neutral-950 text-white shadow-2xs"
+                        : "bg-neutral-100 text-neutral-600 hover:text-neutral-950 hover:bg-neutral-200/80"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Model Cards Grid inside Modal */}
             <div className="flex-1 p-5 overflow-y-auto space-y-3 scrollbar-thin">
-              {STUDIO_MODELS.map((m) => {
+              {STUDIO_MODELS.filter((m) => {
+                if (modalCategory !== "all" && m.category !== modalCategory) return false;
+                if (modalSearch.trim()) {
+                  const q = modalSearch.toLowerCase();
+                  return (
+                    m.name.toLowerCase().includes(q) ||
+                    m.engine.toLowerCase().includes(q) ||
+                    m.desc.toLowerCase().includes(q) ||
+                    m.badge.toLowerCase().includes(q)
+                  );
+                }
+                return true;
+              }).map((m) => {
                 const isSelected = selectedModelId === m.id;
                 return (
                   <div

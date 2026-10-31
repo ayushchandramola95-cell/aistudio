@@ -476,9 +476,9 @@ export default function DedicatedDeveloperConsolePage() {
   const [monitoringModel, setMonitoringModel] = useState<ModelItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Local Worker Configuration
+  // Local Worker Configuration (Initially idle since no local models added yet)
   const [workerUrl, setWorkerUrl] = useState("http://127.0.0.1:8188");
-  const [workerPingStatus, setWorkerPingStatus] = useState<"idle" | "testing" | "connected" | "offline">("connected");
+  const [workerPingStatus, setWorkerPingStatus] = useState<"idle" | "testing" | "connected" | "offline">("idle");
   const [workerLatencyMs, setWorkerLatencyMs] = useState(14);
   const [weightsDirectory, setWeightsDirectory] = useState("C:\\ai-models\\checkpoints");
 
@@ -706,10 +706,10 @@ export default function DedicatedDeveloperConsolePage() {
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Cpu className="w-4 h-4 text-emerald-500" />
+                <Cpu className={`w-4 h-4 ${workerPingStatus === "connected" ? "text-emerald-500" : "text-neutral-400"}`} />
                 <span>Local GPU & ComfyUI</span>
               </div>
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className={`w-2 h-2 rounded-full ${workerPingStatus === "connected" ? "bg-emerald-500" : "bg-neutral-300"}`} />
             </button>
           </div>
 
