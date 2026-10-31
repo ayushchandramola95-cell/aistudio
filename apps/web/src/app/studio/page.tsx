@@ -40,7 +40,14 @@ import {
   RotateCcw,
   Plus,
   Compass,
-  ArrowRight
+  ArrowRight,
+  History,
+  Trash2,
+  CornerDownLeft,
+  Paintbrush,
+  Expand,
+  Palette,
+  UserCheck
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -312,6 +319,70 @@ const STYLE_PRESETS: StylePreset[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CREATION MODES
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface CreationModeDef {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge: string;
+  color: string;
+  desc: string;
+}
+
+const CREATION_MODES: CreationModeDef[] = [
+  {
+    id: "text-to-image",
+    label: "Text to Image",
+    icon: Wand2,
+    badge: "Prompt-driven",
+    color: "text-blue-600",
+    desc: "Generate artwork entirely from text description",
+  },
+  {
+    id: "image-to-image",
+    label: "Image to Image",
+    icon: ImageIcon,
+    badge: "Reference-based",
+    color: "text-emerald-600",
+    desc: "Transform and re-imagine existing source images",
+  },
+  {
+    id: "inpainting",
+    label: "Inpainting",
+    icon: Paintbrush,
+    badge: "Brush & Erase",
+    color: "text-amber-600",
+    desc: "Brush and redraw or erase specific image regions",
+  },
+  {
+    id: "outpainting",
+    label: "Outpainting",
+    icon: Expand,
+    badge: "Canvas Expansion",
+    color: "text-indigo-600",
+    desc: "Extend canvas borders in any direction",
+  },
+  {
+    id: "style-transfer",
+    label: "Style Transfer",
+    icon: Palette,
+    badge: "Aesthetic Extraction",
+    color: "text-rose-600",
+    desc: "Apply artistic styles and color palettes",
+  },
+  {
+    id: "character-consistency",
+    label: "Character Consistency",
+    icon: UserCheck,
+    badge: "Face & ID Lock",
+    color: "text-purple-600",
+    desc: "Lock face and persona identity across scenes",
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 // INITIAL SHOWCASE FEED ITEMS (from ChatGPT mockup)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -499,6 +570,16 @@ export default function StudioPage() {
   // Creation mode
   const [creationMode, setCreationMode] = useState<string>("text-to-image");
 
+  // Mode working states
+  const [inpaintBrushSize, setInpaintBrushSize] = useState<number>(24);
+  const [inpaintMode, setInpaintMode] = useState<string>("replace");
+  const [outpaintScale, setOutpaintScale] = useState<string>("1.5x");
+  const [outpaintDirection, setOutpaintDirection] = useState<string>("all");
+  const [styleStrength, setStyleStrength] = useState<string>("balanced");
+  const [characterName, setCharacterName] = useState<string>("Elena, Cyber Sorceress");
+  const [copiedPromptId, setCopiedPromptId] = useState<number | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState<boolean>(false);
+
   // Prompt & Enhancer
   const [prompt, setPrompt] = useState<string>(
     "A majestic dragon flying over snow-covered mountains at sunrise, cinematic lighting, ultra detailed, realistic, epic fantasy, volumetric clouds, 8k"
@@ -511,6 +592,29 @@ export default function StudioPage() {
     "Minimalist architectural glass villa with infinity pool at dusk, warm interior glow",
   ]);
   const [promptHistoryOpen, setPromptHistoryOpen] = useState<boolean>(false);
+  const promptHistoryRef = useRef<HTMLDivElement | null>(null);
+
+  const handleSelectCreationMode = (modeId: string) => {
+    setCreationMode(modeId);
+    if (modeId === "character-consistency") {
+      setMaintainCharacter(true);
+    }
+  };
+
+  // Close Prompt History dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        promptHistoryOpen &&
+        promptHistoryRef.current &&
+        !promptHistoryRef.current.contains(e.target as Node)
+      ) {
+        setPromptHistoryOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [promptHistoryOpen]);
 
   // References
   const [referenceImages, setReferenceImages] = useState(INITIAL_REFERENCES);
@@ -1140,47 +1244,233 @@ export default function StudioPage() {
           ══════════════════════════════════════════════════════════════════════ */}
           <div className="p-5 rounded-3xl bg-white border border-neutral-200/90 shadow-card-elevated space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3">
-              <span className="text-base font-bold text-neutral-950 font-sans">
-                2. Describe What You Want
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-neutral-950 font-sans">
+                  2. Describe What You Want
+                </span>
+                <span className="text-xs text-neutral-400 font-medium hidden sm:inline">
+                  • {CREATION_MODES.find((m) => m.id === creationMode)?.badge || "Prompt-driven"}
+                </span>
+              </div>
 
-              {/* Mode Tabs */}
-              <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
-                {[
-                  { id: "text-to-image", label: "Text to Image", icon: "✨" },
-                  { id: "image-to-image", label: "Image to Image", icon: "🖼️" },
-                  { id: "inpainting", label: "Inpainting", icon: "🎯" },
-                  { id: "outpainting", label: "Outpainting", icon: "📐" },
-                  { id: "style-transfer", label: "Style Transfer", icon: "🎨" },
-                  { id: "character-consistency", label: "Character Consistency", icon: "👤" },
-                ].map((mode) => (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => setCreationMode(mode.id)}
-                    className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-                      creationMode === mode.id
-                        ? "bg-neutral-950 text-white shadow-2xs"
-                        : "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100"
-                    }`}
-                  >
-                    <span className="text-xs">{mode.icon}</span>
-                    <span>{mode.label}</span>
-                  </button>
-                ))}
+              {/* Square Box Segmented Mode Buttons */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none bg-neutral-100/80 p-1 rounded-xl border border-neutral-200/60">
+                {CREATION_MODES.map((mode) => {
+                  const Icon = mode.icon;
+                  const isActive = creationMode === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => handleSelectCreationMode(mode.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer border ${
+                        isActive
+                          ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
+                          : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                      }`}
+                      title={mode.desc}
+                    >
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? mode.color : "text-neutral-400"}`} />
+                      <span>{mode.label}</span>
+                      {isActive && (
+                        <span className={`w-1.5 h-1.5 rounded-full ${mode.color.replace("text-", "bg-")}`}></span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
+            {/* Mode-Specific Working Control Banners */}
+            {creationMode === "image-to-image" && (
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/70 text-xs text-emerald-950 animate-fadeIn">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <ImageIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-emerald-900">Image to Image Synthesis Active:</span>{" "}
+                    <span className="text-emerald-800">Your prompt will transform the reference image selected below.</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[11px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-lg border border-emerald-200">
+                    {imageInfluence}% Influence
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {creationMode === "inpainting" && (
+              <div className="p-3 rounded-2xl bg-amber-50/50 border border-amber-200/70 text-xs text-amber-950 space-y-2 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-amber-900">
+                    <Paintbrush className="w-4 h-4 text-amber-600" />
+                    <span>Inpainting Precision Brush Tool</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                    Mask editing active
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 flex-wrap text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-neutral-600 font-medium">Brush Size:</span>
+                    <input
+                      type="range"
+                      min={8}
+                      max={64}
+                      value={inpaintBrushSize}
+                      onChange={(e) => setInpaintBrushSize(Number(e.target.value))}
+                      className="w-24 h-1.5 bg-amber-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                    />
+                    <span className="font-mono text-[11px] font-bold text-amber-800">{inpaintBrushSize}px</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-600 font-medium">Mask Operation:</span>
+                    {["replace", "erase", "fill"].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setInpaintMode(m)}
+                        className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold capitalize transition-all cursor-pointer ${
+                          inpaintMode === m
+                            ? "bg-amber-600 text-white shadow-2xs"
+                            : "bg-white border border-amber-200 text-amber-800 hover:bg-amber-100/50"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {creationMode === "outpainting" && (
+              <div className="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-200/70 text-xs text-indigo-950 space-y-2 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-indigo-900">
+                    <Expand className="w-4 h-4 text-indigo-600" />
+                    <span>Outpainting Canvas Extender</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-full">
+                    Extends beyond viewport
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 flex-wrap text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-600 font-medium">Expand Ratio:</span>
+                    {["1.25x", "1.5x", "2.0x"].map((scale) => (
+                      <button
+                        key={scale}
+                        type="button"
+                        onClick={() => setOutpaintScale(scale)}
+                        className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                          outpaintScale === scale
+                            ? "bg-indigo-600 text-white shadow-2xs"
+                            : "bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-100/50"
+                        }`}
+                      >
+                        {scale}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-600 font-medium">Direction:</span>
+                    {["all", "horizontal", "vertical"].map((dir) => (
+                      <button
+                        key={dir}
+                        type="button"
+                        onClick={() => setOutpaintDirection(dir)}
+                        className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold capitalize transition-all cursor-pointer ${
+                          outpaintDirection === dir
+                            ? "bg-indigo-600 text-white shadow-2xs"
+                            : "bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-100/50"
+                        }`}
+                      >
+                        {dir}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {creationMode === "style-transfer" && (
+              <div className="p-3 rounded-2xl bg-rose-50/50 border border-rose-200/70 text-xs text-rose-950 space-y-2 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-rose-900">
+                    <Palette className="w-4 h-4 text-rose-600" />
+                    <span>Neural Style Transfer Active</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">
+                    Aesthetic preservation
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="text-neutral-600 font-medium">Style Blend:</span>
+                  <div className="flex items-center gap-1">
+                    {["Light", "Balanced", "Heavy"].map((str) => (
+                      <button
+                        key={str}
+                        type="button"
+                        onClick={() => setStyleStrength(str.toLowerCase())}
+                        className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                          styleStrength === str.toLowerCase()
+                            ? "bg-rose-600 text-white shadow-2xs"
+                            : "bg-white border border-rose-200 text-rose-800 hover:bg-rose-100/50"
+                        }`}
+                      >
+                        {str}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {creationMode === "character-consistency" && (
+              <div className="p-3 rounded-2xl bg-purple-50/50 border border-purple-200/70 text-xs text-purple-950 space-y-2 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-purple-900">
+                    <UserCheck className="w-4 h-4 text-purple-600" />
+                    <span>Subject & Persona Identity Anchoring</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-purple-800 bg-purple-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span>
+                    Face & ID Locked
+                  </span>
+                </div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <label className="text-neutral-600 font-medium shrink-0">Character Persona Tag:</label>
+                  <input
+                    type="text"
+                    value={characterName}
+                    onChange={(e) => setCharacterName(e.target.value)}
+                    placeholder="e.g. Elena, Cyber Sorceress"
+                    className="px-3 py-1 text-xs bg-white border border-purple-200 rounded-lg text-purple-950 font-semibold placeholder-purple-300 focus:outline-none focus:border-purple-500 w-64 shadow-2xs"
+                  />
+                  <span className="text-[10px] text-purple-600 font-medium">Ensures facial features match between scenes</span>
+                </div>
+              </div>
+            )}
+
             {/* Prompt Textarea Box */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between text-xs text-neutral-500">
-                <label className="font-semibold text-neutral-700">Prompt</label>
+                <div className="flex items-center gap-2">
+                  <label className="font-bold text-neutral-800">Prompt</label>
+                  <span className="text-[10px] font-mono text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
+                    {prompt.length}/3000 chars
+                  </span>
+                </div>
+
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={handleEnhancePrompt}
                     disabled={isEnhancing || !prompt.trim()}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:from-blue-700 hover:to-indigo-700 transition-all cursor-pointer disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-xs hover:from-blue-700 hover:to-indigo-700 transition-all cursor-pointer disabled:opacity-50"
                   >
                     <Sparkles className={`w-3.5 h-3.5 ${isEnhancing ? "animate-spin" : ""}`} />
                     <span>{isEnhancing ? "Enhancing..." : "Enhance Prompt"}</span>
@@ -1189,59 +1479,181 @@ export default function StudioPage() {
                   <button
                     type="button"
                     onClick={handleSurpriseMe}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white text-xs font-semibold text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all cursor-pointer shadow-2xs"
                   >
                     <Dice5 className="w-3.5 h-3.5 text-purple-600" />
                     <span>Surprise Me</span>
                   </button>
 
-                  {/* Prompt History Dropdown */}
-                  <div className="relative">
+                  {/* Prompt History Dropdown with Click-Outside Ref */}
+                  <div className="relative" ref={promptHistoryRef}>
                     <button
                       type="button"
                       onClick={() => setPromptHistoryOpen(!promptHistoryOpen)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer"
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                        promptHistoryOpen
+                          ? "bg-blue-50 border-blue-300 text-blue-700 shadow-2xs"
+                          : "border-neutral-200/90 bg-white hover:bg-neutral-50 hover:border-neutral-300 text-neutral-700 shadow-2xs"
+                      }`}
                     >
-                      <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                      <History className="w-3.5 h-3.5 text-blue-600" />
                       <span>Prompt History</span>
-                      <ChevronDown className="w-3 h-3 text-neutral-400" />
+                      <span className="w-4 h-4 rounded-full bg-neutral-100 text-[10px] font-bold text-neutral-600 flex items-center justify-center">
+                        {promptHistory.length}
+                      </span>
+                      <ChevronDown className={`w-3 h-3 text-neutral-400 transition-transform ${promptHistoryOpen ? "rotate-180" : ""}`} />
                     </button>
 
                     {promptHistoryOpen && (
-                      <div className="absolute right-0 top-full mt-1.5 w-80 bg-white rounded-2xl border border-neutral-200 shadow-popover p-2 z-30 animate-dropdown space-y-1">
-                        <div className="px-2 py-1 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                          Recent Prompts
-                        </div>
-                        {promptHistory.map((h, i) => (
-                          <div
-                            key={i}
-                            onClick={() => {
-                              setPrompt(h);
-                              setPromptHistoryOpen(false);
-                            }}
-                            className="p-2 rounded-xl text-xs text-neutral-800 hover:bg-neutral-50 cursor-pointer line-clamp-2 transition-colors border border-transparent hover:border-neutral-200"
-                          >
-                            {h}
+                      <div className="absolute right-0 top-full mt-2 w-96 bg-white/95 backdrop-blur-md rounded-2xl border border-neutral-200/90 shadow-xl shadow-neutral-900/10 p-3 z-30 animate-dropdown space-y-2">
+                        {/* Header */}
+                        <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+                          <div className="flex items-center gap-2">
+                            <History className="w-4 h-4 text-blue-600" />
+                            <span className="text-xs font-bold text-neutral-900">Recent Prompts</span>
+                            <span className="text-[10px] font-semibold text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded-md">
+                              {promptHistory.length} saved
+                            </span>
                           </div>
-                        ))}
+                          {promptHistory.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPromptHistory([]);
+                              }}
+                              className="text-[11px] font-semibold text-neutral-400 hover:text-rose-600 flex items-center gap-1 cursor-pointer transition-colors"
+                              title="Clear all prompt history"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>Clear</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {/* List of prompts */}
+                        <div className="max-h-72 overflow-y-auto space-y-1.5 pr-1 [scrollbar-width:thin]">
+                          {promptHistory.length === 0 ? (
+                            <div className="py-6 text-center text-xs text-neutral-400 space-y-1">
+                              <p className="font-semibold text-neutral-600">No prompt history</p>
+                              <p className="text-[11px]">Generate or enhance prompts to view them here.</p>
+                            </div>
+                          ) : (
+                            promptHistory.map((h, i) => (
+                              <div
+                                key={i}
+                                className="group relative p-2.5 rounded-xl border border-neutral-150 hover:border-blue-200 bg-white hover:bg-blue-50/30 transition-all flex items-start gap-2.5 text-left cursor-pointer"
+                                onClick={() => {
+                                  setPrompt(h);
+                                  setPromptHistoryOpen(false);
+                                }}
+                              >
+                                <Clock className="w-3.5 h-3.5 text-neutral-400 group-hover:text-blue-600 shrink-0 mt-0.5" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs text-neutral-800 line-clamp-2 leading-relaxed font-sans">
+                                    {h}
+                                  </p>
+                                  <div className="flex items-center justify-between mt-1 text-[10px] text-neutral-400">
+                                    <span>#{promptHistory.length - i} • {h.length} chars</span>
+                                    <span className="text-blue-600 font-semibold opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-opacity">
+                                      Use <CornerDownLeft className="w-2.5 h-2.5" />
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(h);
+                                      setCopiedPromptId(i);
+                                      setTimeout(() => setCopiedPromptId(null), 1500);
+                                    }}
+                                    className="p-1 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                                    title="Copy prompt"
+                                  >
+                                    {copiedPromptId === i ? (
+                                      <Check className="w-3 h-3 text-emerald-600" />
+                                    ) : (
+                                      <Copy className="w-3 h-3" />
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPromptHistory((prev) => prev.filter((_, idx) => idx !== i));
+                                    }}
+                                    className="p-1 rounded-md text-neutral-400 hover:text-rose-600 hover:bg-rose-50"
+                                    title="Delete from history"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        {/* Footer Hint */}
+                        <div className="pt-1.5 border-t border-neutral-100 text-[10px] text-neutral-400 text-center">
+                          Click any prompt to load it into the editor
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="relative">
+              {/* Textarea with quick copy & clear actions */}
+              <div className="relative group/prompt">
                 <textarea
                   ref={textareaRef}
                   rows={3}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Describe your scene in detail, camera lighting, textures, composition..."
-                  className="w-full bg-neutral-50/70 border border-neutral-200/90 rounded-2xl p-4 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:bg-white focus:border-blue-600 transition-all resize-none leading-relaxed font-sans"
+                  className="w-full bg-neutral-50/70 border border-neutral-200/90 rounded-2xl p-4 pr-24 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none leading-relaxed font-sans"
                 />
-                <span className="absolute bottom-3 right-3 text-[11px] font-mono text-neutral-400">
-                  {prompt.length}/3000
-                </span>
+
+                <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+                  {prompt.trim().length > 0 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(prompt);
+                          setCopyFeedback(true);
+                          setTimeout(() => setCopyFeedback(false), 1500);
+                        }}
+                        className="px-2 py-0.5 rounded-md bg-white border border-neutral-200 text-[11px] font-semibold text-neutral-600 hover:text-neutral-950 hover:bg-neutral-50 flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                        title="Copy prompt"
+                      >
+                        {copyFeedback ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span className="text-emerald-700">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3 text-neutral-400" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setPrompt("")}
+                        className="px-2 py-0.5 rounded-md bg-white border border-neutral-200 text-[11px] font-semibold text-neutral-400 hover:text-rose-600 hover:bg-rose-50 flex items-center gap-0.5 shadow-2xs transition-all cursor-pointer"
+                        title="Clear prompt text"
+                      >
+                        <X className="w-3 h-3" />
+                        <span>Clear</span>
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
