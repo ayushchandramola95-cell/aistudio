@@ -606,21 +606,77 @@ export default function StudioPage() {
     };
   }, [checkScrollability, visibleModels]);
 
-  // Horizontal mouse wheel scrolling for Model Rail
+  // Buttery-smooth horizontal mouse wheel inertia scrolling for Model Rail
   useEffect(() => {
     const el = modelScrollRef.current;
     if (!el) return;
 
+    let targetScroll = el.scrollLeft;
+    let animId: number | null = null;
+
+    const smoothStep = () => {
+      if (!el) {
+        animId = null;
+        return;
+      }
+      const current = el.scrollLeft;
+      const diff = targetScroll - current;
+
+      if (Math.abs(diff) < 0.5) {
+        el.scrollLeft = targetScroll;
+        animId = null;
+        return;
+      }
+
+      // Smooth lerp: 0.16 factor provides fluid, natural momentum without jitter
+      el.scrollLeft = current + diff * 0.16;
+      animId = requestAnimationFrame(smoothStep);
+    };
+
     const handleWheel = (e: WheelEvent) => {
-      if (el.scrollWidth > el.clientWidth && e.deltaY !== 0) {
+      if (el.scrollWidth <= el.clientWidth) return;
+
+      // Support standard vertical mouse wheel and trackpad gestures
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(delta) < 0.5) return;
+
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      const canScrollLeft = el.scrollLeft > 0;
+      const canScrollRight = el.scrollLeft < maxScroll - 1;
+
+      // Intercept wheel when scrolling within bounds or while actively gliding
+      if ((delta > 0 && canScrollRight) || (delta < 0 && canScrollLeft) || animId !== null) {
         e.preventDefault();
-        el.scrollLeft += e.deltaY * 1.15;
+
+        // Start accumulation from current actual position if previously idle
+        if (animId === null) {
+          targetScroll = el.scrollLeft;
+        }
+
+        // Apply comfortable step multiplier and clamp to scroll bounds
+        targetScroll = Math.max(0, Math.min(maxScroll, targetScroll + delta * 1.25));
+
+        if (animId === null) {
+          animId = requestAnimationFrame(smoothStep);
+        }
+      }
+    };
+
+    const syncScroll = () => {
+      if (animId === null && el) {
+        targetScroll = el.scrollLeft;
       }
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
+    el.addEventListener("scroll", syncScroll, { passive: true });
+
     return () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+      }
       el.removeEventListener("wheel", handleWheel);
+      el.removeEventListener("scroll", syncScroll);
     };
   }, [visibleModels]);
 
@@ -1009,7 +1065,7 @@ export default function StudioPage() {
             <div className="relative">
               <div
                 ref={modelScrollRef}
-                className="flex items-stretch gap-3.5 overflow-x-auto pb-1 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                className="flex items-stretch gap-3.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
               >
                 {visibleModels.map((m) => {
                   const isSelected = selectedModelId === m.id;
@@ -1200,50 +1256,52 @@ export default function StudioPage() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 flex-wrap">
-                {/* Reference Thumbnails */}
-                {referenceImages.map((ref) => (
-                  <div
-                    key={ref.id}
-                    className="relative w-28 h-20 rounded-xl overflow-hidden border border-neutral-200 group shadow-2xs"
-                  >
-                    <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {/* Left Side: Reference Thumbnails & Upload Button */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {referenceImages.map((ref) => (
+                    <div
+                      key={ref.id}
+                      className="relative w-28 h-20 rounded-xl overflow-hidden border border-neutral-200 group shadow-2xs shrink-0"
+                    >
+                      <img src={ref.url} alt={ref.name} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveReference(ref.id)}
+                        className="absolute top-1 right-1 p-1 rounded-full bg-neutral-950/80 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-neutral-950"
+                        title="Remove reference"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <span className="absolute bottom-0 inset-x-0 bg-neutral-950/70 text-white text-[9px] font-bold text-center py-0.5 truncate px-1">
+                        {ref.name}
+                      </span>
+                    </div>
+                  ))}
+
+                  {/* Upload Button */}
+                  {referenceImages.length < 4 && (
                     <button
                       type="button"
-                      onClick={() => handleRemoveReference(ref.id)}
-                      className="absolute top-1 right-1 p-1 rounded-full bg-neutral-950/80 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-neutral-950"
-                      title="Remove reference"
+                      onClick={() => refFileInputRef.current?.click()}
+                      className="w-28 h-20 rounded-xl border-2 border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/60 hover:bg-neutral-100/60 flex flex-col items-center justify-center transition-all cursor-pointer text-neutral-500 hover:text-neutral-900 group shrink-0"
                     >
-                      <X className="w-3 h-3" />
+                      <Plus className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform mb-1" />
+                      <span className="text-xs font-bold">Add Reference</span>
+                      <span className="text-[10px] text-neutral-400 font-mono">({referenceImages.length}/4)</span>
                     </button>
-                    <span className="absolute bottom-0 inset-x-0 bg-neutral-950/70 text-white text-[9px] font-bold text-center py-0.5 truncate px-1">
-                      {ref.name}
-                    </span>
-                  </div>
-                ))}
+                  )}
+                  <input
+                    ref={refFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAddReference}
+                    className="hidden"
+                  />
+                </div>
 
-                {/* Upload Button */}
-                {referenceImages.length < 4 && (
-                  <button
-                    type="button"
-                    onClick={() => refFileInputRef.current?.click()}
-                    className="w-28 h-20 rounded-xl border-2 border-dashed border-neutral-300 hover:border-neutral-900 bg-neutral-50/60 hover:bg-neutral-100/60 flex flex-col items-center justify-center transition-all cursor-pointer text-neutral-500 hover:text-neutral-900 group"
-                  >
-                    <Plus className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform mb-1" />
-                    <span className="text-xs font-bold">Add Reference</span>
-                    <span className="text-[10px] text-neutral-400 font-mono">({referenceImages.length}/4)</span>
-                  </button>
-                )}
-                <input
-                  ref={refFileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAddReference}
-                  className="hidden"
-                />
-
-                {/* Compact Image Influence & Maintain Character Controls */}
-                <div className="flex items-center gap-3 flex-wrap">
+                {/* Right-most Side: Image Influence & Maintain Character Controls */}
+                <div className="flex items-center gap-3 ml-auto shrink-0 flex-wrap">
                   {/* Sized Image Influence Card */}
                   <div className="w-56 h-20 p-2.5 rounded-xl bg-neutral-50/90 border border-neutral-200/80 flex flex-col justify-between shrink-0 shadow-2xs">
                     <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
