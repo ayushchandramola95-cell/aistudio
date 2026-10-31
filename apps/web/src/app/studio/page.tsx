@@ -47,7 +47,9 @@ import {
   Paintbrush,
   Expand,
   Palette,
-  UserCheck
+  UserCheck,
+  Coins,
+  FolderKanban
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -792,6 +794,18 @@ export default function StudioPage() {
     if (qualityTier === "high") cost += 1;
     return cost * outputsCount;
   }, [currentModel, selectedResolution, qualityTier, outputsCount]);
+
+  // Dynamic pixel dimensions label based on aspect ratio & resolution
+  const dynamicDimensions = useMemo(() => {
+    const dimMap: Record<string, Record<string, string>> = {
+      "1:1": { "1K": "1024 × 1024", "2K": "2048 × 2048", "4K": "4096 × 4096" },
+      "16:9": { "1K": "1344 × 768", "2K": "1920 × 1080", "4K": "3840 × 2160" },
+      "9:16": { "1K": "768 × 1344", "2K": "1080 × 1920", "4K": "2160 × 3840" },
+      "4:3": { "1K": "1152 × 864", "2K": "1600 × 1200", "4K": "3200 × 2400" },
+      "3:2": { "1K": "1216 × 832", "2K": "1800 × 1200", "4K": "3600 × 2400" },
+    };
+    return dimMap[selectedRatio]?.[selectedResolution] || (selectedResolution === "1K" ? "1024 × 1024" : selectedResolution === "2K" ? "2048 × 2048" : "4096 × 4096");
+  }, [selectedRatio, selectedResolution]);
 
   // Toggle favorite model
   const toggleFavoriteModel = (id: string, e: React.MouseEvent) => {
@@ -1765,141 +1779,307 @@ export default function StudioPage() {
           </div>
 
           {/* ══════════════════════════════════════════════════════════════════════
+          {/* ══════════════════════════════════════════════════════════════════════
               3. GENERATION SETTINGS & ACTION BAR
           ══════════════════════════════════════════════════════════════════════ */}
           <div className="p-5 rounded-3xl bg-white border border-neutral-200/90 shadow-card-elevated space-y-5">
-            <span className="text-base font-bold text-neutral-950 font-sans block border-b border-neutral-100 pb-3">
-              3. Generation Settings
-            </span>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
-              {/* Aspect Ratio */}
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-xs font-semibold text-neutral-700">Aspect Ratio</label>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {["1:1", "16:9", "9:16", "4:3", "3:2"].map((ratio) => (
-                    <button
-                      key={ratio}
-                      type="button"
-                      onClick={() => setSelectedRatio(ratio)}
-                      className={`h-8 px-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                        selectedRatio === ratio
-                          ? "bg-neutral-950 text-white border-neutral-950 shadow-2xs"
-                          : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
-                      }`}
-                    >
-                      <span className="text-[10px]">{ratio === "1:1" ? "◻" : ratio.includes("16:9") ? "▭" : "▯"}</span>
-                      <span>{ratio}</span>
-                    </button>
-                  ))}
-                </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-base font-bold text-neutral-950 font-sans">
+                  3. Generation Settings
+                </span>
+                <span className="text-xs text-neutral-400 font-medium hidden sm:inline">
+                  • Engine: <span className="font-semibold text-neutral-700">{currentModel.name}</span>
+                </span>
               </div>
 
-              {/* Resolution */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-700">Resolution</label>
-                <div className="flex items-center gap-1">
-                  {["1K", "2K", "4K"].map((res) => (
-                    <button
-                      key={res}
-                      type="button"
-                      onClick={() => setSelectedResolution(res)}
-                      className={`h-8 px-2.5 rounded-xl border text-xs font-semibold transition-all flex-1 cursor-pointer ${
-                        selectedResolution === res
-                          ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
-                          : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
-                      }`}
-                    >
-                      {res}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Outputs */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-700">Outputs</label>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setOutputsCount(num)}
-                      className={`h-8 px-2 rounded-xl border text-xs font-semibold transition-all flex-1 cursor-pointer ${
-                        outputsCount === num
-                          ? "bg-neutral-950 text-white border-neutral-950 shadow-2xs"
-                          : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quality & Advanced Toggle */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-700">Quality</label>
-                <div className="flex items-center gap-1">
-                  {["Draft", "Standard", "High"].map((q) => (
-                    <button
-                      key={q}
-                      type="button"
-                      onClick={() => setQualityTier(q.toLowerCase())}
-                      className={`h-8 px-2 rounded-xl border text-xs font-semibold transition-all flex-1 cursor-pointer ${
-                        qualityTier === q.toLowerCase()
-                          ? "bg-neutral-950 text-white border-neutral-950 shadow-2xs"
-                          : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
-                      }`}
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Toggle Advanced Settings Button */}
-            <div className="pt-2 flex items-center justify-end">
+              {/* Advanced Settings Toggle aligned in Section Header */}
               <button
                 type="button"
                 onClick={() => setAdvancedPanelOpen(!advancedPanelOpen)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                   advancedPanelOpen
-                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-2xs"
-                    : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:bg-neutral-100"
+                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-2xs font-bold"
+                    : "bg-neutral-50/80 border-neutral-200/90 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/70"
                 }`}
+                title="Toggle fine-grained sampling steps, seed, CFG scale, and negative prompt"
               >
-                <Sliders className="w-3.5 h-3.5" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-500" />
                 <span>Advanced Settings</span>
-                <span className={`w-2 h-2 rounded-full ${advancedPanelOpen ? "bg-blue-600" : "bg-neutral-300"}`} />
+                <span
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    advancedPanelOpen ? "bg-blue-600 animate-pulse" : "bg-neutral-300"
+                  }`}
+                />
               </button>
             </div>
 
-            {/* Bottom Generation Action Ribbon */}
-            <div className="pt-4 border-t border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-wrap text-xs text-neutral-600">
-                <div className="flex items-center gap-1.5 font-bold text-neutral-900 bg-neutral-100/80 px-3 py-1.5 rounded-xl border border-neutral-200/60">
-                  <span className="text-amber-500">🪙</span>
-                  <span>Estimated Cost: ~ {estimatedCost} Credits</span>
+            {/* Row 1: Aspect Ratio Proportional Controls */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5">
+                  <label className="font-bold text-neutral-800">Aspect Ratio</label>
+                  <span className="text-[11px] text-neutral-400 font-normal">
+                    (Framing & Proportions)
+                  </span>
                 </div>
+                <span className="text-[11px] font-mono font-bold text-blue-600 bg-blue-50/70 border border-blue-200/60 px-2 py-0.5 rounded-md">
+                  {selectedRatio}
+                </span>
+              </div>
+              <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1 overflow-x-auto scrollbar-none">
+                {[
+                  {
+                    id: "1:1",
+                    name: "Square",
+                    svg: (active: boolean) => (
+                      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+                        <rect
+                          x="2"
+                          y="2"
+                          width="12"
+                          height="12"
+                          rx="2"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "16:9",
+                    name: "Landscape",
+                    svg: (active: boolean) => (
+                      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 18 14" fill="none">
+                        <rect
+                          x="1"
+                          y="2.5"
+                          width="16"
+                          height="9"
+                          rx="1.5"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "9:16",
+                    name: "Portrait",
+                    svg: (active: boolean) => (
+                      <svg className="w-3 h-4 shrink-0" viewBox="0 0 14 18" fill="none">
+                        <rect
+                          x="2.5"
+                          y="1"
+                          width="9"
+                          height="16"
+                          rx="1.5"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "4:3",
+                    name: "Classic",
+                    svg: (active: boolean) => (
+                      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
+                        <rect
+                          x="1.5"
+                          y="1.5"
+                          width="13"
+                          height="11"
+                          rx="1.5"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "3:2",
+                    name: "Photo",
+                    svg: (active: boolean) => (
+                      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
+                        <rect
+                          x="1"
+                          y="2"
+                          width="14"
+                          height="10"
+                          rx="1.5"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+                        />
+                      </svg>
+                    ),
+                  },
+                ].map((ratio) => {
+                  const isSelected = selectedRatio === ratio.id;
+                  return (
+                    <button
+                      key={ratio.id}
+                      type="button"
+                      onClick={() => setSelectedRatio(ratio.id)}
+                      className={`flex-1 min-w-[85px] py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 flex items-center justify-center gap-1.5 cursor-pointer border ${
+                        isSelected
+                          ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
+                          : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                      }`}
+                    >
+                      {ratio.svg(isSelected)}
+                      <span>{ratio.id}</span>
+                      <span className="text-[10px] text-neutral-400 font-normal hidden sm:inline">
+                        ({ratio.name})
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                <div className="flex items-center gap-1.5 text-neutral-500">
-                  <Clock className="w-3.5 h-3.5 text-neutral-400" />
-                  <span>Estimated time: ~ 10–20 seconds</span>
+            {/* Row 2: Resolution, Outputs Count, and Quality Tier in 3 Balanced Columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Resolution */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <label className="font-bold text-neutral-800">Resolution</label>
+                  <span className="text-[10px] font-mono text-neutral-500 font-medium">
+                    {dynamicDimensions}
+                  </span>
                 </div>
-
-                <div className="text-neutral-500">
-                  Save to: <strong className="text-neutral-800">My Creations</strong>
+                <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1">
+                  {[
+                    { id: "1K", label: "1K", badge: "Standard" },
+                    { id: "2K", label: "2K", badge: "+1 cr" },
+                    { id: "4K", label: "4K", badge: "+2 cr" },
+                  ].map((res) => {
+                    const isSelected = selectedResolution === res.id;
+                    return (
+                      <button
+                        key={res.id}
+                        type="button"
+                        onClick={() => setSelectedResolution(res.id)}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
+                          isSelected
+                            ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
+                            : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                        }`}
+                      >
+                        <span>{res.label}</span>
+                        <span className={`text-[10px] font-normal ${isSelected ? "text-blue-600 font-bold" : "text-neutral-400"}`}>
+                          {res.badge}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Big Generate Images Button */}
+              {/* Outputs Count */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <label className="font-bold text-neutral-800">Outputs</label>
+                  <span className="text-[10px] text-neutral-400 font-medium">
+                    {outputsCount} image{outputsCount > 1 ? "s" : ""}
+                  </span>
+                </div>
+                <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1">
+                  {[1, 2, 3, 4].map((num) => {
+                    const isSelected = outputsCount === num;
+                    return (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setOutputsCount(num)}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center cursor-pointer border ${
+                          isSelected
+                            ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
+                            : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Quality Tier */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <label className="font-bold text-neutral-800">Quality Tier</label>
+                  <span className="text-[10px] text-neutral-400 font-medium capitalize">
+                    {qualityTier} mode
+                  </span>
+                </div>
+                <div className="p-1 rounded-xl bg-neutral-100/80 border border-neutral-200/60 flex items-center gap-1">
+                  {[
+                    { id: "draft", label: "Draft", hint: "Fast" },
+                    { id: "standard", label: "Standard", hint: "Optimal" },
+                    { id: "high", label: "High", hint: "Ultra" },
+                  ].map((q) => {
+                    const isSelected = qualityTier === q.id;
+                    return (
+                      <button
+                        key={q.id}
+                        type="button"
+                        onClick={() => setQualityTier(q.id)}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
+                          isSelected
+                            ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5"
+                            : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent"
+                        }`}
+                      >
+                        <span>{q.label}</span>
+                        <span className={`text-[10px] font-normal ${isSelected ? "text-purple-600 font-bold" : "text-neutral-400"}`}>
+                          {q.hint}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Generation Action Ribbon */}
+            <div className="pt-4 border-t border-neutral-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+              <div className="flex items-center gap-3 flex-wrap text-xs">
+                {/* Cost Badge with gold coin */}
+                <div
+                  className="flex items-center gap-2 font-bold text-neutral-900 bg-amber-50/70 border border-amber-200/80 px-3.5 py-2 rounded-xl shadow-2xs"
+                  title={`Cost breakdown: ${currentModel.cost} base × ${outputsCount} outputs + extras = ${estimatedCost} credits`}
+                >
+                  <Coins className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span className="text-neutral-700">Estimated Cost:</span>
+                  <span className="text-amber-700 font-mono font-bold text-sm">~{estimatedCost} Credits</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                  <Clock className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <span>~10–20s render</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-neutral-500 font-medium">
+                  <FolderKanban className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                  <span>Save to:</span>
+                  <span className="font-semibold text-neutral-800 bg-neutral-100 px-2 py-0.5 rounded-lg border border-neutral-200/60">
+                    My Creations
+                  </span>
+                </div>
+              </div>
+
+              {/* Big Luxury Generate Images Button */}
               <button
                 type="button"
                 onClick={handleGenerate}
                 disabled={isGenerating || !prompt.trim()}
-                className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-extrabold text-sm shadow-luxury hover:shadow-luxury-hover transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer disabled:opacity-50"
+                className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-extrabold text-sm shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0 whitespace-nowrap"
               >
                 <Sparkles className={`w-4 h-4 ${isGenerating ? "animate-spin" : ""}`} />
                 <span>{isGenerating ? "Synthesizing Images..." : "Generate Images"}</span>
