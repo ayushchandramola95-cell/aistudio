@@ -4594,37 +4594,32 @@ export default function StudioPage() {
       {/* ── LIGHTBOX: FULLSCREEN PREVIEW ── */}
       {lightboxImage && (
         <div
-          className="fixed inset-0 z-50 bg-neutral-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
+          className="fixed inset-0 z-50 bg-black/92 backdrop-blur-xl flex items-center justify-center p-2 sm:p-5 animate-fadeIn cursor-zoom-out select-none"
           onClick={() => setLightboxImage(null)}
         >
+          {/* Floating Minimal Close Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxImage(null);
+            }}
+            className="fixed top-5 right-5 z-60 p-2.5 rounded-full bg-neutral-900/80 hover:bg-neutral-800 text-white backdrop-blur-md border border-white/15 shadow-xl transition-all hover:scale-110 cursor-pointer group"
+            title="Close Fullscreen (Esc)"
+          >
+            <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
+          </button>
+
+          {/* Fullscreen Image Canvas */}
           <div
-            className="relative max-w-5xl max-h-[90vh] bg-neutral-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col w-full"
+            className="relative flex items-center justify-center max-w-[96vw] max-h-[94vh] cursor-default"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-5 py-3.5 flex items-center justify-between text-white border-b border-neutral-800">
-              <span className="text-xs font-bold">Ultra High-Definition Canvas</span>
-              <div className="flex items-center gap-2">
-                <a
-                  href={lightboxImage}
-                  download="aistudio-render.jpg"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1 rounded-xl bg-white text-neutral-950 font-bold text-xs flex items-center gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download</span>
-                </a>
-                <button
-                  onClick={() => setLightboxImage(null)}
-                  className="p-1 rounded-full hover:bg-neutral-800 text-white cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 flex items-center justify-center p-4 overflow-auto bg-neutral-950">
-              <img src={lightboxImage} alt="Fullscreen View" className="max-h-[75vh] w-auto object-contain rounded-xl" />
-            </div>
+            <img
+              src={lightboxImage}
+              alt="Fullscreen View"
+              className="max-h-[94vh] max-w-[96vw] w-auto h-auto object-contain rounded-2xl shadow-2xl animate-spring"
+            />
           </div>
         </div>
       )}
