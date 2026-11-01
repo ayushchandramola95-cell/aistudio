@@ -1628,10 +1628,13 @@ export default function StudioPage() {
       setElapsedSeconds(Number(((Date.now() - startTime) / 1000).toFixed(1)));
     }, 100);
 
-    // Auto-scroll down smoothly to the generation feed
+    // Smoothly scroll to the Generation Result showcase loading screen
     setTimeout(() => {
-      generationFeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
+      const targetEl = document.getElementById("generation-result-showcase");
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 60);
 
     const token = typeof window !== "undefined" ? localStorage.getItem("aistudio_token") : null;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -2804,26 +2807,6 @@ export default function StudioPage() {
               </button>
             </div>
 
-            {/* In-Flight Progress Bar */}
-            {isGenerating && (
-              <div className="space-y-2 pt-2 animate-fadeIn">
-                <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                    {generationPhase}
-                  </span>
-                  <span className="font-mono text-blue-600">{progress}%</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-neutral-100 overflow-hidden relative">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                  <div className="animate-scanline" />
-                </div>
-              </div>
-            )}
-
             {/* Success Toast Banner */}
             {showSuccessToast && (
               <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-800 text-xs font-semibold animate-spring shadow-2xs">
@@ -2834,117 +2817,287 @@ export default function StudioPage() {
           </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            GENERATION RESULT SHOWCASE (Match Screenshot Design)
+            GENERATION RESULT SHOWCASE (Match Screenshot Design & Loading Screen)
         ══════════════════════════════════════════════════════════════════════ */}
-        {selectedShowcaseItem && (
+        {(isGenerating || selectedShowcaseItem) && (
           <div
             id="generation-result-showcase"
-            className="rounded-3xl border border-neutral-200/90 bg-white p-5 shadow-luxury space-y-4 animate-fadeIn"
+            className="rounded-3xl border border-neutral-200/90 bg-white p-5 shadow-luxury space-y-4 animate-fadeIn scroll-mt-24"
           >
             {/* Header Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3.5">
-              {/* Left: Status chips */}
-              <div className="flex items-center gap-2 flex-wrap text-xs">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600 text-white font-bold shadow-2xs">
-                  <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Generation Result</span>
+            {isGenerating ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3.5">
+                {/* Left: Status chips */}
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600 text-white font-bold shadow-2xs">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Generating Image</span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                    <span>Processing</span>
+                  </div>
+
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-600 font-medium">
+                    {outputsCount} {outputsCount === 1 ? "image" : "images"}
+                  </span>
+
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-600 font-medium">
+                    {estimatedCost} Credits
+                  </span>
+
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-600 font-medium font-mono">
+                    {elapsedSeconds.toFixed(1)}s
+                  </span>
                 </div>
 
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Completed</span>
+                {/* Right: Phase indicator */}
+                <div className="text-xs text-neutral-500 font-medium flex items-center gap-1.5">
+                  <span className="truncate max-w-xs">{generationPhase || "Connecting to Vertex AI..."}</span>
+                </div>
+              </div>
+            ) : selectedShowcaseItem ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3.5">
+                {/* Left: Status chips */}
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600 text-white font-bold shadow-2xs">
+                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Generation Result</span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Completed</span>
+                  </div>
+
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-600 font-medium">
+                    {selectedShowcaseItem.outputCount || 1} image
+                  </span>
+
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-600 font-medium">
+                    {selectedShowcaseItem.cost} Credits
+                  </span>
+
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-600 font-medium">
+                    {selectedShowcaseItem.renderTime || "1.2s"}
+                  </span>
                 </div>
 
-                <span className="text-neutral-400">•</span>
-                <span className="text-neutral-600 font-medium">
-                  {selectedShowcaseItem.outputCount || 1} image
-                </span>
+                {/* Right: Actions toolbar */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => handleUseAsReference(selectedShowcaseItem)}
+                    className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Add this image to Reference Images"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Use as Reference</span>
+                  </button>
 
-                <span className="text-neutral-400">•</span>
-                <span className="text-neutral-600 font-medium">
-                  {selectedShowcaseItem.cost} Credits
-                </span>
+                  <button
+                    type="button"
+                    onClick={() => handleGenerateVariations(selectedShowcaseItem)}
+                    className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Synthesize new variations of this prompt"
+                  >
+                    <Shuffle className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Generate Variations</span>
+                  </button>
 
-                <span className="text-neutral-400">•</span>
-                <span className="text-neutral-600 font-medium">
-                  {selectedShowcaseItem.renderTime || "1.2s"}
-                </span>
+                  <button
+                    type="button"
+                    onClick={() => handleUpscale(selectedShowcaseItem)}
+                    className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Upscale to higher resolution"
+                  >
+                    <span className="px-1 py-0.2 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">4K</span>
+                    <span>Upscale</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleEditItem(selectedShowcaseItem)}
+                    className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Load prompt & settings into studio"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Edit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadImage(selectedShowcaseItem.image, selectedShowcaseItem.title)}
+                    className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Download full quality image"
+                  >
+                    <Download className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>Download</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFeedItems((prev) =>
+                        prev.map((i) => (i.id === selectedShowcaseItem.id ? { ...i, isFavorite: !i.isFavorite } : i))
+                      );
+                      setSelectedShowcaseItem((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));
+                    }}
+                    className={`p-1.5 rounded-xl border border-neutral-200/90 text-xs transition-all cursor-pointer ${
+                      selectedShowcaseItem.isFavorite
+                        ? "bg-rose-50 text-rose-600 border-rose-200"
+                        : "bg-white text-neutral-600 hover:bg-neutral-50"
+                    }`}
+                    title={selectedShowcaseItem.isFavorite ? "Saved to favorites" : "Save to favorites"}
+                  >
+                    <Heart className={`w-4 h-4 ${selectedShowcaseItem.isFavorite ? "fill-rose-600" : ""}`} />
+                  </button>
+                </div>
               </div>
-
-              {/* Right: Actions toolbar */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => handleUseAsReference(selectedShowcaseItem)}
-                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  title="Add this image to Reference Images"
-                >
-                  <Layers className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Use as Reference</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleGenerateVariations(selectedShowcaseItem)}
-                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  title="Synthesize new variations of this prompt"
-                >
-                  <Shuffle className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Generate Variations</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleUpscale(selectedShowcaseItem)}
-                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  title="Upscale to higher resolution"
-                >
-                  <span className="px-1 py-0.2 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">4K</span>
-                  <span>Upscale</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleEditItem(selectedShowcaseItem)}
-                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  title="Load prompt & settings into studio"
-                >
-                  <Edit3 className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Edit</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleDownloadImage(selectedShowcaseItem.image, selectedShowcaseItem.title)}
-                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  title="Download full quality image"
-                >
-                  <Download className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Download</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFeedItems((prev) =>
-                      prev.map((i) => (i.id === selectedShowcaseItem.id ? { ...i, isFavorite: !i.isFavorite } : i))
-                    );
-                    setSelectedShowcaseItem((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));
-                  }}
-                  className={`p-1.5 rounded-xl border border-neutral-200/90 text-xs transition-all cursor-pointer ${
-                    selectedShowcaseItem.isFavorite
-                      ? "bg-rose-50 text-rose-600 border-rose-200"
-                      : "bg-white text-neutral-600 hover:bg-neutral-50"
-                  }`}
-                  title={selectedShowcaseItem.isFavorite ? "Saved to favorites" : "Save to favorites"}
-                >
-                  <Heart className={`w-4 h-4 ${selectedShowcaseItem.isFavorite ? "fill-rose-600" : ""}`} />
-                </button>
-              </div>
-            </div>
+            ) : null}
 
             {/* Two-Column Split Visualizer */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            {isGenerating ? (
+              /* Simple Loading Canvas */
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                {/* Left: Simple Loading Canvas */}
+                <div className="lg:col-span-6 xl:col-span-6 flex flex-col space-y-3">
+                  <div className="relative rounded-2xl overflow-hidden bg-neutral-950 flex flex-col items-center justify-center border border-neutral-200/60 shadow-inner min-h-[280px] sm:min-h-[320px] max-h-[460px] w-full p-6 text-center">
+                    {/* Subtle pulse ambient background */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-900/15 via-transparent to-transparent pointer-events-none animate-pulse" />
+
+                    <div className="relative z-10 flex flex-col items-center gap-4">
+                      {/* Spinning indicator */}
+                      <div className="relative w-16 h-16 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+                        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+                          <Sparkles className="w-5 h-5 animate-pulse" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-bold text-white tracking-wide">Creating Your Image</h4>
+                        <p className="text-xs text-neutral-400 font-normal max-w-xs">
+                          {generationPhase || "Connecting to Google Cloud Vertex AI..."}
+                        </p>
+                      </div>
+
+                      {/* Progress Bar & Elapsed Time */}
+                      <div className="w-56 sm:w-64 space-y-1.5 pt-1">
+                        <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-300 ease-out"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400">
+                          <span>{progress}%</span>
+                          <span>{elapsedSeconds.toFixed(1)}s</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Placeholder during Generation */}
+                  <div className="flex items-center gap-2.5 pt-0.5">
+                    <div className="w-16 h-12 rounded-xl bg-neutral-100 border-2 border-blue-400/50 flex items-center justify-center animate-pulse shrink-0">
+                      <Sparkles className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div className="text-xs text-neutral-400 font-medium italic">
+                      Rendering {selectedRatio} ({selectedResolution}) with {currentModel.name}...
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Prompt & Settings Cards for Current In-Flight Job */}
+                <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-between space-y-3.5">
+                  <div className="flex items-center gap-1.5 border-b border-neutral-100 pb-2.5">
+                    <div className="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50/80 text-indigo-700 border border-indigo-200/90 shadow-2xs flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Prompt & Settings</span>
+                    </div>
+                  </div>
+
+                  {/* Prompt Box */}
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-neutral-900">Prompt</span>
+                    <div className="p-3.5 rounded-xl bg-neutral-50/80 border border-neutral-200/80 text-xs text-neutral-800 leading-relaxed font-normal min-h-[80px] max-h-28 overflow-y-auto scrollbar-thin shadow-2xs">
+                      {prompt}
+                    </div>
+                  </div>
+
+                  {/* Parameter Cards Grid - 5 Labeled Columns */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2 pt-1">
+                    {/* 1. Model Card */}
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Model</span>
+                      <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center gap-1.5 shadow-2xs overflow-hidden">
+                        <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                        </svg>
+                        <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 whitespace-nowrap overflow-hidden text-ellipsis">
+                          {currentModel.name}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 2. Aspect Ratio */}
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Aspect Ratio</span>
+                      <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center justify-center gap-1.5 shadow-2xs">
+                        <Square className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                        <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 font-mono">
+                          {selectedRatio}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 3. Resolution */}
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Resolution</span>
+                      <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center justify-center shadow-2xs">
+                        <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 font-mono whitespace-nowrap">
+                          {selectedResolution} ({dynamicDimensions})
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 4. Outputs */}
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Outputs</span>
+                      <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center justify-center gap-1.5 shadow-2xs">
+                        <Layers className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                        <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 font-mono">
+                          {outputsCount}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 5. Seed */}
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Seed</span>
+                      <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center gap-1.5 shadow-2xs">
+                        <Dice5 className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                        <span className="text-[11px] sm:text-xs font-semibold text-neutral-600 font-mono italic">
+                          {seedMode === "custom" ? seedValue : "Auto"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : selectedShowcaseItem ? (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
               {/* Left: Generated Image Viewer */}
               <div className="lg:col-span-6 xl:col-span-6 flex flex-col space-y-3">
                 {/* Main Image Container */}
@@ -3215,6 +3368,7 @@ export default function StudioPage() {
                 )}
               </div>
             </div>
+            ) : null}
           </div>
         )}
 
