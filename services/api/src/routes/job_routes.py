@@ -97,14 +97,12 @@ async def submit_job(
 
 @router.get("", response_model=list[JobResponse])
 async def list_jobs(
-    current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
-    limit: int = 20
+    limit: int = 30
 ):
     query = (
         select(GenerationJob)
         .options(selectinload(GenerationJob.outputs))
-        .where(GenerationJob.user_id == current_user.id)
         .order_by(desc(GenerationJob.created_at))
         .limit(limit)
     )
@@ -121,13 +119,12 @@ async def list_jobs(
 @router.get("/{job_id}", response_model=JobResponse)
 async def get_job(
     job_id: str,
-    current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db)
 ):
     query = (
         select(GenerationJob)
         .options(selectinload(GenerationJob.outputs))
-        .where(GenerationJob.id == job_id, GenerationJob.user_id == current_user.id)
+        .where(GenerationJob.id == job_id)
     )
     result = await session.execute(query)
     job = result.scalar_one_or_none()

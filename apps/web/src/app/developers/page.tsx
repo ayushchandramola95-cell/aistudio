@@ -19,6 +19,7 @@ import {
   Server,
   Lock,
   Sparkles,
+  Globe,
   CheckCircle2,
   AlertCircle,
   Eye,
@@ -52,6 +53,10 @@ interface ModelRequirements {
   allowedAspectRatios: string[];
   maxPromptLength: number;
   maxBatchCount: number;
+  maxReferences?: number;
+  supportsWebGrounding?: boolean;
+  supportedResolutions?: string[];
+  parallelFanOut?: boolean;
   safetyFilterLevel: "block_none" | "block_low_and_above" | "block_medium_and_above";
   personGeneration: "allow_all" | "allow_adult" | "dont_allow";
   synthIdWatermark: boolean;
@@ -116,12 +121,16 @@ const DEFAULT_MODELS: ModelItem[] = [
     latency: "1.4s",
     region: "us-central1",
     enabled: true,
-    desc: "Our upgraded mainstream Gemini image model with stronger prompt adherence, and multi-reference consistency, enabling production quality image generation and edits from 1K to 4K.",
+    desc: "Our upgraded mainstream Gemini image model with stronger prompt adherence, 1M token context, up to 14 reference images for multi-character consistency, 10 aspect ratios including ultra-wide banners, 0.5K fast draft, and real-time Web Search Grounding.",
     version: "gemini-nano-banana-2.1",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "4:1", "1:4", "8:1", "1:8"],
+      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "21:9", "4:1", "1:4", "8:1", "1:8"],
       maxPromptLength: 1000000,
-      maxBatchCount: 1,
+      maxBatchCount: 4,
+      maxReferences: 14,
+      supportsWebGrounding: true,
+      supportedResolutions: ["0.5K", "1K", "2K", "4K"],
+      parallelFanOut: true,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -161,7 +170,7 @@ const DEFAULT_MODELS: ModelItem[] = [
     desc: "Class leading image generation capabilities, now optimized for high-volume, latency-sensitive asset creation.",
     version: "gemini-3.1-flash-lite-image",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "4:5", "21:9"],
       maxPromptLength: 1000000,
       maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
@@ -205,7 +214,8 @@ const DEFAULT_MODELS: ModelItem[] = [
     requirements: {
       allowedAspectRatios: ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4", "8:1", "1:8"],
       maxPromptLength: 1000000,
-      maxBatchCount: 1,
+      maxReferences: 10,
+      maxBatchCount: 2,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -245,9 +255,10 @@ const DEFAULT_MODELS: ModelItem[] = [
     desc: "gemini-3.1-flash-image is a model designed for general image generation and editing tasks, offering high quality and low latency.",
     version: "gemini-3.1-flash-image",
     requirements: {
-      allowedAspectRatios: ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4"],
+      allowedAspectRatios: ["1:1", "16:9", "4:3", "3:2", "5:4", "9:16", "3:4", "2:3", "4:5", "21:9", "4:1", "1:4", "8:1", "1:8"],
       maxPromptLength: 1000000,
-      maxBatchCount: 1,
+      maxReferences: 14,
+      maxBatchCount: 4,
       safetyFilterLevel: "block_medium_and_above",
       personGeneration: "allow_adult",
       synthIdWatermark: true,
@@ -287,7 +298,7 @@ const DEFAULT_MODELS: ModelItem[] = [
     desc: "gemini-2.5-flash-image. State-of-the-art image generation and editing model.",
     version: "gemini-2.5-flash-image",
     requirements: {
-      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+      allowedAspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "5:4", "4:5", "21:9"],
       maxPromptLength: 1000000,
       maxBatchCount: 1,
       safetyFilterLevel: "block_medium_and_above",
@@ -877,14 +888,24 @@ export default function DedicatedDeveloperConsolePage() {
                                 {model.requirements.maxPromptLength >= 1000000 ? "1M Tokens" : `${model.requirements.maxPromptLength} chars`}
                               </span>
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-800 font-mono">
-                                {model.id.includes("2-1") || model.id.includes("pro") ? "Up to 4K" : model.id.includes("lite") ? "512px / 1K" : model.id.includes("fast") ? "1MP Fast" : "Native 1K"}
+                                {model.id.includes("2-1") ? "0.5K - 4K" : model.id.includes("pro") ? "Up to 4K" : model.id.includes("lite") ? "512px / 1K" : model.id.includes("fast") ? "1MP Fast" : "Native 1K"}
                               </span>
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700">
                                 {model.requirements.allowedAspectRatios.length} Ratios
                               </span>
+                              {model.requirements.maxReferences && model.requirements.maxReferences > 0 && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700">
+                                  Up to {model.requirements.maxReferences} Refs
+                                </span>
+                              )}
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700">
-                                {model.requirements.maxBatchCount}x Batch
+                                {model.requirements.maxBatchCount}x Batch {model.requirements.parallelFanOut ? "(Fan-Out)" : ""}
                               </span>
+                              {model.requirements.supportsWebGrounding && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  Web Grounding
+                                </span>
+                              )}
                               {model.requirements.synthIdWatermark && (
                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                                   SynthID
@@ -1001,7 +1022,7 @@ export default function DedicatedDeveloperConsolePage() {
                       Allowed Canvas Aspect Ratios
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {["1:1", "16:9", "9:16", "4:3", "3:4", "21:9"].map((ratio) => {
+                      {["1:1", "16:9", "9:16", "4:3", "3:4", "21:9", "4:1", "1:4", "8:1", "1:8"].map((ratio) => {
                         const isSelected = configuringModel.requirements.allowedAspectRatios.includes(ratio);
                         return (
                           <button
@@ -1091,7 +1112,7 @@ export default function DedicatedDeveloperConsolePage() {
                       >
                         <option value={1}>1x Only (Single output)</option>
                         <option value={2}>Up to 2x Parallel</option>
-                        <option value={4}>Up to 4x Parallel (Pro Tier)</option>
+                        <option value={4}>Up to 4x Parallel (Gemini Fan-Out)</option>
                       </select>
                     </div>
 
@@ -1102,8 +1123,8 @@ export default function DedicatedDeveloperConsolePage() {
                       <input
                         type="number"
                         min={100}
-                        max={4000}
-                        step={100}
+                        max={1000000}
+                        step={1000}
                         value={configuringModel.requirements.maxPromptLength}
                         onChange={(e) =>
                           setConfiguringModel({
@@ -1139,6 +1160,78 @@ export default function DedicatedDeveloperConsolePage() {
                         className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-xs font-bold text-neutral-900 focus:outline-none focus:border-neutral-950"
                       />
                     </div>
+                  </div>
+
+                  {/* Multi-Reference Consistency & Architecture Callout */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5 p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200">
+                      <div className="flex items-center justify-between">
+                        <label className="font-bold text-neutral-800 uppercase text-[10px] tracking-wider block">
+                          Max Reference Images
+                        </label>
+                        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
+                          {configuringModel.requirements.maxReferences ?? 6} slots
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={14}
+                        value={configuringModel.requirements.maxReferences ?? 6}
+                        onChange={(e) =>
+                          setConfiguringModel({
+                            ...configuringModel,
+                            requirements: {
+                              ...configuringModel.requirements,
+                              maxReferences: Number(e.target.value),
+                            },
+                          })
+                        }
+                        className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <div className="flex justify-between text-[9px] text-neutral-400">
+                        <span>0 (None)</span>
+                        <span>6 (Std)</span>
+                        <span>14 (Nano Banana 2.1 Max)</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200/80 text-[11px] text-blue-900 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-blue-950">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span>Gemini 1-Output Fan-Out</span>
+                      </div>
+                      <p className="text-blue-800/90 text-[10px] leading-relaxed">
+                        Unlike diffusion endpoints with native sampleCount, Gemini-based models generate 1 image per turn. Batch selections (1–4) trigger parallel fan-out calls and scale credits proportionally.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Google Web Search Grounding Toggle */}
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200">
+                    <div className="space-y-0.5">
+                      <div className="font-bold text-neutral-900 flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-emerald-600" />
+                        <span>Real-Time Google Web Search Grounding</span>
+                      </div>
+                      <div className="text-[11px] text-neutral-500">
+                        Enables visual synthesis grounded in real-time web search (e.g. current events, specific products, new logos, landmarks).
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={configuringModel.requirements.supportsWebGrounding ?? false}
+                      onChange={(e) =>
+                        setConfiguringModel({
+                          ...configuringModel,
+                          requirements: {
+                            ...configuringModel.requirements,
+                            supportsWebGrounding: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 accent-neutral-950 rounded cursor-pointer"
+                    />
                   </div>
 
                   {/* SynthID Watermark Toggle */}

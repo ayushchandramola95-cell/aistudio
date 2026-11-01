@@ -6,6 +6,7 @@ import {
   Wand2,
   Image as ImageIcon,
   Sliders,
+  Brain,
   ChevronDown,
   Layers,
   Zap,
@@ -56,6 +57,22 @@ import {
 // DATA TYPES & INTERFACES
 // ─────────────────────────────────────────────────────────────────────────────
 
+type AspectRatioId =
+  | "1:1"
+  | "16:9"
+  | "9:16"
+  | "4:3"
+  | "3:4"
+  | "3:2"
+  | "2:3"
+  | "5:4"
+  | "4:5"
+  | "21:9"
+  | "4:1"
+  | "1:4"
+  | "8:1"
+  | "1:8";
+
 interface ModelDef {
   id: string;
   name: string;
@@ -66,8 +83,8 @@ interface ModelDef {
   cost: number;
   desc: string;
   maxResolution: string;
-  aspectRatios: string[];
-  category: "nano" | "imagen" | "specialized" | "all";
+  aspectRatios: AspectRatioId[];
+  category: "nano" | "imagen" | "specialized" | "local" | "all";
   isRecommended?: boolean;
   avatarIcon?: string;
   iconBg?: string;
@@ -75,10 +92,11 @@ interface ModelDef {
   // Dynamic engine capabilities
   maxPromptLength: number;
   maxReferences: number;
-  supportedResolutions: ("1K" | "2K" | "4K")[];
+  supportedResolutions: ("0.5K" | "1K" | "2K" | "4K")[];
   maxOutputs: number;
   supportedQualityTiers: ("draft" | "standard" | "high")[];
   supportsNegativePrompt: boolean;
+  supportsWebGrounding?: boolean;
   estimatedRenderTime: string;
   supportedCreationModes: string[];
 }
@@ -122,7 +140,7 @@ interface GenerationJob {
 
 const ASPECT_RATIO_PREVIEWS = [
   {
-    id: "1:1",
+    id: "1:1" as const,
     name: "Square",
     svg: (active: boolean) => (
       <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
@@ -132,104 +150,251 @@ const ASPECT_RATIO_PREVIEWS = [
           width="12"
           height="12"
           rx="2"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
         />
       </svg>
     ),
   },
   {
-    id: "16:9",
-    name: "Landscape",
+    id: "16:9" as const,
+    name: "Landscape Wide",
     svg: (active: boolean) => (
-      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 18 14" fill="none">
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
         <rect
           x="1"
-          y="2.5"
-          width="16"
-          height="9"
+          y="4"
+          width="14"
+          height="8"
           rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
         />
       </svg>
     ),
   },
   {
-    id: "9:16",
-    name: "Portrait",
+    id: "9:16" as const,
+    name: "Portrait Story",
     svg: (active: boolean) => (
-      <svg className="w-3 h-4 shrink-0" viewBox="0 0 14 18" fill="none">
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
         <rect
-          x="2.5"
+          x="4"
           y="1"
-          width="9"
-          height="16"
+          width="8"
+          height="14"
           rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
         />
       </svg>
     ),
   },
   {
-    id: "4:3",
-    name: "Classic",
+    id: "4:3" as const,
+    name: "Standard Landscape",
     svg: (active: boolean) => (
-      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
-        <rect
-          x="1.5"
-          y="1.5"
-          width="13"
-          height="11"
-          rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "3:2",
-    name: "Photo",
-    svg: (active: boolean) => (
-      <svg className="w-4 h-3.5 shrink-0" viewBox="0 0 16 14" fill="none">
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
         <rect
           x="1"
-          y="2"
+          y="3"
           width="14"
           height="10"
           rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
         />
       </svg>
     ),
   },
   {
-    id: "3:4",
-    name: "Vertical",
+    id: "3:4" as const,
+    name: "Tall Portrait",
     svg: (active: boolean) => (
-      <svg className="w-3 h-3.5 shrink-0" viewBox="0 0 14 16" fill="none">
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="3"
+          y="1"
+          width="10"
+          height="14"
+          rx="1.5"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "3:2" as const,
+    name: "Classic Photo",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="1"
+          y="3.5"
+          width="14"
+          height="9.3"
+          rx="1.5"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "2:3" as const,
+    name: "Vertical Photo",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="3.5"
+          y="1"
+          width="9.3"
+          height="14"
+          rx="1.5"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "5:4" as const,
+    name: "Medium Landscape",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
         <rect
           x="1.5"
+          y="2.8"
+          width="13"
+          height="10.4"
+          rx="1.5"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "4:5" as const,
+    name: "Social Portrait",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="2.8"
           y="1.5"
-          width="11"
+          width="10.4"
           height="13"
           rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className={active ? "text-blue-600 fill-blue-50/70" : "text-neutral-400"}
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "21:9" as const,
+    name: "Ultrawide Banner",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="0.5"
+          y="4.8"
+          width="15"
+          height="6.4"
+          rx="1.5"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "4:1" as const,
+    name: "Panoramic Ribbon",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="0.5"
+          y="6"
+          width="15"
+          height="4"
+          rx="1"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "1:4" as const,
+    name: "Vertical Skyscraper",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="6"
+          y="0.5"
+          width="4"
+          height="15"
+          rx="1"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "8:1" as const,
+    name: "Extreme Panorama",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="0"
+          y="7"
+          width="16"
+          height="2"
+          rx="0.5"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "1:8" as const,
+    name: "Extreme Vertical",
+    svg: (active: boolean) => (
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+        <rect
+          x="7"
+          y="0"
+          width="2"
+          height="16"
+          rx="0.5"
+          stroke={active ? "#2563eb" : "#737373"}
+          strokeWidth="1.5"
+          fill={active ? "#dbeafe" : "none"}
         />
       </svg>
     ),
   },
 ];
+
+const PRIMARY_RATIO_IDS: AspectRatioId[] = ["1:1", "16:9", "9:16", "4:3"];
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MODELS REPOSITORY (With Dynamic Engine Capabilities)
@@ -244,20 +409,21 @@ const STUDIO_MODELS: ModelDef[] = [
     badge: "Flagship",
     badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
     cost: 6,
-    desc: "Upgraded mainstream Gemini model with stronger prompt adherence and multi-reference consistency from 1K to 4K.",
+    desc: "Upgraded mainstream Gemini model with stronger prompt adherence, 1M token context, 14 reference images, and real-time Web Search Grounding.",
     maxResolution: "Up to 4096×4096 (4K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "5:4", "4:5", "21:9"],
     category: "nano",
     isRecommended: true,
     avatarIcon: "🍌",
     iconBg: "bg-blue-50 border-blue-200 text-blue-600",
-    maxPromptLength: 5000,
-    maxReferences: 6,
-    supportedResolutions: ["1K", "2K", "4K"],
+    maxPromptLength: 50000,
+    maxReferences: 14,
+    supportedResolutions: ["0.5K", "1K", "2K", "4K"],
     maxOutputs: 4,
-    supportedQualityTiers: ["draft", "standard", "high"],
+    supportedQualityTiers: [],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "1.6s",
+    supportsWebGrounding: true,
+    estimatedRenderTime: "1.4s",
     supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "style-transfer", "character-consistency"],
   },
   {
@@ -270,18 +436,19 @@ const STUDIO_MODELS: ModelDef[] = [
     cost: 3,
     desc: "Class-leading generation optimized for high-volume creation and rapid drafting with sub-second latency.",
     maxResolution: "1024×1024 (1K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3"],
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "2:3", "4:5"],
     category: "nano",
     isRecommended: true,
     avatarIcon: "⚡",
     iconBg: "bg-emerald-50 border-emerald-200 text-emerald-600",
     maxPromptLength: 4000,
     maxReferences: 2,
-    supportedResolutions: ["1K"],
-    maxOutputs: 4,
-    supportedQualityTiers: ["draft", "standard"],
+    supportedResolutions: ["0.5K", "1K"],
+    maxOutputs: 1,
+    supportedQualityTiers: [],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "0.9s",
+    supportsWebGrounding: true,
+    estimatedRenderTime: "0.8s",
     supportedCreationModes: ["text-to-image", "image-to-image"],
   },
   {
@@ -294,18 +461,19 @@ const STUDIO_MODELS: ModelDef[] = [
     cost: 10,
     desc: "Internal Thinking Process reasoning budget, multilingual crisp typography, and complex infographics in studio 4K.",
     maxResolution: "Up to 4096×4096 (4K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+    aspectRatios: ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4", "8:1", "1:8"],
     category: "nano",
     isRecommended: true,
     avatarIcon: "💎",
     iconBg: "bg-purple-50 border-purple-200 text-purple-600",
-    maxPromptLength: 5000,
-    maxReferences: 4,
+    maxPromptLength: 10000,
+    maxReferences: 10,
     supportedResolutions: ["1K", "2K", "4K"],
     maxOutputs: 2,
-    supportedQualityTiers: ["standard", "high"],
+    supportedQualityTiers: [],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "2.8s",
+    supportsWebGrounding: true,
+    estimatedRenderTime: "2.6s",
     supportedCreationModes: ["text-to-image", "image-to-image", "inpainting", "outpainting", "style-transfer", "character-consistency"],
   },
   {
@@ -317,19 +485,20 @@ const STUDIO_MODELS: ModelDef[] = [
     badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
     cost: 5,
     desc: "General image generation and editing tasks offering balanced high visual quality and low latency.",
-    maxResolution: "1024×1024 (1K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+    maxResolution: "Up to 4096×4096 (4K)",
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "5:4", "4:5", "21:9", "4:1", "1:4", "8:1", "1:8"],
     category: "nano",
     isRecommended: false,
     avatarIcon: "🌟",
     iconBg: "bg-amber-50 border-amber-200 text-amber-600",
-    maxPromptLength: 5000,
-    maxReferences: 4,
-    supportedResolutions: ["1K"],
+    maxPromptLength: 10000,
+    maxReferences: 14,
+    supportedResolutions: ["0.5K", "1K", "2K", "4K"],
     maxOutputs: 4,
-    supportedQualityTiers: ["draft", "standard", "high"],
+    supportedQualityTiers: [],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "1.4s",
+    supportsWebGrounding: true,
+    estimatedRenderTime: "1.2s",
     supportedCreationModes: ["text-to-image", "image-to-image", "character-consistency"],
   },
   {
@@ -338,11 +507,11 @@ const STUDIO_MODELS: ModelDef[] = [
     provider: "Google Vertex AI",
     engine: "gemini-2.5-flash-image",
     badge: "Foundation",
-    badgeColor: "bg-neutral-100 text-neutral-700 border-neutral-200",
+    badgeColor: "bg-yellow-50 text-yellow-700 border-yellow-200",
     cost: 4,
-    desc: "State-of-the-art native multimodal image generation with direct prompt synthesis baseline.",
+    desc: "gemini-2.5-flash-image. State-of-the-art native multimodal image generation with direct prompt synthesis baseline.",
     maxResolution: "1024×1024 (1K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "5:4", "4:5", "21:9"],
     category: "nano",
     isRecommended: false,
     avatarIcon: "🍌",
@@ -350,10 +519,11 @@ const STUDIO_MODELS: ModelDef[] = [
     maxPromptLength: 4000,
     maxReferences: 3,
     supportedResolutions: ["1K"],
-    maxOutputs: 4,
-    supportedQualityTiers: ["draft", "standard", "high"],
+    maxOutputs: 1,
+    supportedQualityTiers: [],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "1.2s",
+    supportsWebGrounding: false,
+    estimatedRenderTime: "1.1s",
     supportedCreationModes: ["text-to-image", "image-to-image"],
   },
   {
@@ -368,65 +538,68 @@ const STUDIO_MODELS: ModelDef[] = [
     maxResolution: "1408×768 (1K Fast)",
     aspectRatios: ["1:1", "16:9", "9:16", "4:3"],
     category: "imagen",
-    isRecommended: true,
+    isRecommended: false,
     avatarIcon: "⚡",
     iconBg: "bg-sky-50 border-sky-200 text-sky-600",
-    maxPromptLength: 1000,
+    maxPromptLength: 2000,
     maxReferences: 0,
     supportedResolutions: ["1K"],
     maxOutputs: 4,
     supportedQualityTiers: ["draft", "standard"],
     supportsNegativePrompt: true,
-    estimatedRenderTime: "1.0s",
+    supportsWebGrounding: false,
+    estimatedRenderTime: "0.9s",
     supportedCreationModes: ["text-to-image"],
   },
   {
-    id: "virtual-try-on",
-    name: "Virtual try-on",
-    provider: "Google Vertex AI",
-    engine: "virtual-try-on-v1",
-    badge: "Specialized Apparel",
-    badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
-    cost: 8,
-    desc: "Generates realistic apparel on people with accurate fabric drape, lighting, and body shape adaptation.",
-    maxResolution: "1024×1024 (1K Portrait)",
-    aspectRatios: ["1:1", "3:4", "9:16"],
-    category: "specialized",
-    isRecommended: false,
-    avatarIcon: "👗",
-    iconBg: "bg-rose-50 border-rose-200 text-rose-600",
-    maxPromptLength: 2500,
-    maxReferences: 2,
-    supportedResolutions: ["1K"],
-    maxOutputs: 1,
-    supportedQualityTiers: ["standard", "high"],
-    supportsNegativePrompt: true,
-    estimatedRenderTime: "3.5s",
-    supportedCreationModes: ["image-to-image", "character-consistency"],
-  },
-  {
     id: "imagen-3-capability-001",
-    name: "Imagen 3 Capability 001",
+    name: "Imagen 3 Precision",
     provider: "Google Vertex AI",
     engine: "imagen-3.0-capability-001",
-    badge: "Inpainting & Edits",
+    badge: "Inpainting Pro",
     badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
-    cost: 5,
-    desc: "Fast precision targeted inpainting with visual brush mask editor, outpainting boundary expansion, and background replacement.",
-    maxResolution: "1024×1024 (1K)",
-    aspectRatios: ["1:1", "16:9", "9:16", "4:3"],
+    cost: 8,
+    desc: "Specialized inpainting and outpainting engine with boundary-aware generative fill.",
+    maxResolution: "2048×2048 (2K)",
+    aspectRatios: ["1:1", "16:9", "9:16", "4:3", "3:4"],
     category: "imagen",
     isRecommended: false,
     avatarIcon: "🖌️",
     iconBg: "bg-indigo-50 border-indigo-200 text-indigo-600",
+    maxPromptLength: 3000,
+    maxReferences: 1,
+    supportedResolutions: ["1K", "2K"],
+    maxOutputs: 2,
+    supportedQualityTiers: ["standard", "high"],
+    supportsNegativePrompt: true,
+    supportsWebGrounding: false,
+    estimatedRenderTime: "2.4s",
+    supportedCreationModes: ["inpainting", "outpainting"],
+  },
+  {
+    id: "virtual-try-on-v1",
+    name: "Try-On Studio v1",
+    provider: "Google Cloud / FitEngine",
+    engine: "virtual-try-on-001",
+    badge: "E-Commerce",
+    badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+    cost: 12,
+    desc: "Specialized garment drape and fitting engine for e-commerce apparel visualization.",
+    maxResolution: "1024×1024 (1K)",
+    aspectRatios: ["3:4", "9:16", "1:1"],
+    category: "specialized",
+    isRecommended: false,
+    avatarIcon: "👗",
+    iconBg: "bg-rose-50 border-rose-200 text-rose-600",
     maxPromptLength: 2000,
     maxReferences: 2,
     supportedResolutions: ["1K"],
-    maxOutputs: 4,
-    supportedQualityTiers: ["draft", "standard", "high"],
-    supportsNegativePrompt: true,
-    estimatedRenderTime: "1.9s",
-    supportedCreationModes: ["image-to-image", "inpainting", "outpainting"],
+    maxOutputs: 1,
+    supportedQualityTiers: ["standard", "high"],
+    supportsNegativePrompt: false,
+    supportsWebGrounding: false,
+    estimatedRenderTime: "3.2s",
+    supportedCreationModes: ["character-consistency", "image-to-image"],
   },
 ];
 
@@ -577,67 +750,7 @@ const CREATION_MODES: CreationModeDef[] = [
 // INITIAL SHOWCASE FEED ITEMS (from ChatGPT mockup)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const INITIAL_FEED_ITEMS: FeedItem[] = [
-  {
-    id: "feed-1",
-    title: "Majestic Dragon Sunrise",
-    prompt: "A majestic dragon flying over snow-covered mountains at sunrise, cinematic lighting, ultra detailed, realistic, epic fantasy, volumetric clouds, 8k",
-    modelName: "Nano Banana 2.1",
-    cost: 6,
-    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=900&auto=format&fit=crop&q=85",
-    timestamp: "2 hours ago",
-    aspectRatio: "16:9",
-    resolution: "2K",
-    isFavorite: true,
-  },
-  {
-    id: "feed-2",
-    title: "Cyberpunk Supercar Nocturne",
-    prompt: "Futuristic sports supercar racing through rainy neo-Tokyo street, neon reflections on wet asphalt, volumetric fog, 8k cinematic",
-    modelName: "Nano Banana Pro",
-    cost: 10,
-    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=900&auto=format&fit=crop&q=85",
-    timestamp: "5 hours ago",
-    aspectRatio: "16:9",
-    resolution: "4K",
-  },
-  {
-    id: "feed-3",
-    title: "Cherry Blossom Spirit",
-    prompt: "Ethereal portrait with long flowing pastel hair amidst falling cherry blossom petals, golden hour light leaks, masterpiece",
-    modelName: "Imagen 4 Fast",
-    cost: 4,
-    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=900&auto=format&fit=crop&q=85",
-    timestamp: "1 day ago",
-    aspectRatio: "1:1",
-    resolution: "1K",
-    isFavorite: true,
-  },
-  {
-    id: "feed-4",
-    title: "Meadow Blossom Feline",
-    prompt: "Fluffy white kitten with vivid sapphire eyes sitting in spring wildflowers meadow, soft morning dew, macro portrait photography",
-    modelName: "Nano Banana 2 Lite",
-    cost: 3,
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=900&auto=format&fit=crop&q=85",
-    timestamp: "1 day ago",
-    aspectRatio: "1:1",
-    resolution: "1K",
-  },
-  {
-    id: "feed-5",
-    title: "Nordic Glass Villa Sunset",
-    prompt: "Ultra modern minimalist luxury architectural house with infinity reflection pool, floor to ceiling glass, twilight sky glow",
-    modelName: "Nano Banana 2",
-    cost: 5,
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&auto=format&fit=crop&q=85",
-    timestamp: "2 days ago",
-    aspectRatio: "16:9",
-    resolution: "1K",
-  },
-];
-
-// Sample Reference Photos (Initially empty so right-side influence controls remain cleanly hidden until user adds a reference)
+const INITIAL_FEED_ITEMS: FeedItem[] = [];
 const INITIAL_REFERENCES: { id: string; name: string; url: string }[] = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -784,14 +897,87 @@ export default function StudioPage() {
   const [activeStyleId, setActiveStyleId] = useState<string>("photorealistic");
 
   // Generation Settings
-  const [selectedRatio, setSelectedRatio] = useState<string>("16:9");
-  const [selectedResolution, setSelectedResolution] = useState<string>("2K");
+  const [selectedRatio, setSelectedRatio] = useState<AspectRatioId>("16:9");
+  const [selectedResolution, setSelectedResolution] = useState<"0.5K" | "1K" | "2K" | "4K">("1K");
   const [outputsCount, setOutputsCount] = useState<number>(1);
   const [qualityTier, setQualityTier] = useState<string>("standard");
   const [inlineMoreOpen, setInlineMoreOpen] = useState<boolean>(false);
 
   // Advanced Settings panel state (Collapsible Split-View)
   const [advancedPanelOpen, setAdvancedPanelOpen] = useState<boolean>(false);
+
+  // Dynamic Google Cloud / Vertex AI Engine Parameters
+  const [thinkingBudget, setThinkingBudget] = useState<"standard" | "deep">("standard");
+  const [safetyFilterLevel, setSafetyFilterLevel] = useState<string>("block_medium_and_above");
+  const [personGeneration, setPersonGeneration] = useState<string>("allow_adult");
+  const [synthIdWatermark, setSynthIdWatermark] = useState<boolean>(true);
+  const [webGrounding, setWebGrounding] = useState<boolean>(false);
+  const [inpaintBoundaryFeather, setInpaintBoundaryFeather] = useState<number>(6);
+
+  // Ratio rail sliding refs and states
+  const ratioRailRef = useRef<HTMLDivElement>(null);
+  const [canScrollRatioLeft, setCanScrollRatioLeft] = useState<boolean>(false);
+  const [canScrollRatioRight, setCanScrollRatioRight] = useState<boolean>(true);
+
+  // Live generation states
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
+  const [newlyGeneratedId, setNewlyGeneratedId] = useState<string | null>(null);
+  const generationFeedRef = useRef<HTMLDivElement>(null);
+
+  // Sidebar sync
+  const sidebarWasCollapsedRef = useRef<boolean | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("aistudio_sidebar_collapsed");
+      if (saved === "true") setSidebarCollapsed(true);
+    } catch {}
+
+    const handleSidebarChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ collapsed?: boolean }>;
+      if (customEvent.detail?.collapsed !== undefined) {
+        setSidebarCollapsed(customEvent.detail.collapsed);
+      }
+    };
+    window.addEventListener("aistudio:sidebar-changed", handleSidebarChange);
+    return () => window.removeEventListener("aistudio:sidebar-changed", handleSidebarChange);
+  }, []);
+
+  const handleToggleAdvancedPanel = (targetState?: boolean) => {
+    const nextState = typeof targetState === "boolean" ? targetState : !advancedPanelOpen;
+    setAdvancedPanelOpen(nextState);
+
+    if (typeof window !== "undefined") {
+      if (nextState) {
+        sidebarWasCollapsedRef.current = sidebarCollapsed;
+        window.dispatchEvent(new CustomEvent("aistudio:set-sidebar", { detail: { collapsed: true } }));
+      } else {
+        if (sidebarWasCollapsedRef.current !== null) {
+          window.dispatchEvent(
+            new CustomEvent("aistudio:set-sidebar", { detail: { collapsed: sidebarWasCollapsedRef.current } })
+          );
+          sidebarWasCollapsedRef.current = null;
+        } else {
+          window.dispatchEvent(new CustomEvent("aistudio:set-sidebar", { detail: { collapsed: false } }));
+        }
+      }
+    }
+  };
+
+  const ratioTrackWidthClass = useMemo(() => {
+    if (advancedPanelOpen) {
+      return "w-[226px] sm:w-[286px] max-w-[286px]";
+    }
+    return "w-[226px] sm:w-[350px] md:w-[420px] lg:w-[490px] xl:w-[540px] max-w-[540px]";
+  }, [advancedPanelOpen]);
+
+  const checkRatioScroll = () => {
+    if (!ratioRailRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = ratioRailRef.current;
+    setCanScrollRatioLeft(scrollLeft > 2);
+    setCanScrollRatioRight(scrollLeft < scrollWidth - clientWidth - 2);
+  };
   const [steps, setSteps] = useState<number>(30);
   const [cfgScale, setCfgScale] = useState<number>(7.5);
   const [sampler, setSampler] = useState<string>("DPM++ 2M Karras");
@@ -842,7 +1028,7 @@ export default function StudioPage() {
       setSelectedRatio(currentModel.aspectRatios[0] || "1:1");
     }
     // 2. Resolution
-    if (!currentModel.supportedResolutions.includes(selectedResolution as "1K" | "2K" | "4K")) {
+    if (!currentModel.supportedResolutions.includes(selectedResolution)) {
       const highest = currentModel.supportedResolutions[currentModel.supportedResolutions.length - 1];
       setSelectedResolution(highest || "1K");
     }
@@ -977,26 +1163,104 @@ export default function StudioPage() {
     };
   }, [visibleModels]);
 
-  // Estimated Cost calculation
-  const estimatedCost = useMemo(() => {
-    let cost = currentModel.cost;
-    if (selectedResolution === "2K") cost += 1;
-    if (selectedResolution === "4K") cost += 2;
-    if (qualityTier === "high") cost += 1;
-    return cost * outputsCount;
-  }, [currentModel, selectedResolution, qualityTier, outputsCount]);
-
-  // Dynamic pixel dimensions label based on aspect ratio & resolution
   const dynamicDimensions = useMemo(() => {
     const dimMap: Record<string, Record<string, string>> = {
-      "1:1": { "1K": "1024 × 1024", "2K": "2048 × 2048", "4K": "4096 × 4096" },
-      "16:9": { "1K": "1344 × 768", "2K": "1920 × 1080", "4K": "3840 × 2160" },
-      "9:16": { "1K": "768 × 1344", "2K": "1080 × 1920", "4K": "2160 × 3840" },
-      "4:3": { "1K": "1152 × 864", "2K": "1600 × 1200", "4K": "3200 × 2400" },
-      "3:2": { "1K": "1216 × 832", "2K": "1800 × 1200", "4K": "3600 × 2400" },
+      "0.5K": {
+        "1:1": "512×512",
+        "16:9": "680×384",
+        "9:16": "384×680",
+        "4:3": "592×444",
+        "3:4": "444×592",
+        "3:2": "624×416",
+        "2:3": "416×624",
+        "5:4": "572×458",
+        "4:5": "458×572",
+        "21:9": "784×336",
+        "4:1": "1024×256",
+        "1:4": "256×1024",
+        "8:1": "1024×128",
+        "1:8": "128×1024",
+      },
+      "1K": {
+        "1:1": "1024×1024",
+        "16:9": "1360×768",
+        "9:16": "768×1360",
+        "4:3": "1184×888",
+        "3:4": "888×1184",
+        "3:2": "1248×832",
+        "2:3": "832×1248",
+        "5:4": "1144×916",
+        "4:5": "916×1144",
+        "21:9": "1568×672",
+        "4:1": "2048×512",
+        "1:4": "512×2048",
+        "8:1": "2048×256",
+        "1:8": "256×2048",
+      },
+      "2K": {
+        "1:1": "2048×2048",
+        "16:9": "2720×1536",
+        "9:16": "1536×2720",
+        "4:3": "2368×1776",
+        "3:4": "1776×2368",
+        "3:2": "2496×1664",
+        "2:3": "1664×2496",
+        "5:4": "2288×1832",
+        "4:5": "1832×2288",
+        "21:9": "3136×1344",
+        "4:1": "4096×1024",
+        "1:4": "1024×4096",
+        "8:1": "4096×512",
+        "1:8": "512×4096",
+      },
+      "4K": {
+        "1:1": "4096×4096",
+        "16:9": "5440×3072",
+        "9:16": "3072×5440",
+        "4:3": "4736×3552",
+        "3:4": "3552×4736",
+        "3:2": "4992×3328",
+        "2:3": "3328×4992",
+        "5:4": "4576×3664",
+        "4:5": "3664×4576",
+        "21:9": "6272×2688",
+        "4:1": "8192×2048",
+        "1:4": "2048×8192",
+        "8:1": "8192×1024",
+        "1:8": "1024×8192",
+      },
     };
-    return dimMap[selectedRatio]?.[selectedResolution] || (selectedResolution === "1K" ? "1024 × 1024" : selectedResolution === "2K" ? "2048 × 2048" : "4096 × 4096");
-  }, [selectedRatio, selectedResolution]);
+    return dimMap[selectedResolution]?.[selectedRatio] || "1024×1024";
+  }, [selectedResolution, selectedRatio]);
+
+  // Calibrated cost calculator based on Google Vertex AI engine specifications
+  const estimatedCost = useMemo(() => {
+    let base = currentModel.cost;
+    if (currentModel.id === "nano-banana-pro") {
+      if (selectedResolution === "2K") base = 14;
+      else if (selectedResolution === "4K") base = 20;
+      else base = 10;
+      if (thinkingBudget === "deep") base += 2;
+    } else if (currentModel.id === "nano-banana-2") {
+      if (selectedResolution === "0.5K") base = 3;
+      else if (selectedResolution === "2K") base = 8;
+      else if (selectedResolution === "4K") base = 15;
+      else base = 5;
+    } else if (currentModel.id === "nano-banana-2-1") {
+      if (selectedResolution === "0.5K") base = 4;
+      else if (selectedResolution === "2K") base = 10;
+      else if (selectedResolution === "4K") base = 18;
+      else base = 6;
+    } else if (currentModel.id === "nano-banana-2-lite") {
+      if (selectedResolution === "0.5K") base = 2;
+      else base = 3;
+    } else if (currentModel.id === "nano-banana") {
+      base = 4;
+    } else {
+      if (qualityTier === "high") base += 1;
+    }
+    return base * outputsCount;
+  }, [currentModel, qualityTier, outputsCount, selectedResolution, thinkingBudget]);
 
   // Toggle favorite model
   const toggleFavoriteModel = (id: string, e: React.MouseEvent) => {
@@ -1090,15 +1354,66 @@ export default function StudioPage() {
     setReferenceImages((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // Load live past generations on mount
+  useEffect(() => {
+    const loadPastGenerations = async () => {
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("aistudio_token") : null;
+        const headers: Record<string, string> = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const res = await fetch("http://localhost:8100/api/v1/jobs?task_type=image_generation&limit=20", { headers });
+        if (res.ok) {
+          const jobs: any[] = await res.json();
+          const items: FeedItem[] = [];
+          for (const j of jobs) {
+            if (j.status === "succeeded" && j.result_urls?.length) {
+              for (let idx = 0; idx < j.result_urls.length; idx++) {
+                items.push({
+                  id: `${j.id}-${idx}`,
+                  title: (j.raw_prompt || "Generated Image").slice(0, 32),
+                  prompt: j.raw_prompt || "",
+                  modelName: j.model_id || "Vertex AI",
+                  cost: j.credits_cost || 4,
+                  image: j.result_urls[idx],
+                  timestamp: "Recently",
+                  aspectRatio: j.parameters?.aspect_ratio || "1:1",
+                  resolution: j.parameters?.resolution || "1024×1024",
+                  isFavorite: false,
+                });
+              }
+            }
+          }
+          if (items.length > 0) {
+            setFeedItems(items);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load historical generations from backend:", err);
+      }
+    };
+    loadPastGenerations();
+  }, []);
+
   // Trigger Generation
   const handleGenerate = async () => {
     if (!prompt.trim() || isGenerating) return;
     setErrorMsg(null);
     setIsGenerating(true);
-    setProgress(15);
-    setGenerationPhase("Initializing pipeline & allocating credits...");
+    setProgress(10);
+    setElapsedSeconds(0);
+    setGenerationPhase(`Connecting to Google Cloud Vertex AI (${currentModel.name})...`);
 
+    // Live elapsed timer for generation animation
     const startTime = Date.now();
+    const timerInterval = setInterval(() => {
+      setElapsedSeconds(Number(((Date.now() - startTime) / 1000).toFixed(1)));
+    }, 100);
+
+    // Auto-scroll down smoothly to the generation feed
+    setTimeout(() => {
+      generationFeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+
     const token = typeof window !== "undefined" ? localStorage.getItem("aistudio_token") : null;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -1110,101 +1425,119 @@ export default function StudioPage() {
         body: JSON.stringify({
           model_id: selectedModelId,
           task_type: "image_generation",
-          raw_prompt: prompt,
+          raw_prompt: prompt.trim(),
           parameters: {
             aspect_ratio: selectedRatio,
             resolution: selectedResolution,
             sample_count: outputsCount,
-            steps,
-            guidance_scale: cfgScale,
+            steps: currentModel.category === "local" ? steps : undefined,
+            guidance_scale: currentModel.category === "imagen" || currentModel.category === "local" ? cfgScale : undefined,
             quality: qualityTier,
             negative_prompt: negativePrompt || undefined,
+            web_search_grounding: currentModel.supportsWebGrounding ? webGrounding : false,
             seed: seedMode === "custom" ? seedValue : Math.floor(Math.random() * 999999),
           },
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Generation request failed. Starting local synthesis pipeline...");
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || "Generation submission failed on the server.");
       }
 
-      const job: GenerationJob = await res.json();
-      setProgress(40);
-      setGenerationPhase(`Rendering latent frames with ${currentModel.name}...`);
+      const job: any = await res.json();
+      setProgress(25);
+      setGenerationPhase(`Synthesizing multimodal latents with ${currentModel.name}...`);
 
-      // Poll for job completion
+      // Poll for job completion with robust timeout (up to 90 * 800ms = 72 seconds for Vertex AI)
       let completed = false;
-      for (let i = 0; i < 20; i++) {
-        await new Promise((r) => setTimeout(r, 600));
-        setProgress((p) => Math.min(92, p + 8));
+      for (let i = 0; i < 90; i++) {
+        await new Promise((r) => setTimeout(r, 800));
+
+        // Dynamic progress & phase simulation during backend processing
+        setProgress((prev) => {
+          if (prev < 45) return prev + 6;
+          if (prev < 70) return prev + 4;
+          if (prev < 90) return prev + 2;
+          return Math.min(94, prev + 1);
+        });
+
+        if (i === 4) {
+          setGenerationPhase(`Synthesizing multimodal image latents (${selectedRatio})...`);
+        } else if (i === 10) {
+          setGenerationPhase(`Decoding high-fidelity ${selectedResolution} canvas with Vertex AI...`);
+        } else if (i === 16) {
+          setGenerationPhase(`Applying SynthID digital watermark & finalizing output...`);
+        }
 
         try {
-          const pollRes = await fetch(`http://localhost:8100/api/v1/jobs/${job.id}`);
+          const pollRes = await fetch(`http://localhost:8100/api/v1/jobs/${job.id}`, { headers });
           if (pollRes.ok) {
-            const pollData: GenerationJob = await pollRes.json();
+            const pollData: any = await pollRes.json();
             if (pollData.status === "COMPLETED" && pollData.outputs && pollData.outputs.length > 0) {
-              const newFeedItem: FeedItem = {
-                id: `gen-${Date.now()}`,
-                title: prompt.slice(0, 32) + "...",
-                prompt,
-                modelName: currentModel.name,
-                cost: estimatedCost,
-                image: pollData.outputs[0],
-                timestamp: "Just now",
-                aspectRatio: selectedRatio,
-                resolution: selectedResolution,
-                isFavorite: false,
-              };
-              setFeedItems((prev) => [newFeedItem, ...prev]);
+              const newFeedItems: FeedItem[] = pollData.outputs.map((out: any, idx: number) => {
+                const fullUrl = typeof out === "string"
+                  ? (out.startsWith("http") ? out : `http://localhost:8100${out.startsWith("/") ? "" : "/"}${out}`)
+                  : (out.download_url || (out.file_key?.startsWith("http") ? out.file_key : `http://localhost:8100${out.file_key?.startsWith("/") ? "" : "/"}${out.file_key}`));
+
+                return {
+                  id: `gen-${job.id}-${idx}`,
+                  title: `${prompt.slice(0, 32)}... ${pollData.outputs.length > 1 ? `(${idx + 1}/${pollData.outputs.length})` : ""}`,
+                  prompt,
+                  modelName: currentModel.name,
+                  cost: Math.round(estimatedCost / pollData.outputs.length),
+                  image: fullUrl,
+                  timestamp: "Just now",
+                  aspectRatio: selectedRatio,
+                  resolution: selectedResolution,
+                  isFavorite: false,
+                };
+              });
+
+              setFeedItems((prev) => [...newFeedItems, ...prev]);
+              setNewlyGeneratedId(newFeedItems[0].id);
               completed = true;
+
+              // Smoothly scroll to the newly generated image card
+              setTimeout(() => {
+                const targetEl = document.getElementById(`feed-card-${newFeedItems[0].id}`);
+                if (targetEl) {
+                  targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                } else {
+                  generationFeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }, 250);
+
+              // Clear highlight badge after 7 seconds
+              setTimeout(() => {
+                setNewlyGeneratedId((current) => (current === newFeedItems[0].id ? null : current));
+              }, 7000);
+
               break;
+            } else if (pollData.status === "FAILED") {
+              throw new Error(pollData.error_message || "Generation failed on Vertex AI engine.");
             }
           }
-        } catch {
-          // continue polling
+        } catch (pollErr: any) {
+          if (pollErr.message && pollErr.message.includes("failed on Vertex AI")) {
+            throw pollErr;
+          }
+          // otherwise continue polling
         }
       }
 
       if (!completed) {
-        // Fallback showcase addition
-        const newFeedItem: FeedItem = {
-          id: `gen-${Date.now()}`,
-          title: prompt.slice(0, 32) + "...",
-          prompt,
-          modelName: currentModel.name,
-          cost: estimatedCost,
-          image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=90",
-          timestamp: "Just now",
-          aspectRatio: selectedRatio,
-          resolution: selectedResolution,
-          isFavorite: false,
-        };
-        setFeedItems((prev) => [newFeedItem, ...prev]);
+        throw new Error("Generation timed out on Google Cloud. Please try again.");
       }
 
       setProgress(100);
-      setGenerationPhase("Generation complete! Ultra-high definition ready.");
+      setGenerationPhase("Generation complete! Ready in high resolution.");
       setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 4000);
+      setTimeout(() => setShowSuccessToast(false), 5000);
     } catch (err: any) {
-      // Create instant realistic synthesis item
-      const newFeedItem: FeedItem = {
-        id: `gen-${Date.now()}`,
-        title: prompt.slice(0, 32) + "...",
-        prompt,
-        modelName: currentModel.name,
-        cost: estimatedCost,
-        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=90",
-        timestamp: "Just now",
-        aspectRatio: selectedRatio,
-        resolution: selectedResolution,
-        isFavorite: false,
-      };
-      setFeedItems((prev) => [newFeedItem, ...prev]);
-      setProgress(100);
-      setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 4000);
+      setErrorMsg(err.message || "Failed to generate image. Please try again.");
     } finally {
+      clearInterval(timerInterval);
       setIsGenerating(false);
     }
   };
@@ -2045,7 +2378,7 @@ export default function StudioPage() {
               {/* Advanced Split Drawer Toggle */}
               <button
                 type="button"
-                onClick={() => setAdvancedPanelOpen(!advancedPanelOpen)}
+                onClick={() => handleToggleAdvancedPanel()}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                   advancedPanelOpen
                     ? "bg-blue-50 border-blue-300 text-blue-700 shadow-2xs font-bold"
@@ -2065,20 +2398,37 @@ export default function StudioPage() {
 
             {/* ── THE ONE-LINE SETTINGS TOOLBAR (Quick Settings + Toggable More) ── */}
             <div className="p-2 rounded-2xl bg-neutral-100/75 border border-neutral-200/75 flex flex-wrap items-center justify-between gap-2.5">
-              {/* Quick Setting 1: Aspect Ratio */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Quick Setting 1: Aspect Ratio Sliding Box (Responsive Width based on layout) */}
+              <div className="flex items-center gap-1.5 shrink-0 min-w-0">
                 <span className="text-xs font-bold text-neutral-700 pl-1 shrink-0">Ratio:</span>
-                <div className="flex items-center gap-1 bg-white/95 p-1 rounded-xl border border-neutral-200/70 shadow-2xs">
-                  {ASPECT_RATIO_PREVIEWS
-                    .filter((r) => currentModel.aspectRatios.includes(r.id))
-                    .map((ratio) => {
+                <div className="flex items-center gap-0.5 bg-white/95 p-1 rounded-xl border border-neutral-200/70 shadow-2xs shrink-0 min-w-0">
+                  {/* Slide Left Button */}
+                  <button
+                    type="button"
+                    disabled={!canScrollRatioLeft}
+                    onClick={() => ratioRailRef.current?.scrollBy({ left: -140, behavior: "smooth" })}
+                    className="w-5 h-7 rounded-lg hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-all cursor-pointer shrink-0"
+                    title="Slide ratios left"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Scrollable track of ratio buttons - dynamic width based on available space */}
+                  <div
+                    ref={ratioRailRef}
+                    onScroll={checkRatioScroll}
+                    className={`flex items-center gap-1 overflow-x-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden scroll-smooth px-0.5 transition-all duration-300 ease-in-out ${ratioTrackWidthClass}`}
+                  >
+                    {currentModel.aspectRatios.map((id) => {
+                      const ratio = ASPECT_RATIO_PREVIEWS.find((r) => r.id === id);
+                      if (!ratio) return null;
                       const isSelected = selectedRatio === ratio.id;
                       return (
                         <button
                           key={ratio.id}
                           type="button"
                           onClick={() => setSelectedRatio(ratio.id)}
-                          className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer border shrink-0 ${
                             isSelected
                               ? "bg-blue-50 text-blue-900 border-blue-200 shadow-2xs font-bold ring-1 ring-blue-500/20"
                               : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 border-transparent"
@@ -2090,12 +2440,23 @@ export default function StudioPage() {
                         </button>
                       );
                     })}
+                  </div>
+
+                  {/* Slide Right Button */}
+                  <button
+                    type="button"
+                    disabled={!canScrollRatioRight}
+                    onClick={() => ratioRailRef.current?.scrollBy({ left: 140, behavior: "smooth" })}
+                    className="w-5 h-7 rounded-lg hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-all cursor-pointer shrink-0"
+                    title="Slide ratios right"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
               {/* Vertical Divider */}
               <div className="h-6 w-px bg-neutral-200 hidden md:block shrink-0" />
-
               {/* Quick Setting 2: Resolution */}
               <div className="flex items-center gap-2 shrink-0">
                 <div className="flex flex-col pl-1">
@@ -2103,10 +2464,17 @@ export default function StudioPage() {
                   <span className="text-[9px] font-mono text-neutral-400 font-medium leading-tight">{dynamicDimensions}</span>
                 </div>
                 <div className="flex items-center gap-1 bg-white/95 p-1 rounded-xl border border-neutral-200/70 shadow-2xs">
-                  {(["1K", "2K", "4K"] as const).map((res) => {
-                    const isSupported = currentModel.supportedResolutions.includes(res);
+                  {(["0.5K", "1K", "2K", "4K"] as const).map((res) => {
+                    const isSupported = currentModel.supportedResolutions.includes(res as any);
                     const isSelected = selectedResolution === res;
-                    const badge = res === "1K" ? "Std" : res === "2K" ? "+1cr" : "+2cr";
+                    const badge =
+                      res === "0.5K"
+                        ? "Draft"
+                        : res === "1K"
+                        ? "Std"
+                        : res === "2K"
+                        ? "+3cr"
+                        : "+10cr";
                     return (
                       <button
                         key={res}
@@ -2120,7 +2488,7 @@ export default function StudioPage() {
                             ? "bg-blue-50 text-blue-900 border-blue-200 shadow-2xs font-bold ring-1 ring-blue-500/20 cursor-pointer"
                             : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 border-transparent cursor-pointer"
                         }`}
-                        title={isSupported ? `${res} (${badge})` : `4K not supported by ${currentModel.name}`}
+                        title={isSupported ? `${res} (${badge})` : `Resolution ${res} not supported by ${currentModel.name}`}
                       >
                         <span>{res}</span>
                         <span className={`text-[9px] ${isSelected ? "text-blue-600 font-bold" : "text-neutral-400"}`}>
@@ -2429,143 +2797,640 @@ export default function StudioPage() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            RIGHT COLLAPSIBLE PANEL: ADVANCED SETTINGS (Design 1)
+            RIGHT COLLAPSIBLE PANEL: ADVANCED SETTINGS (Dynamic Google Cloud Suite)
         ══════════════════════════════════════════════════════════════════════ */}
-        {advancedPanelOpen && (
-          <aside className="w-80 xl:w-96 shrink-0 rounded-3xl bg-white border border-neutral-200/90 shadow-luxury p-5 space-y-6 sticky top-24 animate-spring">
+        <div
+          className={`shrink-0 transition-all duration-300 ease-in-out ${
+            advancedPanelOpen
+              ? "w-full lg:w-80 xl:w-96 opacity-100 translate-x-0"
+              : "w-0 h-0 lg:h-auto opacity-0 overflow-hidden pointer-events-none translate-x-8"
+          }`}
+        >
+          <aside className="w-full lg:w-80 xl:w-96 rounded-3xl bg-white border border-neutral-200/90 shadow-luxury p-5 space-y-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-blue-600" />
-                <h3 className="text-sm font-bold text-neutral-950">Advanced Settings</h3>
+                <Sliders className="w-4 h-4 text-blue-600 shrink-0" />
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-950">Advanced Settings</h3>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {currentModel.category === "nano" ? (
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80">
+                        {currentModel.id === "nano-banana-pro" ? "Google Gemini Reasoning Studio" : "Google Gemini Autoregressive"}
+                      </span>
+                    ) : currentModel.category === "imagen" ? (
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                        {currentModel.id === "imagen-3-capability-001" ? "Google Imagen Inpainting Engine" : "Google Imagen Latent"}
+                      </span>
+                    ) : (
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80">
+                        Google Vertex AI Specialized
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
-                    setSteps(30);
+                    setQualityTier("standard");
+                    setThinkingBudget("standard");
+                    setInpaintBoundaryFeather(6);
                     setCfgScale(7.5);
-                    setSampler("DPM++ 2M Karras");
                     setSeedMode("random");
                     setNegativePrompt("");
+                    setSafetyFilterLevel("block_medium_and_above");
+                    setPersonGeneration("allow_adult");
+                    setSynthIdWatermark(true);
+                    setWebGrounding(false);
                   }}
                   className="text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors cursor-pointer"
+                  title="Reset to model recommended defaults"
                 >
                   Reset
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAdvancedPanelOpen(false)}
+                  onClick={() => handleToggleAdvancedPanel(false)}
                   className="p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-800 transition-colors cursor-pointer"
+                  title="Close Advanced Settings"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Sampling Sliders */}
-            <div className="space-y-4">
-              <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                Sampling
+            {/* Architecture Context Alert Card */}
+            <div
+              className={`p-3 rounded-2xl border text-xs space-y-1 transition-colors ${
+                currentModel.category === "nano"
+                  ? "bg-amber-50/60 border-amber-200/80 text-amber-900"
+                  : currentModel.category === "imagen"
+                  ? "bg-indigo-50/60 border-indigo-200/80 text-indigo-900"
+                  : "bg-rose-50/60 border-rose-200/80 text-rose-900"
+              }`}
+            >
+              <div className="flex items-center gap-1.5 font-bold">
+                <Info className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  {currentModel.id === "nano-banana-pro"
+                    ? "Gemini Multimodal Reasoning & 4K Synthesis"
+                    : currentModel.category === "nano"
+                    ? "Multimodal Token Synthesis"
+                    : currentModel.id === "imagen-3-capability-001"
+                    ? "Vertex AI Precision Inpainting & Expansion"
+                    : currentModel.category === "imagen"
+                    ? "Vertex AI Cloud Latent Pipeline"
+                    : "Vertex AI Apparel & Geometry Engine"}
+                </span>
               </div>
-
-              {/* Steps */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
-                  <span>Steps</span>
-                  <span className="font-mono text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded">
-                    {steps}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={10}
-                  max={50}
-                  value={steps}
-                  onChange={(e) => setSteps(Number(e.target.value))}
-                  className="w-full accent-blue-600"
-                />
-              </div>
-
-              {/* CFG Scale */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
-                  <span>CFG Scale</span>
-                  <span className="font-mono text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded">
-                    {cfgScale}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={1}
-                  max={20}
-                  step={0.5}
-                  value={cfgScale}
-                  onChange={(e) => setCfgScale(Number(e.target.value))}
-                  className="w-full accent-blue-600"
-                />
-              </div>
-
-              {/* Sampler Selector */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-700">Sampler</label>
-                <select
-                  value={sampler}
-                  onChange={(e) => setSampler(e.target.value)}
-                  className="w-full h-9 px-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:bg-white focus:border-blue-600 transition-all cursor-pointer"
-                >
-                  <option value="DPM++ 2M Karras">DPM++ 2M Karras</option>
-                  <option value="Euler a">Euler a</option>
-                  <option value="DDIM">DDIM</option>
-                  <option value="UniPC">UniPC</option>
-                </select>
-              </div>
+              <p className="text-[11px] leading-relaxed text-neutral-600">
+                {currentModel.id === "nano-banana-pro"
+                  ? "Gemini 3 Pro utilizes dynamic reasoning budgets to plan complex multilingual text, intricate reflections, and scene balance prior to autoregressive image generation."
+                  : currentModel.category === "nano"
+                  ? "Gemini synthesizes images directly via autoregressive multimodal token generation. Steering is achieved via prompt fidelity, Google Search grounding, and safety thresholds."
+                  : currentModel.id === "imagen-3-capability-001"
+                  ? "Google Imagen Inpainting pipeline isolates masked visual regions and denoises boundary edges with seamless background blend coherence."
+                  : currentModel.category === "imagen"
+                  ? "Google Imagen automates denoising step scheduling server-side for peak visual fidelity. Fine-tuning parameters include CFG Guidance Scale, Person Generation Policy, and SynthID."
+                  : "Specialized multimodal vision model tailored for virtual try-on, ensuring photorealistic garment texture drape, lighting continuity, and accurate human body shape alignment."}
+              </p>
             </div>
 
-            {/* Seed */}
-            <div className="space-y-2.5 pt-2 border-t border-neutral-100">
-              <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                Seed
+            {/* Quality Mode Tier Selector - Hidden for all Nano models */}
+            {currentModel.category !== "nano" && (
+            <div className="bg-neutral-50/80 p-3 rounded-2xl border border-neutral-200/80 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-800">Quality Mode</span>
+                <span className="text-[10px] text-neutral-500 font-medium capitalize">
+                  {qualityTier} render tier
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSeedMode("random")}
-                  className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    seedMode === "random"
-                      ? "bg-blue-600 text-white shadow-2xs"
-                      : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
-                  }`}
-                >
-                  Random
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSeedMode("custom")}
-                  className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    seedMode === "custom"
-                      ? "bg-blue-600 text-white shadow-2xs"
-                      : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
-                  }`}
-                >
-                  Custom
-                </button>
+              <div className="flex items-center gap-1.5 bg-neutral-100/70 p-1 rounded-xl border border-neutral-200/60">
+                {[
+                  { id: "draft", label: "Draft", hint: "Fast" },
+                  { id: "standard", label: "Standard", hint: "Optimal" },
+                  { id: "high", label: "High", hint: "+1cr" },
+                ].map((q) => {
+                  const isSupported = currentModel.supportedQualityTiers.includes(q.id as any);
+                  const isSelected = qualityTier === q.id;
+                  return (
+                    <button
+                      key={q.id}
+                      type="button"
+                      disabled={!isSupported}
+                      onClick={() => setQualityTier(q.id)}
+                      className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 border ${
+                        !isSupported
+                          ? "opacity-30 cursor-not-allowed text-neutral-400 border-transparent bg-neutral-50/50"
+                          : isSelected
+                          ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5 cursor-pointer"
+                          : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent cursor-pointer"
+                      }`}
+                      title={isSupported ? `${q.label} tier: ${q.hint}` : `Not supported by ${currentModel.name}`}
+                    >
+                      <span>{q.label}</span>
+                      <span className={`text-[9px] ${isSelected ? "text-blue-600 font-bold" : "text-neutral-400"}`}>
+                        ({q.hint})
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
-              {seedMode === "custom" && (
-                <input
-                  type="number"
-                  value={seedValue}
-                  onChange={(e) => setSeedValue(Number(e.target.value))}
-                  className="w-full h-8 px-3 rounded-xl border border-neutral-200 bg-white text-xs font-mono text-neutral-900 focus:outline-none focus:border-blue-600"
-                  placeholder="Enter seed number..."
-                />
-              )}
+              <p className="text-[10px] text-neutral-400 leading-normal">
+                High quality mode allocates additional sampling compute and precision rendering (+1 credit).
+              </p>
             </div>
+            )}
+
+            {/* ─── DYNAMIC PARAMETERS SECTION ─── */}
+
+            {/* CASE A: NANO BANANA (GEMINI MULTIMODAL) */}
+            {currentModel.category === "nano" && (
+              <div className="space-y-4">
+                <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Google Cloud Engine Controls</span>
+                  <span className="text-[10px] text-amber-600 font-semibold bg-amber-100/70 px-1.5 py-0.5 rounded">Vertex AI</span>
+                </div>
+
+                {/* Exclusive Nano Banana Pro Feature: AI Reasoning & Thinking Budget */}
+                {currentModel.id === "nano-banana-pro" && (
+                  <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-purple-900 flex items-center gap-1.5">
+                        <Brain className="w-3.5 h-3.5 text-purple-600" />
+                        AI Reasoning & Thinking Budget
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-100/80 px-1.5 py-0.5 rounded uppercase">
+                        {thinkingBudget === "deep" ? "2,000 Tokens" : "1,000 Tokens"}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[
+                        { id: "standard", label: "Standard Reasoning", desc: "1,000 tokens planning" },
+                        { id: "deep", label: "Deep Reasoning", desc: "2,000 tokens (text & physics)" },
+                      ].map((b) => (
+                        <button
+                          key={b.id}
+                          type="button"
+                          onClick={() => setThinkingBudget(b.id as any)}
+                          className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
+                            thinkingBudget === b.id
+                              ? "bg-white text-purple-950 border-purple-300 shadow-2xs font-bold ring-1 ring-purple-500/10"
+                              : "bg-purple-100/40 hover:bg-white/70 border-transparent text-purple-800"
+                          }`}
+                        >
+                          <div className="text-xs font-bold">{b.label}</div>
+                          <div className="text-[9px] text-purple-600/80">{b.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-purple-700/80 leading-tight">
+                      Allocates internal thinking budget prior to token synthesis for accurate hands, text rendering & geometry.
+                    </p>
+                  </div>
+                )}
+
+                {/* Google Web Search Grounding */}
+                <div className="p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-blue-600 shrink-0" />
+                      <div>
+                        <span className="text-xs font-bold text-neutral-800">Google Search Grounding</span>
+                        {!currentModel.supportsWebGrounding && (
+                          <span className="ml-2 text-[9px] font-bold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded">
+                            Not supported by 2.5 Flash
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!currentModel.supportsWebGrounding}
+                      onClick={() => setWebGrounding(!webGrounding)}
+                      className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                        webGrounding && currentModel.supportsWebGrounding ? "bg-blue-600" : "bg-neutral-300"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          webGrounding && currentModel.supportsWebGrounding ? "translate-x-4" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-neutral-500 leading-normal">
+                    Grounds generation with live Google Search index for current events, factual public figures, and latest world data.
+                  </p>
+                </div>
+
+                {/* Vertex AI Safety Filter Level */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
+                      Safety Filter Level
+                    </span>
+                  </div>
+                  <select
+                    value={safetyFilterLevel}
+                    onChange={(e) => setSafetyFilterLevel(e.target.value)}
+                    className="w-full h-9 px-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:bg-white focus:border-blue-600 transition-all cursor-pointer"
+                  >
+                    <option value="block_medium_and_above">Block Medium & Above (Standard)</option>
+                    <option value="block_low_and_above">Block Low & Above (Strict Family Safe)</option>
+                    <option value="block_only_high">Block Only High (High Creativity)</option>
+                    <option value="dont_block">Do Not Block (Unfiltered Developer)</option>
+                  </select>
+                </div>
+
+                {/* Person Generation Policy */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
+                    <span className="flex items-center gap-1.5">
+                      <UserCheck className="w-3.5 h-3.5 text-neutral-500" />
+                      Person Generation Policy
+                    </span>
+                  </div>
+                  <select
+                    value={personGeneration}
+                    onChange={(e) => setPersonGeneration(e.target.value)}
+                    className="w-full h-9 px-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:bg-white focus:border-blue-600 transition-all cursor-pointer"
+                  >
+                    <option value="allow_adult">Allow Adults Only (Default)</option>
+                    <option value="dont_allow">Do Not Allow (Objects & Landscapes Only)</option>
+                    <option value="allow_all">Allow All Demographics</option>
+                  </select>
+                </div>
+
+                {/* SynthID Watermark */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-neutral-800">Google SynthID Watermarking</span>
+                    <p className="text-[10px] text-neutral-500">Embeds invisible cryptographic provenance</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSynthIdWatermark(!synthIdWatermark)}
+                    className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${
+                      synthIdWatermark ? "bg-emerald-600" : "bg-neutral-300"
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                        synthIdWatermark ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Seed with Multimodal Turn Notice */}
+                <div className="space-y-2 pt-2 border-t border-neutral-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-neutral-700">Generation Seed</span>
+                    <span className="text-[10px] text-amber-600 font-medium">Turn variation active</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSeedMode("random")}
+                      className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        seedMode === "random"
+                          ? "bg-blue-600 text-white shadow-2xs"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
+                      }`}
+                    >
+                      Random
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSeedMode("custom")}
+                      className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        seedMode === "custom"
+                          ? "bg-blue-600 text-white shadow-2xs"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
+                      }`}
+                    >
+                      Fixed Seed
+                    </button>
+                  </div>
+                  {seedMode === "custom" && (
+                    <input
+                      type="number"
+                      value={seedValue}
+                      onChange={(e) => setSeedValue(Number(e.target.value))}
+                      className="w-full h-8 px-3 rounded-xl border border-neutral-200 bg-white text-xs font-mono text-neutral-900 focus:outline-none focus:border-blue-600"
+                      placeholder="Seed number..."
+                    />
+                  )}
+                  <p className="text-[10px] text-neutral-400 leading-normal">
+                    Gemini multimodal token sampling exhibits natural temperature variation across calls even with an identical seed.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* CASE B: GOOGLE IMAGEN SUITE */}
+            {currentModel.category === "imagen" && (
+              <div className="space-y-4">
+                <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Google Imagen Parameters</span>
+                  <span className="text-[10px] text-indigo-600 font-semibold bg-indigo-100/70 px-1.5 py-0.5 rounded">Vertex AI</span>
+                </div>
+
+                {/* Specialized Inpainting controls for imagen-3-capability-001 */}
+                {currentModel.id === "imagen-3-capability-001" && (
+                  <div className="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-indigo-950">
+                      <span className="flex items-center gap-1.5">
+                        <Paintbrush className="w-3.5 h-3.5 text-indigo-600" />
+                        Inpainting Boundary Blend
+                      </span>
+                      <span className="font-mono text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded text-[10px]">
+                        {inpaintBoundaryFeather}px Feather
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={20}
+                      value={inpaintBoundaryFeather}
+                      onChange={(e) => setInpaintBoundaryFeather(Number(e.target.value))}
+                      className="w-full accent-indigo-600"
+                    />
+                    <div className="flex justify-between text-[9px] text-indigo-700/80 font-medium">
+                      <span>Sharp Edge (0px)</span>
+                      <span>Balanced (6px)</span>
+                      <span>Soft Blend (20px)</span>
+                    </div>
+                    <p className="text-[10px] text-indigo-800/80 leading-normal">
+                      Feathers the transition border between original image pixels and inpainting synthesis.
+                    </p>
+                  </div>
+                )}
+
+                {/* Vertex Guidance Scale (CFG) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
+                    <span>Guidance Scale (CFG)</span>
+                    <span className="font-mono text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded">
+                      {cfgScale}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={10}
+                    step={0.5}
+                    value={cfgScale}
+                    onChange={(e) => setCfgScale(Number(e.target.value))}
+                    className="w-full accent-indigo-600"
+                  />
+                  <div className="flex justify-between text-[10px] text-neutral-400 font-medium">
+                    <span>1.0 (Creative)</span>
+                    <span className="text-indigo-600 font-bold">7.5 (Optimal)</span>
+                    <span>10.0 (Strict)</span>
+                  </div>
+                </div>
+
+                {/* Vertex AI Safety Filter Level */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
+                    Safety Filter Level
+                  </label>
+                  <select
+                    value={safetyFilterLevel}
+                    onChange={(e) => setSafetyFilterLevel(e.target.value)}
+                    className="w-full h-9 px-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all cursor-pointer"
+                  >
+                    <option value="block_medium_and_above">Block Medium & Above (Standard)</option>
+                    <option value="block_low_and_above">Block Low & Above (Strict Family Safe)</option>
+                    <option value="block_only_high">Block Only High (Permissive)</option>
+                    <option value="dont_block">Do Not Block (Unfiltered)</option>
+                  </select>
+                </div>
+
+                {/* Person Generation Policy */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 text-neutral-500" />
+                    Person Generation Policy
+                  </label>
+                  <select
+                    value={personGeneration}
+                    onChange={(e) => setPersonGeneration(e.target.value)}
+                    className="w-full h-9 px-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all cursor-pointer"
+                  >
+                    <option value="allow_adult">Allow Adults Only (Standard)</option>
+                    <option value="dont_allow">Do Not Allow (Objects / Landscapes Only)</option>
+                    <option value="allow_all">Allow All Demographics</option>
+                  </select>
+                </div>
+
+                {/* SynthID Watermark */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-neutral-800">Google SynthID Watermarking</span>
+                    <p className="text-[10px] text-neutral-500">Embeds invisible cryptographic provenance</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSynthIdWatermark(!synthIdWatermark)}
+                    className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${
+                      synthIdWatermark ? "bg-emerald-600" : "bg-neutral-300"
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                        synthIdWatermark ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Deterministic Seed */}
+                <div className="space-y-2 pt-2 border-t border-neutral-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-neutral-700">Deterministic Seed</span>
+                    <span className="text-[10px] text-indigo-600 font-mono">100% Reproducible</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSeedMode("random")}
+                      className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        seedMode === "random"
+                          ? "bg-indigo-600 text-white shadow-2xs"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
+                      }`}
+                    >
+                      Random
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSeedMode("custom")}
+                      className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        seedMode === "custom"
+                          ? "bg-indigo-600 text-white shadow-2xs"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
+                      }`}
+                    >
+                      Custom Seed
+                    </button>
+                  </div>
+                  {seedMode === "custom" && (
+                    <input
+                      type="number"
+                      value={seedValue}
+                      onChange={(e) => setSeedValue(Number(e.target.value))}
+                      className="w-full h-8 px-3 rounded-xl border border-neutral-200 bg-white text-xs font-mono text-neutral-900 focus:outline-none focus:border-indigo-600"
+                      placeholder="Enter seed number..."
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* CASE C: SPECIALIZED MODELS (VIRTUAL TRY-ON) */}
+            {currentModel.category === "specialized" && (
+              <div className="space-y-4">
+                <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Virtual Try-On Controls</span>
+                  <span className="text-[10px] text-rose-600 font-semibold bg-rose-100/70 px-1.5 py-0.5 rounded">Apparel SLA</span>
+                </div>
+
+                {/* Fabric Guidance Adherence */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-semibold text-neutral-700">
+                    <span>Garment Adherence (CFG)</span>
+                    <span className="font-mono text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded">
+                      {cfgScale}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={10}
+                    step={0.5}
+                    value={cfgScale}
+                    onChange={(e) => setCfgScale(Number(e.target.value))}
+                    className="w-full accent-rose-600"
+                  />
+                  <div className="flex justify-between text-[10px] text-neutral-400 font-medium">
+                    <span>Natural Drape (3.5)</span>
+                    <span className="text-rose-600 font-bold">Optimal Fit (7.5)</span>
+                    <span>Strict Fabric (10.0)</span>
+                  </div>
+                </div>
+
+                {/* Person Demographic Policy */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 text-neutral-500" />
+                    Fitting Demographic Policy
+                  </label>
+                  <select
+                    value={personGeneration}
+                    onChange={(e) => setPersonGeneration(e.target.value)}
+                    className="w-full h-9 px-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:bg-white focus:border-rose-600 transition-all cursor-pointer"
+                  >
+                    <option value="allow_adult">Adult Fashion Models Only</option>
+                    <option value="allow_all">All Demographic Models</option>
+                  </select>
+                </div>
+
+                {/* Safety Filter */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
+                    Safety Moderation
+                  </label>
+                  <select
+                    value={safetyFilterLevel}
+                    onChange={(e) => setSafetyFilterLevel(e.target.value)}
+                    className="w-full h-9 px-3 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:bg-white focus:border-rose-600 transition-all cursor-pointer"
+                  >
+                    <option value="block_medium_and_above">Standard Moderation</option>
+                    <option value="block_low_and_above">Strict Brand Safe</option>
+                  </select>
+                </div>
+
+                {/* SynthID Watermark */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-neutral-800">SynthID Apparel Provenance</span>
+                    <p className="text-[10px] text-neutral-500">Invisible digital watermark</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSynthIdWatermark(!synthIdWatermark)}
+                    className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${
+                      synthIdWatermark ? "bg-emerald-600" : "bg-neutral-300"
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                        synthIdWatermark ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Deterministic Seed */}
+                <div className="space-y-2 pt-2 border-t border-neutral-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-neutral-700">Model Character Seed</span>
+                    <span className="text-[10px] text-rose-600 font-mono">Avatar Consistency</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSeedMode("random")}
+                      className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        seedMode === "random"
+                          ? "bg-rose-600 text-white shadow-2xs"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
+                      }`}
+                    >
+                      Random
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSeedMode("custom")}
+                      className={`h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        seedMode === "custom"
+                          ? "bg-rose-600 text-white shadow-2xs"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80"
+                      }`}
+                    >
+                      Fixed Seed
+                    </button>
+                  </div>
+                  {seedMode === "custom" && (
+                    <input
+                      type="number"
+                      value={seedValue}
+                      onChange={(e) => setSeedValue(Number(e.target.value))}
+                      className="w-full h-8 px-3 rounded-xl border border-neutral-200 bg-white text-xs font-mono text-neutral-900 focus:outline-none focus:border-rose-600"
+                      placeholder="Enter seed number..."
+                    />
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Negative Prompt */}
             <div className="space-y-2 pt-2 border-t border-neutral-100">
               <div className="flex items-center justify-between text-xs font-bold text-neutral-700">
-                <span>Negative Prompt</span>
+                <span className="flex items-center gap-1.5">
+                  Negative Guidance
+                  <span className="text-[9px] font-normal text-neutral-400">
+                    {currentModel.category === "nano" ? "(Natural Prompt)" : "(Native Tensor)"}
+                  </span>
+                </span>
                 <span className="text-[10px] text-neutral-400 font-mono">
                   {negativePrompt.length}/1000
                 </span>
@@ -2574,30 +3439,79 @@ export default function StudioPage() {
                 rows={2}
                 value={negativePrompt}
                 onChange={(e) => setNegativePrompt(e.target.value)}
-                placeholder="Things to avoid in the image (blurry, deformed, bad anatomy, watermarks)..."
+                placeholder={
+                  currentModel.category === "nano"
+                    ? "Elements to steer away from (e.g. text watermark, dark lighting, clutter, neon signs)..."
+                    : currentModel.category === "specialized"
+                    ? "Garment artifacts to avoid (e.g. unnatural folds, blurry fabric texture, bad anatomy)..."
+                    : "Unwanted attributes (e.g. blurry, deformed, bad anatomy, low quality)..."
+                }
                 className="w-full p-2.5 rounded-xl border border-neutral-200 bg-neutral-50/70 text-xs text-neutral-800 focus:outline-none focus:bg-white focus:border-blue-600 transition-all resize-none"
               />
+              {currentModel.category === "nano" && (
+                <p className="text-[10px] text-blue-600 leading-tight">
+                  Auto-formatted as natural instruction: <code className="bg-blue-50 px-1 py-0.5 rounded font-mono text-[9px]">Avoid the following elements: {negativePrompt || "..."}</code>
+                </p>
+              )}
             </div>
 
-            {/* Advanced Options Toggles */}
+            {/* Advanced Options Toggles: Smart Prompt Keyword Enrichers */}
             <div className="space-y-3 pt-2 border-t border-neutral-100">
-              <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                Advanced Options
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+                  Enhancement Modifiers
+                </div>
+                <span className="text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-200/80 px-1.5 py-0.5 rounded">
+                  Smart Enrichers
+                </span>
               </div>
+              <p className="text-[10px] text-neutral-500 leading-normal">
+                Google Cloud APIs synthesize images best through curated descriptors rather than ad-hoc boolean flags; these toggles inject expert prompt tokens.
+              </p>
 
               {[
-                { label: "High Detail Mode", state: highDetailMode, setter: setHighDetailMode },
-                { label: "Face Enhancement", state: faceEnhancement, setter: setFaceEnhancement },
-                { label: "Text Rendering", state: textRendering, setter: setTextRendering },
-                { label: "HDR Lighting", state: hdrLighting, setter: setHdrLighting },
-                { label: "Safe Generation", state: safeGeneration, setter: setSafeGeneration },
+                {
+                  label: "High Detail Mode",
+                  desc: "+hyper-detailed, intricate surface textures, 8k",
+                  state: highDetailMode,
+                  setter: setHighDetailMode,
+                },
+                {
+                  label: "Face Enhancement",
+                  desc: "+flawless facial symmetry, realistic skin pores",
+                  state: faceEnhancement,
+                  setter: setFaceEnhancement,
+                },
+                {
+                  label: "Text & Typography",
+                  desc: currentModel.id === "nano-banana-pro"
+                    ? "+crisp multilingual typography, signboards & logos (Nano Banana Pro optimized)"
+                    : "+sharp legible typography, clear crisp lettering",
+                  state: textRendering,
+                  setter: setTextRendering,
+                },
+                {
+                  label: "Cinematic HDR Lighting",
+                  desc: "+cinematic HDR lighting, dynamic range, specular",
+                  state: hdrLighting,
+                  setter: setHdrLighting,
+                },
+                {
+                  label: "Safe Generation",
+                  desc: "Enforce Google Cloud Responsible AI guardrails",
+                  state: safeGeneration,
+                  setter: setSafeGeneration,
+                },
               ].map((opt) => (
-                <div key={opt.label} className="flex items-center justify-between text-xs font-medium text-neutral-800">
-                  <span>{opt.label}</span>
+                <div key={opt.label} className="flex items-center justify-between text-xs font-medium text-neutral-800 py-0.5">
+                  <div className="space-y-0.5 pr-2">
+                    <span className="font-semibold">{opt.label}</span>
+                    <p className="text-[9px] text-neutral-400 leading-tight font-mono">{opt.desc}</p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => opt.setter(!opt.state)}
-                    className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${
+                    className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${
                       opt.state ? "bg-blue-600" : "bg-neutral-300"
                     }`}
                   >
@@ -2611,13 +3525,30 @@ export default function StudioPage() {
               ))}
             </div>
           </aside>
-        )}
+        </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          5. RECENT GENERATIONS FEED & GALLERY (Full Width Bottom)
-      ══════════════════════════════════════════════════════════════════════ */}
-      <div className="space-y-4 pt-4 border-t border-neutral-200/80">
+      <div ref={generationFeedRef} id="generations-feed" className="space-y-4 pt-4 border-t border-neutral-200/80 scroll-mt-6">
+        {/* Error Alert Banner */}
+        {errorMsg && (
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-start justify-between gap-3 text-rose-800 text-xs font-semibold animate-fadeIn shadow-2xs">
+            <div className="flex items-start gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-rose-600 mt-1.5 shrink-0" />
+              <div>
+                <span className="font-bold">Generation Error: </span>
+                <span>{errorMsg}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorMsg(null)}
+              className="text-rose-500 hover:text-rose-800 font-bold text-xs p-1 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
           {/* Feed Tabs */}
           <div className="flex items-center gap-1">
@@ -2680,6 +3611,74 @@ export default function StudioPage() {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {/* ── Active Live Generation in Progress Card (Live High-Tech Animation) ── */}
+          {isGenerating && (
+            <div className="relative rounded-2xl overflow-hidden border-2 border-blue-500 bg-gradient-to-br from-neutral-950 via-slate-900 to-indigo-950 text-white shadow-xl shadow-blue-500/15 flex flex-col justify-between p-4 col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-2 min-h-[280px] animate-fadeIn">
+              {/* Animated top shimmer lines */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute -top-12 -right-12 w-36 h-36 bg-indigo-500/25 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Header */}
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                  <span className="text-xs font-extrabold text-white tracking-wide">
+                    Live Synthesis Active
+                  </span>
+                  <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.2 rounded-full font-bold">
+                    Vertex AI
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-sm border border-white/15">
+                  <Clock className="w-3 h-3 text-cyan-300 animate-spin-slow" />
+                  <span className="text-cyan-300">{elapsedSeconds.toFixed(1)}s</span>
+                </div>
+              </div>
+
+              {/* Center Animation Visualizer */}
+              <div className="relative z-10 my-4 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="relative w-14 h-14 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-2 border-dashed border-cyan-400/60 animate-spin-slow" />
+                  <div className="absolute inset-1.5 rounded-full border-2 border-indigo-400/60 animate-reverse-spin" />
+                  <Sparkles className="w-6 h-6 text-cyan-300 animate-pulse" />
+                </div>
+
+                <div className="space-y-1 max-w-sm px-2">
+                  <p className="text-xs font-extrabold text-white tracking-wide">
+                    {generationPhase || `Synthesizing with ${currentModel.name}...`}
+                  </p>
+                  <p className="text-[11px] text-neutral-300 line-clamp-2 italic font-sans opacity-90 leading-tight">
+                    "{prompt}"
+                  </p>
+                </div>
+
+                {/* Live Glowing Progress Bar */}
+                <div className="w-full max-w-xs space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono font-semibold text-neutral-300">
+                    <span className="text-blue-300 font-bold">{currentModel.name}</span>
+                    <span className="text-cyan-300 font-bold">{progress}%</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden relative border border-white/10">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 rounded-full transition-all duration-300 shadow-sm shadow-cyan-400/50"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Metadata Footer */}
+              <div className="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-400 font-mono">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-white/10 px-2 py-0.5 rounded text-neutral-200 font-semibold">{selectedRatio}</span>
+                  <span className="bg-white/10 px-2 py-0.5 rounded text-neutral-200 font-semibold">{selectedResolution}</span>
+                </div>
+                <span className="text-amber-300 font-bold">⚡ {estimatedCost} cr</span>
+              </div>
+            </div>
+          )}
+
+          {/* Real Generated Items */}
           {feedItems
             .filter((item) =>
               feedSearchQuery
@@ -2687,79 +3686,117 @@ export default function StudioPage() {
                   item.prompt.toLowerCase().includes(feedSearchQuery.toLowerCase())
                 : true
             )
-            .map((item) => (
-              <div
-                key={item.id}
-                className="group relative rounded-2xl overflow-hidden border border-neutral-200/90 bg-white shadow-2xs hover:shadow-card-elevated transition-all flex flex-col"
-              >
-                {/* Image Preview Container */}
-                <div className="relative aspect-square overflow-hidden bg-neutral-100">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+            .map((item) => {
+              const isNewlyCreated = item.id === newlyGeneratedId;
+              return (
+                <div
+                  key={item.id}
+                  id={`feed-card-${item.id}`}
+                  className={`group relative rounded-2xl overflow-hidden border bg-white flex flex-col transition-all duration-500 ${
+                    isNewlyCreated
+                      ? "ring-2 ring-emerald-500 ring-offset-2 border-emerald-400 shadow-xl shadow-emerald-500/15 animate-spring"
+                      : "border-neutral-200/90 shadow-2xs hover:shadow-card-elevated"
+                  }`}
+                >
+                  {/* Image Preview Container */}
+                  <div className="relative aspect-square overflow-hidden bg-neutral-100">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
 
-                  {/* Hover Action Overlay */}
-                  <div className="absolute inset-0 bg-neutral-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
-                    <button
-                      type="button"
-                      onClick={() => setLightboxImage(item.image)}
-                      className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
-                      title="Fullscreen Lightbox"
-                    >
-                      <Maximize2 className="w-4 h-4" />
-                    </button>
-                    <a
-                      href={item.image}
-                      download="aistudio-creation.jpg"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
-                      title="Download Image"
-                    >
-                      <Download className="w-4 h-4" />
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPrompt(item.prompt);
-                        window.scrollTo({ top: 300, behavior: "smooth" });
-                      }}
-                      className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
-                      title="Use Prompt"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                  </div>
+                    {/* Newly Generated Badge */}
+                    {isNewlyCreated && (
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-md animate-pulse z-10">
+                        ✨ New
+                      </span>
+                    )}
 
-                  {/* Resolution badge */}
-                  <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-neutral-950/70 text-white text-[9px] font-mono font-bold">
-                    {item.resolution}
-                  </span>
-                </div>
+                    {/* Hover Action Overlay */}
+                    <div className="absolute inset-0 bg-neutral-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                      <button
+                        type="button"
+                        onClick={() => setLightboxImage(item.image)}
+                        className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
+                        title="Fullscreen Lightbox"
+                      >
+                        <Maximize2 className="w-4 h-4" />
+                      </button>
+                      <a
+                        href={item.image}
+                        download={`aistudio-${item.id}.png`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
+                        title="Download Image"
+                      >
+                        <Download className="w-4 h-4" />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPrompt(item.prompt);
+                          window.scrollTo({ top: 300, behavior: "smooth" });
+                        }}
+                        className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
+                        title="Use Prompt"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                    </div>
 
-                {/* Metadata Footer */}
-                <div className="p-3 space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-neutral-900 truncate">
-                      {item.modelName}
+                    {/* Resolution badge */}
+                    <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-neutral-950/70 text-white text-[9px] font-mono font-bold">
+                      {item.resolution}
                     </span>
-                    <span className="text-amber-600 font-bold font-mono">
-                      ⚡ {item.cost} cr
-                    </span>
                   </div>
-                  <div className="text-[10px] text-neutral-400 flex items-center justify-between">
-                    <span>{item.timestamp}</span>
-                    <span className="font-mono">{item.aspectRatio}</span>
+
+                  {/* Metadata Footer */}
+                  <div className="p-3 space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-neutral-900 truncate">
+                        {item.modelName}
+                      </span>
+                      <span className="text-amber-600 font-bold font-mono">
+                        ⚡ {item.cost} cr
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-neutral-400 flex items-center justify-between">
+                      <span>{item.timestamp}</span>
+                      <span className="font-mono">{item.aspectRatio}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
+
+        {/* Clean Empty State when no generations exist yet */}
+        {feedItems.length === 0 && !isGenerating && (
+          <div className="py-16 px-4 rounded-3xl border border-dashed border-neutral-300 bg-neutral-50/60 text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-white border border-neutral-200/80 shadow-xs flex items-center justify-center mx-auto text-blue-600">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div className="space-y-1 max-w-sm mx-auto">
+              <h4 className="text-sm font-bold text-neutral-800">Your Canvas is Ready</h4>
+              <p className="text-xs text-neutral-500 leading-relaxed">
+                Enter your description above and click <strong>Generate Images</strong> to synthesize real visual art powered by Google Cloud Vertex AI.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSurpriseMe}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 shadow-2xs transition-all cursor-pointer"
+            >
+              <Dice5 className="w-3.5 h-3.5 text-purple-600" />
+              <span>Try a Creative Sample Prompt</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
+            {/* ══════════════════════════════════════════════════════════════════════
           POPUP MODALS: MODEL SPECS (Unified Big Popup)
       ══════════════════════════════════════════════════════════════════════ */}
       {modelModalOpen && (

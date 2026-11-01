@@ -84,9 +84,10 @@ INITIAL_MODELS = [
             "max_resolution": "Up to 4096x4096 (4K)",
             "resolutions": ["1024", "2048", "4096"],
             "aspect_ratios": ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4", "8:1", "1:8"],
+            "max_references": 10,
             "thinking_budget": True,
             "text_quotation_guide": True,
-            "batch_max": 1,
+            "batch_max": 2,
             "synthid": True,
             "features": [
                 "Internal Thinking Process before rendering",
@@ -97,7 +98,12 @@ INITIAL_MODELS = [
             "description": "A powerful image generation model that combines high quality graphics, text rendering in multiple languages, and world knowledge"
         },
         "base_credit_cost": 10.0,
-        "cost_multiplier_rules": {"aspect_ratio": 1.0, "batch": 1.0},
+        "cost_multiplier_rules": {
+            "resolution": {"1024": 10.0, "2048": 14.0, "4096": 20.0},
+            "deep_thinking": 2.0,
+            "aspect_ratio": 1.0,
+            "batch": 1.0
+        },
         "min_vram_gb": None,
         "status": "active",
         "commercial_license": "google-cloud-commercial",
@@ -115,10 +121,12 @@ INITIAL_MODELS = [
             "underlying_engine": "Gemini 3.1 Flash Image",
             "primary_job": "General-purpose predecessor to 2.1",
             "prompt_limit": "Up to 1,000,000 tokens",
-            "max_resolution": "512px to 4K",
-            "aspect_ratios": ["1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4"],
+            "max_resolution": "Up to 4096x4096 (4K)",
+            "resolutions": ["512", "1024", "2048", "4096"],
+            "aspect_ratios": ["1:1", "16:9", "4:3", "3:2", "5:4", "9:16", "3:4", "2:3", "4:5", "21:9", "4:1", "1:4", "8:1", "1:8"],
+            "max_references": 14,
             "character_consistency": "Up to 5 characters & 14 objects",
-            "batch_max": 1,
+            "batch_max": 4,
             "synthid": True,
             "features": [
                 "Multi-character consistency (up to 5 characters & 14 objects)",
@@ -128,7 +136,11 @@ INITIAL_MODELS = [
             "description": "gemini-3.1-flash-image is a model designed for general image generation and editing tasks, offering high quality and low latency."
         },
         "base_credit_cost": 5.0,
-        "cost_multiplier_rules": {"aspect_ratio": 1.0, "batch": 1.0},
+        "cost_multiplier_rules": {
+            "resolution": {"512": 3.0, "1024": 5.0, "2048": 8.0, "4096": 15.0},
+            "aspect_ratio": 1.0,
+            "batch": 1.0
+        },
         "min_vram_gb": None,
         "status": "active",
         "commercial_license": "google-cloud-commercial",
@@ -147,7 +159,7 @@ INITIAL_MODELS = [
             "primary_job": "Legacy Flash image generation",
             "prompt_limit": "~128,000 to 1,000,000 tokens",
             "max_resolution": "Native 1K (1024x1024)",
-            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
+            "aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "5:4", "4:5", "21:9"],
             "batch_max": 1,
             "synthid": True,
             "features": [

@@ -20,7 +20,7 @@ logger = logging.getLogger("aistudio.image_service")
 OUTPUT_DIR = Path(settings.STORAGE_DIR) / "outputs"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-SUPPORTED_ASPECT_RATIOS = {"1:1", "3:4", "4:3", "9:16", "16:9", "4:1", "1:4", "8:1", "1:8", "21:9"}
+SUPPORTED_ASPECT_RATIOS = {"1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "5:4", "4:5", "21:9", "4:1", "1:4", "8:1", "1:8"}
 
 class ImageService:
     @staticmethod
@@ -108,6 +108,10 @@ class ImageService:
                 negative_prompt = params.get("negative_prompt")
                 guidance_scale = float(params.get("guidance_scale", 7.0)) if params.get("guidance_scale") else None
                 seed = int(params.get("seed")) if params.get("seed") and params.get("seed") != -1 else None
+                safety_filter_level = params.get("safety_filter_level")
+                person_generation = params.get("person_generation")
+                web_search_grounding = bool(params.get("web_search_grounding", False))
+                synthid_watermark = bool(params.get("synthid_watermark", True))
 
                 client = ImageService.get_genai_client()
                 generated_files: list[str] = []
@@ -140,6 +144,10 @@ class ImageService:
                             config_kwargs["guidance_scale"] = guidance_scale
                         if seed is not None:
                             config_kwargs["seed"] = seed
+                        if safety_filter_level:
+                            config_kwargs["safety_filter_level"] = safety_filter_level
+                        if person_generation:
+                            config_kwargs["person_generation"] = person_generation
 
                         config = types.GenerateImagesConfig(**config_kwargs)
 
@@ -181,32 +189,32 @@ class ImageService:
                                 except Exception as fb_err:
                                     logger.warning(f"Vertex AI gemini-2.5-flash-image fallback note: {fb_err}")
 
-                        # 2. If Gemini Image series (Nano Banana 2 / Nano Banana Pro):
+                        # 2. If Gemini Image series (Nano Banana 2.1 / Nano Banana Pro / etc.):
                         else:
-                            try:
-                                content_res = await asyncio.to_thread(
-                                    client.models.generate_content,
-                                    model=target_engine,
-                                    contents=job.raw_prompt,
-                                )
-                                if content_res.candidates:
-                                    for cand in content_res.candidates:
-                                        if cand.content and cand.content.parts:
-                                            for idx, part in enumerate(cand.content.parts):
-                                                if part.inline_data and part.inline_data.data:
-                                                    ext = "png" if "png" in (part.inline_data.mime_type or "") else "jpg"
-                                                    filename = f"{job.id}_{len(generated_files)}.{ext}"
-                                                    filepath = OUTPUT_DIR / filename
-                                                    with open(filepath, "wb") as f:
-                                                        f.write(part.inline_data.data)
-                                                    generated_files.append(filename)
-                            except Exception as gem_err:
-                                logger.info(f"Gemini {target_engine} fallback to gemini-2.5-flash-image: {gem_err}")
+                            prompt_text = job.raw_prompt
+                            if aspect_ratio and aspect_ratio != "1:1":
+                                prompt_text = f"{prompt_text}\nComposition aspect ratio: {aspect_ratio}"
+                            if negative_prompt:
+                                prompt_text = f"{prompt_text}\nAvoid the following elements: {negative_prompt}"
+
+                            gemini_config = None
+                            if web_search_grounding and target_engine != "gemini-2.5-flash-image":
                                 try:
+                                    gemini_config = types.GenerateContentConfig(
+                                        tools=[types.Tool(google_search=types.GoogleSearch())]
+                                    )
+                                except Exception:
+                                    gemini_config = None
+
+                            turns_to_run = max(1, min(4, sample_count))
+                            for turn_idx in range(turns_to_run):
+                                try:
+                                    gen_kwargs = {"model": target_engine, "contents": prompt_text}
+                                    if gemini_config:
+                                        gen_kwargs["config"] = gemini_config
                                     content_res = await asyncio.to_thread(
                                         client.models.generate_content,
-                                        model="gemini-2.5-flash-image",
-                                        contents=job.raw_prompt,
+                                        **gen_kwargs,
                                     )
                                     if content_res.candidates:
                                         for cand in content_res.candidates:
@@ -219,43 +227,33 @@ class ImageService:
                                                         with open(filepath, "wb") as f:
                                                             f.write(part.inline_data.data)
                                                         generated_files.append(filename)
-                                except Exception as fb_err:
-                                    logger.warning(f"Vertex AI fallback note: {fb_err}")
+                                except Exception as gem_err:
+                                    logger.info(f"Gemini {target_engine} turn {turn_idx} fallback to gemini-2.5-flash-image: {gem_err}")
+                                    try:
+                                        content_res = await asyncio.to_thread(
+                                            client.models.generate_content,
+                                            model="gemini-2.5-flash-image",
+                                            contents=prompt_text,
+                                        )
+                                        if content_res.candidates:
+                                            for cand in content_res.candidates:
+                                                if cand.content and cand.content.parts:
+                                                    for idx, part in enumerate(cand.content.parts):
+                                                        if part.inline_data and part.inline_data.data:
+                                                            ext = "png" if "png" in (part.inline_data.mime_type or "") else "jpg"
+                                                            filename = f"{job.id}_{len(generated_files)}.{ext}"
+                                                            filepath = OUTPUT_DIR / filename
+                                                            with open(filepath, "wb") as f:
+                                                                f.write(part.inline_data.data)
+                                                            generated_files.append(filename)
+                                    except Exception as fb_err:
+                                        logger.warning(f"Vertex AI fallback note: {fb_err}")
 
                     except Exception as gen_err:
                         logger.warning(f"Google Vertex AI generation note: {gen_err}")
 
-                # ── Development & Simulation Fallback ────────────────────────
-                # If no live GCP cloud credentials yet, generate a high-res styled preview
                 if not generated_files:
-                    filename = f"{job.id}_0.jpg"
-                    filepath = OUTPUT_DIR / filename
-                    
-                    try:
-                        from PIL import Image, ImageDraw, ImageFont
-                        # Create 1344x768 canvas
-                        w, h = (1344, 768) if aspect_ratio == "16:9" else (1024, 1024)
-                        img = Image.new("RGB", (w, h), color=(18, 18, 22))
-                        draw = ImageDraw.Draw(img)
-
-                        # Subtle background aesthetic gradient rectangles
-                        for i in range(0, w, 8):
-                            alpha_color = (25 + int(i / w * 30), 25, 45)
-                            draw.line([(i, 0), (i, h)], fill=alpha_color)
-
-                        draw.rectangle([(50, 50), (w - 50, h - 50)], outline=(60, 60, 75), width=2)
-                        draw.text((80, 80), "AI STUDIO • GOOGLE CLOUD VERTEX AI", fill=(140, 140, 180))
-                        draw.text((80, 120), f"Model: {job.model_id.upper()} (Engine: {target_engine})", fill=(255, 255, 255))
-                        draw.text((80, 160), f"Prompt: {job.raw_prompt[:120]}...", fill=(200, 200, 210))
-                        draw.text((80, 200), f"Ratio: {aspect_ratio} | Escrow Reserved: {job.credits_reserved} cr | SynthID Watermark: Embedded", fill=(100, 200, 150))
-                        draw.text((80, h - 100), "Google Vertex AI image generated with active GCP trial credit integration.", fill=(130, 130, 140))
-                        
-                        img.save(filepath, "JPEG", quality=95)
-                    except Exception:
-                        with open(filepath, "wb") as f:
-                            f.write(b"")
-                    
-                    generated_files.append(filename)
+                    raise RuntimeError("No image output generated by Google Vertex AI. Please check model parameters or retry.")
 
                 # 4. Save Outputs to Database
                 for filename in generated_files:

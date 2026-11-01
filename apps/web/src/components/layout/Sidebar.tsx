@@ -99,8 +99,25 @@ export default function Sidebar() {
         toggleCollapse();
       }
     };
+
+    const handleExternalSidebar = (e: Event) => {
+      const customEvent = e as CustomEvent<{ collapsed?: boolean }>;
+      const next = customEvent.detail?.collapsed !== undefined ? customEvent.detail.collapsed : true;
+      setTimeout(() => {
+        setIsCollapsed(next);
+        try {
+          localStorage.setItem("aistudio_sidebar_collapsed", String(next));
+        } catch {}
+        window.dispatchEvent(new CustomEvent("aistudio:sidebar-changed", { detail: { collapsed: next } }));
+      }, 0);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("aistudio:set-sidebar", handleExternalSidebar);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("aistudio:set-sidebar", handleExternalSidebar);
+    };
   }, []);
 
   const toggleCollapse = () => {
@@ -109,6 +126,9 @@ export default function Sidebar() {
       try {
         localStorage.setItem("aistudio_sidebar_collapsed", String(next));
       } catch {}
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("aistudio:sidebar-changed", { detail: { collapsed: next } }));
+      }, 0);
       return next;
     });
   };
