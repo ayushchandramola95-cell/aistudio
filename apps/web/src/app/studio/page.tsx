@@ -50,7 +50,10 @@ import {
   Palette,
   UserCheck,
   Coins,
-  FolderKanban
+  FolderKanban,
+  Shuffle,
+  Edit3,
+  ArrowUpRight
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -113,11 +116,17 @@ interface FeedItem {
   title: string;
   prompt: string;
   modelName: string;
+  modelId?: string;
   cost: number;
   image: string;
   timestamp: string;
   aspectRatio: string;
   resolution: string;
+  dimensions?: string;
+  renderTime?: string;
+  seed?: number;
+  outputCount?: number;
+  status?: string;
   isFavorite?: boolean;
 }
 
@@ -750,7 +759,103 @@ const CREATION_MODES: CreationModeDef[] = [
 // INITIAL SHOWCASE FEED ITEMS (from ChatGPT mockup)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const INITIAL_FEED_ITEMS: FeedItem[] = [];
+const INITIAL_FEED_ITEMS: FeedItem[] = [
+  {
+    id: "gen-dragon-001",
+    title: "Majestic Dragon Sunrise",
+    prompt:
+      "A majestic dragon flying over snow-covered mountains at sunrise, cinematic lighting, ultra detailed, realistic, epic fantasy, volumetric clouds, 8k",
+    modelName: "Nano Banana",
+    modelId: "nano-banana",
+    cost: 4,
+    image: "/showcase/dragon.jpg",
+    timestamp: "Just now",
+    aspectRatio: "16:9",
+    resolution: "1K",
+    dimensions: "1024×576",
+    renderTime: "1.2s",
+    seed: 342781,
+    outputCount: 1,
+    status: "Completed",
+    isFavorite: false,
+  },
+  {
+    id: "gen-cyberpunk-002",
+    title: "Neo-Tokyo Cyberpunk",
+    prompt:
+      "Cyberpunk street in Neo-Tokyo with glowing holographic neon signs, rain reflections on asphalt, cinematic volumetric mist, futuristic cars, 8k photo",
+    modelName: "Nano Banana 2",
+    modelId: "nano-banana-2",
+    cost: 5,
+    image: "/showcase/cyberpunk.jpg",
+    timestamp: "2m ago",
+    aspectRatio: "1:1",
+    resolution: "1K",
+    dimensions: "1024×1024",
+    renderTime: "1.0s",
+    seed: 819203,
+    outputCount: 1,
+    status: "Completed",
+    isFavorite: true,
+  },
+  {
+    id: "gen-anime-003",
+    title: "Cherry Blossom Anime",
+    prompt:
+      "Beautiful anime girl with pastel blue hair and violet eyes smiling gently, surrounded by floating pink cherry blossom petals, soft cinematic lighting, Makoto Shinkai anime style, 8k masterpiece",
+    modelName: "Nano Banana Pro",
+    modelId: "nano-banana-pro",
+    cost: 10,
+    image: "/showcase/anime.jpg",
+    timestamp: "5m ago",
+    aspectRatio: "1:1",
+    resolution: "2K",
+    dimensions: "1024×1024",
+    renderTime: "2.1s",
+    seed: 492019,
+    outputCount: 1,
+    status: "Completed",
+    isFavorite: true,
+  },
+  {
+    id: "gen-portrait-004",
+    title: "Studio Fashion Portrait",
+    prompt:
+      "Professional studio portrait of a serene woman with radiant skin, natural subtle smile, soft window diffused lighting, shallow depth of field, 85mm f1.4 lens bokeh, high-end fashion magazine photography",
+    modelName: "Nano Banana 2.1",
+    modelId: "nano-banana-2.1",
+    cost: 6,
+    image: "/showcase/portrait.jpg",
+    timestamp: "12m ago",
+    aspectRatio: "1:1",
+    resolution: "1K",
+    dimensions: "1024×1024",
+    renderTime: "1.4s",
+    seed: 673910,
+    outputCount: 1,
+    status: "Completed",
+    isFavorite: false,
+  },
+  {
+    id: "gen-chalet-005",
+    title: "Alpine Chalet Sunset",
+    prompt:
+      "Cozy alpine wooden chalet nestled in pine forest at golden twilight, warm glowing interior lights, snow on roof, dramatic mountain peaks",
+    modelName: "Nano Banana 2 Lite",
+    modelId: "nano-banana-2-lite",
+    cost: 3,
+    image: "/showcase/chalet.jpg",
+    timestamp: "18m ago",
+    aspectRatio: "16:9",
+    resolution: "1K",
+    dimensions: "1024×576",
+    renderTime: "0.8s",
+    seed: 284729,
+    outputCount: 1,
+    status: "Completed",
+    isFavorite: false,
+  },
+];
 const INITIAL_REFERENCES: { id: string; name: string; url: string }[] = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -826,6 +931,28 @@ function renderOfficialLogo(modelId: string, className = "w-8 h-8") {
       <Sparkles className="w-full h-full text-blue-400" />
     </div>
   );
+}
+
+function getDimensionsForRatio(ratio: string, res: string = "1K"): string {
+  const mult = res === "2K" ? 2 : res === "4K" ? 4 : res === "0.5K" ? 0.5 : 1;
+  const baseMap: Record<string, [number, number]> = {
+    "1:1": [1024, 1024],
+    "16:9": [1024, 576],
+    "9:16": [576, 1024],
+    "4:3": [1024, 768],
+    "3:4": [768, 1024],
+    "3:2": [1024, 682],
+    "2:3": [682, 1024],
+    "21:9": [1024, 438],
+    "5:4": [1024, 819],
+    "4:5": [819, 1024],
+    "4:1": [1024, 256],
+    "1:4": [256, 1024],
+    "8:1": [1024, 128],
+    "1:8": [128, 1024],
+  };
+  const pair = baseMap[ratio] || [1024, 1024];
+  return `${Math.round(pair[0] * mult)}×${Math.round(pair[1] * mult)}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -995,6 +1122,12 @@ export default function StudioPage() {
   const [feedSearchQuery, setFeedSearchQuery] = useState<string>("");
   const [feedViewMode, setFeedViewMode] = useState<"grid" | "list">("grid");
   const [feedItems, setFeedItems] = useState<FeedItem[]>(INITIAL_FEED_ITEMS);
+  const [selectedShowcaseItem, setSelectedShowcaseItem] = useState<FeedItem | null>(INITIAL_FEED_ITEMS[0]);
+  const [showcaseTab, setShowcaseTab] = useState<"prompt" | "model">("prompt");
+  const [copiedShowcasePrompt, setCopiedShowcasePrompt] = useState<boolean>(false);
+  const [copiedShowcaseSettings, setCopiedShowcaseSettings] = useState<boolean>(false);
+  const [feedModelFilter, setFeedModelFilter] = useState<string>("all");
+  const [feedStatusFilter, setFeedStatusFilter] = useState<string>("all");
 
   // Generation / Job running state
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -1354,6 +1487,80 @@ export default function StudioPage() {
     setReferenceImages((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // Showcase Action Handlers
+  const handleUseAsReference = useCallback(
+    (item: FeedItem) => {
+      setReferenceImages((prev) => {
+        const exists = prev.some((r) => r.url === item.image);
+        if (exists) return prev;
+        if (prev.length >= currentModel.maxReferences) {
+          return [
+            { id: `ref-${Date.now()}`, name: item.title, url: item.image },
+            ...prev.slice(0, currentModel.maxReferences - 1),
+          ];
+        }
+        return [
+          { id: `ref-${Date.now()}`, name: item.title, url: item.image },
+          ...prev,
+        ];
+      });
+      window.scrollTo({ top: 380, behavior: "smooth" });
+    },
+    [currentModel.maxReferences]
+  );
+
+  const handleGenerateVariations = useCallback((item: FeedItem) => {
+    setPrompt(`${item.prompt}, alternate dynamic perspective, cinematic lighting variation`);
+    window.scrollTo({ top: 380, behavior: "smooth" });
+  }, []);
+
+  const handleUpscale = useCallback((item: FeedItem) => {
+    const higherRes = item.resolution === "1K" ? "2K" : item.resolution === "2K" ? "4K" : "2K";
+    setSelectedResolution(higherRes);
+    setPrompt(item.prompt);
+    window.scrollTo({ top: 580, behavior: "smooth" });
+  }, []);
+
+  const handleEditItem = useCallback((item: FeedItem) => {
+    setPrompt(item.prompt);
+    setSelectedRatio(item.aspectRatio as AspectRatioId);
+    window.scrollTo({ top: 350, behavior: "smooth" });
+  }, []);
+
+  const handleDownloadImage = useCallback((url: string, title: string) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.jpg`;
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, []);
+
+  const handleCopyShowcasePrompt = useCallback((text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedShowcasePrompt(true);
+    setTimeout(() => setCopiedShowcasePrompt(false), 2000);
+  }, []);
+
+  const handleCopyShowcaseSettings = useCallback((item: FeedItem) => {
+    const settingsText = JSON.stringify(
+      {
+        model: item.modelName,
+        ratio: item.aspectRatio,
+        resolution: item.resolution,
+        dimensions: item.dimensions,
+        seed: item.seed,
+        cost: item.cost,
+      },
+      null,
+      2
+    );
+    navigator.clipboard.writeText(settingsText);
+    setCopiedShowcaseSettings(true);
+    setTimeout(() => setCopiedShowcaseSettings(false), 2000);
+  }, []);
+
   // Load live past generations on mount
   useEffect(() => {
     const loadPastGenerations = async () => {
@@ -1475,6 +1682,8 @@ export default function StudioPage() {
           if (pollRes.ok) {
             const pollData: any = await pollRes.json();
             if (pollData.status === "COMPLETED" && pollData.outputs && pollData.outputs.length > 0) {
+              const dims = getDimensionsForRatio(selectedRatio, selectedResolution);
+
               const newFeedItems: FeedItem[] = pollData.outputs.map((out: any, idx: number) => {
                 const fullUrl = typeof out === "string"
                   ? (out.startsWith("http") ? out : `http://localhost:8100${out.startsWith("/") ? "" : "/"}${out}`)
@@ -1485,24 +1694,31 @@ export default function StudioPage() {
                   title: `${prompt.slice(0, 32)}... ${pollData.outputs.length > 1 ? `(${idx + 1}/${pollData.outputs.length})` : ""}`,
                   prompt,
                   modelName: currentModel.name,
+                  modelId: currentModel.id,
                   cost: Math.round(estimatedCost / pollData.outputs.length),
                   image: fullUrl,
                   timestamp: "Just now",
                   aspectRatio: selectedRatio,
                   resolution: selectedResolution,
+                  dimensions: dims,
+                  renderTime: `${elapsedSeconds.toFixed(1)}s`,
+                  seed: seedMode === "custom" ? seedValue : Math.floor(Math.random() * 900000 + 100000),
+                  outputCount: outputsCount,
+                  status: "Completed",
                   isFavorite: false,
                 };
               });
 
               setFeedItems((prev) => [...newFeedItems, ...prev]);
               setNewlyGeneratedId(newFeedItems[0].id);
+              setSelectedShowcaseItem(newFeedItems[0]);
               completed = true;
 
-              // Smoothly scroll to the newly generated image card
+              // Smoothly scroll to the Generation Result showcase card
               setTimeout(() => {
-                const targetEl = document.getElementById(`feed-card-${newFeedItems[0].id}`);
+                const targetEl = document.getElementById("generation-result-showcase");
                 if (targetEl) {
-                  targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                  targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
                 } else {
                   generationFeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }
@@ -2604,7 +2820,605 @@ export default function StudioPage() {
               </div>
             )}
           </div>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            GENERATION RESULT SHOWCASE (Match Screenshot Design)
+        ══════════════════════════════════════════════════════════════════════ */}
+        {selectedShowcaseItem && (
+          <div
+            id="generation-result-showcase"
+            className="rounded-3xl border border-neutral-200/90 bg-white p-5 shadow-luxury space-y-4 animate-fadeIn"
+          >
+            {/* Header Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3.5">
+              {/* Left: Status chips */}
+              <div className="flex items-center gap-2 flex-wrap text-xs">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600 text-white font-bold shadow-2xs">
+                  <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Generation Result</span>
+                </div>
+
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Completed</span>
+                </div>
+
+                <span className="text-neutral-400">•</span>
+                <span className="text-neutral-600 font-medium">
+                  {selectedShowcaseItem.outputCount || 1} image
+                </span>
+
+                <span className="text-neutral-400">•</span>
+                <span className="text-neutral-600 font-medium">
+                  {selectedShowcaseItem.cost} Credits
+                </span>
+
+                <span className="text-neutral-400">•</span>
+                <span className="text-neutral-600 font-medium">
+                  {selectedShowcaseItem.renderTime || "1.2s"}
+                </span>
+              </div>
+
+              {/* Right: Actions toolbar */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleUseAsReference(selectedShowcaseItem)}
+                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Add this image to Reference Images"
+                >
+                  <Layers className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Use as Reference</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleGenerateVariations(selectedShowcaseItem)}
+                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Synthesize new variations of this prompt"
+                >
+                  <Shuffle className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Generate Variations</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleUpscale(selectedShowcaseItem)}
+                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Upscale to higher resolution"
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Upscale</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleEditItem(selectedShowcaseItem)}
+                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Load prompt & settings into studio"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Edit</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDownloadImage(selectedShowcaseItem.image, selectedShowcaseItem.title)}
+                  className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Download full quality image"
+                >
+                  <Download className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Download</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFeedItems((prev) =>
+                      prev.map((i) => (i.id === selectedShowcaseItem.id ? { ...i, isFavorite: !i.isFavorite } : i))
+                    );
+                    setSelectedShowcaseItem((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));
+                  }}
+                  className={`p-1.5 rounded-xl border border-neutral-200/90 text-xs transition-all cursor-pointer ${
+                    selectedShowcaseItem.isFavorite
+                      ? "bg-rose-50 text-rose-600 border-rose-200"
+                      : "bg-white text-neutral-600 hover:bg-neutral-50"
+                  }`}
+                  title="Save to favorites"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Two-Column Split Visualizer */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+              {/* Left: Generated Image Viewer */}
+              <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
+                <div className="relative rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-200/60 shadow-inner group min-h-[260px] sm:min-h-[300px] max-h-[460px] w-full">
+                  <img
+                    src={selectedShowcaseItem.image}
+                    alt={selectedShowcaseItem.title}
+                    className="w-full h-full object-cover rounded-2xl transition-transform duration-500 group-hover:scale-101"
+                  />
+
+                  {/* Top-Right Floating Controls */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImage(selectedShowcaseItem.image)}
+                      className="p-2 rounded-xl bg-neutral-950/70 hover:bg-neutral-950 text-white backdrop-blur-md border border-white/20 shadow-md cursor-pointer transition-all hover:scale-105"
+                      title="Fullscreen Lightbox"
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadImage(selectedShowcaseItem.image, selectedShowcaseItem.title)}
+                      className="p-2 rounded-xl bg-neutral-950/70 hover:bg-neutral-950 text-white backdrop-blur-md border border-white/20 shadow-md cursor-pointer transition-all hover:scale-105"
+                      title="Download Image"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Prompt & Settings Tabs */}
+              <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-between space-y-4">
+                {/* Tab Nav Buttons */}
+                <div className="flex items-center gap-1 border-b border-neutral-100 pb-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowcaseTab("prompt")}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      showcaseTab === "prompt"
+                        ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs"
+                        : "text-neutral-500 hover:text-neutral-900"
+                    }`}
+                  >
+                    Prompt & Settings
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowcaseTab("model")}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      showcaseTab === "model"
+                        ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs"
+                        : "text-neutral-500 hover:text-neutral-900"
+                    }`}
+                  >
+                    Model Info
+                  </button>
+                </div>
+
+                {/* Tab Body */}
+                {showcaseTab === "prompt" ? (
+                  <div className="space-y-3.5 flex-1 flex flex-col justify-between">
+                    {/* Prompt Box */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-neutral-900">Prompt</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyShowcasePrompt(selectedShowcaseItem.prompt)}
+                          className="p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
+                          title="Copy Prompt"
+                        >
+                          {copiedShowcasePrompt ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                      <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-xs text-neutral-800 leading-relaxed font-normal max-h-28 overflow-y-auto scrollbar-thin">
+                        {selectedShowcaseItem.prompt}
+                      </div>
+                    </div>
+
+                    {/* Parameter Badges Matrix */}
+                    <div className="flex items-center gap-2 flex-wrap pt-1">
+                      {/* Model Badge */}
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-800">
+                        {renderOfficialLogo(selectedShowcaseItem.modelId || "nano-banana", "w-3.5 h-3.5")}
+                        <span>{selectedShowcaseItem.modelName}</span>
+                      </div>
+
+                      {/* Aspect Ratio Badge */}
+                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
+                        <span>▯</span>
+                        <span>{selectedShowcaseItem.aspectRatio}</span>
+                      </div>
+
+                      {/* Resolution Badge */}
+                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
+                        <span>⊞</span>
+                        <span>
+                          {selectedShowcaseItem.resolution} ({selectedShowcaseItem.dimensions || "1024×576"})
+                        </span>
+                      </div>
+
+                      {/* Output Count Badge */}
+                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
+                        <span>⧉</span>
+                        <span>{selectedShowcaseItem.outputCount || 1} Output</span>
+                      </div>
+
+                      {/* Seed Badge */}
+                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
+                        <span>🎲</span>
+                        <span>Seed: {selectedShowcaseItem.seed || 342781}</span>
+                      </div>
+
+                      {/* Copy Settings Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleCopyShowcaseSettings(selectedShowcaseItem)}
+                        className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors ml-auto cursor-pointer"
+                        title="Copy Generation Settings"
+                      >
+                        {copiedShowcaseSettings ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2 text-xs">
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Model Engine:</span>
+                      <span className="font-mono font-bold text-neutral-900">
+                        {STUDIO_MODELS.find((m) => m.name === selectedShowcaseItem.modelName)?.engine ||
+                          "gemini-2.5-flash-image"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Cloud Provider:</span>
+                      <span className="font-semibold text-blue-700">Google Cloud Vertex AI</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Inference Region:</span>
+                      <span className="font-mono text-neutral-800">us-central1 (Iowa)</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Safety Filter:</span>
+                      <span className="font-semibold text-emerald-700">Responsible AI Level 2</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-neutral-500 font-medium">Digital Provenance:</span>
+                      <span className="font-semibold text-purple-700">SynthID Watermark</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            RECENT GENERATIONS SECTION & 5-COLUMN GALLERY GRID
+        ══════════════════════════════════════════════════════════════════════ */}
+        <div ref={generationFeedRef} id="generations-feed" className="space-y-4 pt-2">
+          {/* Error Alert Banner */}
+          {errorMsg && (
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-start justify-between gap-3 text-rose-800 text-xs font-semibold animate-fadeIn shadow-2xs">
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-rose-600 mt-1.5 shrink-0" />
+                <div>
+                  <span className="font-bold">Generation Error: </span>
+                  <span>{errorMsg}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setErrorMsg(null)}
+                className="text-rose-500 hover:text-rose-800 font-bold text-xs p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Filter Navigation Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
+            {/* Left Tabs */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {[
+                { id: "recent", label: "Recent Generations" },
+                { id: "my-creations", label: "My Creations" },
+                { id: "favorites", label: "Favorites" },
+                { id: "projects", label: "Projects" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveFeedTab(tab.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    activeFeedTab === tab.id
+                      ? "bg-blue-600 text-white shadow-2xs"
+                      : "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Right Filters & Search */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Model Filter Dropdown */}
+              <select
+                value={feedModelFilter}
+                onChange={(e) => setFeedModelFilter(e.target.value)}
+                className="h-8 px-2.5 rounded-xl border border-neutral-200 bg-white text-xs font-semibold text-neutral-700 hover:border-neutral-300 focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs"
+              >
+                <option value="all">All Models</option>
+                <option value="nano">Nano Banana</option>
+                <option value="imagen">Imagen Suite</option>
+                <option value="specialized">Specialized</option>
+              </select>
+
+              {/* Status Filter Dropdown */}
+              <select
+                value={feedStatusFilter}
+                onChange={(e) => setFeedStatusFilter(e.target.value)}
+                className="h-8 px-2.5 rounded-xl border border-neutral-200 bg-white text-xs font-semibold text-neutral-700 hover:border-neutral-300 focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs"
+              >
+                <option value="all">All Status</option>
+                <option value="completed">Completed</option>
+              </select>
+
+              {/* View Mode Toggle */}
+              <div className="flex items-center rounded-xl border border-neutral-200 bg-white p-0.5 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setFeedViewMode("grid")}
+                  className={`p-1 rounded-lg transition-colors cursor-pointer ${
+                    feedViewMode === "grid" ? "bg-blue-600 text-white" : "text-neutral-500 hover:text-neutral-900"
+                  }`}
+                  title="Grid View"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFeedViewMode("list")}
+                  className={`p-1 rounded-lg transition-colors cursor-pointer ${
+                    feedViewMode === "list" ? "bg-blue-600 text-white" : "text-neutral-500 hover:text-neutral-900"
+                  }`}
+                  title="List View"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={feedSearchQuery}
+                  onChange={(e) => setFeedSearchQuery(e.target.value)}
+                  placeholder="Search your generations..."
+                  className="pl-8 pr-3 py-1.5 rounded-xl border border-neutral-200 bg-white text-xs text-neutral-800 focus:outline-none focus:border-neutral-400 placeholder-neutral-400 w-44 sm:w-56 shadow-2xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {/* Live Synthesis In-Progress Card */}
+            {isGenerating && (
+              <div className="relative rounded-2xl overflow-hidden border-2 border-blue-500 bg-gradient-to-br from-neutral-950 via-slate-900 to-indigo-950 text-white shadow-xl shadow-blue-500/15 flex flex-col justify-between p-4 col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-2 min-h-[280px] animate-fadeIn">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute -top-12 -right-12 w-36 h-36 bg-indigo-500/25 rounded-full blur-2xl pointer-events-none" />
+
+                {/* Header */}
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                    <span className="text-xs font-extrabold text-white tracking-wide">
+                      Live Synthesis Active
+                    </span>
+                    <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.2 rounded-full font-bold">
+                      Vertex AI
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-sm border border-white/15">
+                    <Clock className="w-3 h-3 text-cyan-300 animate-spin-slow" />
+                    <span className="text-cyan-300">{elapsedSeconds.toFixed(1)}s</span>
+                  </div>
+                </div>
+
+                {/* Center Animation Visualizer */}
+                <div className="relative z-10 my-4 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="relative w-14 h-14 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-2 border-dashed border-cyan-400/60 animate-spin-slow" />
+                    <div className="absolute inset-1.5 rounded-full border-2 border-indigo-400/60 animate-reverse-spin" />
+                    <Sparkles className="w-6 h-6 text-cyan-300 animate-pulse" />
+                  </div>
+
+                  <div className="space-y-1 max-w-sm px-2">
+                    <p className="text-xs font-extrabold text-white tracking-wide">
+                      {generationPhase || `Synthesizing with ${currentModel.name}...`}
+                    </p>
+                    <p className="text-[11px] text-neutral-300 line-clamp-2 italic font-sans opacity-90 leading-tight">
+                      "{prompt}"
+                    </p>
+                  </div>
+
+                  {/* Live Glowing Progress Bar */}
+                  <div className="w-full max-w-xs space-y-1">
+                    <div className="flex items-center justify-between text-[10px] font-mono font-semibold text-neutral-300">
+                      <span className="text-blue-300 font-bold">{currentModel.name}</span>
+                      <span className="text-cyan-300 font-bold">{progress}%</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden relative border border-white/10">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 rounded-full transition-all duration-300 shadow-sm shadow-cyan-400/50"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metadata Footer */}
+                <div className="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-400 font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <span className="bg-white/10 px-2 py-0.5 rounded text-neutral-200 font-semibold">{selectedRatio}</span>
+                    <span className="bg-white/10 px-2 py-0.5 rounded text-neutral-200 font-semibold">{selectedResolution}</span>
+                  </div>
+                  <span className="text-amber-300 font-bold">⚡ {estimatedCost} cr</span>
+                </div>
+              </div>
+            )}
+
+            {/* Feed Items Cards */}
+            {feedItems
+              .filter((item) => {
+                if (feedSearchQuery.trim()) {
+                  const q = feedSearchQuery.toLowerCase();
+                  const match =
+                    item.title.toLowerCase().includes(q) ||
+                    item.prompt.toLowerCase().includes(q) ||
+                    item.modelName.toLowerCase().includes(q);
+                  if (!match) return false;
+                }
+                if (feedModelFilter !== "all") {
+                  if (feedModelFilter === "nano" && !item.modelName.toLowerCase().includes("nano")) return false;
+                  if (feedModelFilter === "imagen" && !item.modelName.toLowerCase().includes("imagen")) return false;
+                  if (
+                    feedModelFilter === "specialized" &&
+                    (item.modelName.toLowerCase().includes("nano") || item.modelName.toLowerCase().includes("imagen"))
+                  )
+                    return false;
+                }
+                if (feedStatusFilter !== "all") {
+                  if (feedStatusFilter === "completed" && item.status && item.status !== "Completed") return false;
+                }
+                if (activeFeedTab === "favorites" && !item.isFavorite) return false;
+                return true;
+              })
+              .map((item) => {
+                const isNewlyCreated = item.id === newlyGeneratedId;
+                const isSelectedInShowcase = selectedShowcaseItem?.id === item.id;
+
+                return (
+                  <div
+                    key={item.id}
+                    id={`feed-card-${item.id}`}
+                    onClick={() => setSelectedShowcaseItem(item)}
+                    className={`group relative rounded-2xl overflow-hidden border bg-white flex flex-col transition-all duration-300 cursor-pointer ${
+                      isSelectedInShowcase
+                        ? "ring-2 ring-blue-600 ring-offset-2 border-blue-400 shadow-md"
+                        : isNewlyCreated
+                        ? "ring-2 ring-emerald-500 ring-offset-2 border-emerald-400 shadow-xl shadow-emerald-500/15 animate-spring"
+                        : "border-neutral-200/90 shadow-2xs hover:shadow-card-elevated hover:border-neutral-300"
+                    }`}
+                  >
+                    {/* Image Preview Container */}
+                    <div className="relative aspect-square overflow-hidden bg-neutral-100">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+
+                      {/* Resolution badge */}
+                      <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-neutral-950/70 text-white text-[9px] font-mono font-bold backdrop-blur-xs">
+                        {item.resolution}
+                      </span>
+
+                      {/* Newly Generated Badge */}
+                      {isNewlyCreated && (
+                        <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-md animate-pulse z-10">
+                          ✨ New
+                        </span>
+                      )}
+
+                      {/* Hover Action Overlay Top-Right */}
+                      <div
+                        className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setLightboxImage(item.image)}
+                          className="p-1.5 rounded-lg bg-neutral-950/70 hover:bg-neutral-950 text-white backdrop-blur-sm shadow-xs cursor-pointer transition-transform hover:scale-110"
+                          title="Fullscreen Lightbox"
+                        >
+                          <Maximize2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadImage(item.image, item.title)}
+                          className="p-1.5 rounded-lg bg-neutral-950/70 hover:bg-neutral-950 text-white backdrop-blur-sm shadow-xs cursor-pointer transition-transform hover:scale-110"
+                          title="Download Image"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPrompt(item.prompt);
+                            window.scrollTo({ top: 380, behavior: "smooth" });
+                          }}
+                          className="p-1.5 rounded-lg bg-neutral-950/70 hover:bg-neutral-950 text-white backdrop-blur-sm shadow-xs cursor-pointer transition-transform hover:scale-110"
+                          title="Use Prompt"
+                        >
+                          <MoreHorizontal className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Metadata Footer */}
+                    <div className="p-3 space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-bold text-neutral-900 truncate">
+                          {item.modelName}
+                        </span>
+                        <span className="text-amber-600 font-bold font-mono">
+                          ⚡ {item.cost} cr
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-neutral-400 flex items-center justify-between">
+                        <span>{item.timestamp}</span>
+                        <span className="font-mono">{item.aspectRatio}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          {/* Empty State */}
+          {feedItems.length === 0 && !isGenerating && (
+            <div className="py-16 px-4 rounded-3xl border border-dashed border-neutral-300 bg-neutral-50/60 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-neutral-200/80 shadow-xs flex items-center justify-center mx-auto text-blue-600">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div className="space-y-1 max-w-sm mx-auto">
+                <h4 className="text-sm font-bold text-neutral-800">Your Canvas is Ready</h4>
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                  Enter your description above and click <strong>Generate Images</strong> to synthesize real visual art powered by Google Cloud Vertex AI.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSurpriseMe}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 shadow-2xs transition-all cursor-pointer"
+              >
+                <Dice5 className="w-3.5 h-3.5 text-purple-600" />
+                <span>Try a Creative Sample Prompt</span>
+              </button>
+            </div>
+          )}
         </div>
+      </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
             RIGHT COLLAPSIBLE PANEL: ADVANCED SETTINGS (Dynamic Google Cloud Suite)
@@ -3336,274 +4150,6 @@ export default function StudioPage() {
             </div>
           </aside>
         </div>
-      </div>
-
-      <div ref={generationFeedRef} id="generations-feed" className="space-y-4 pt-4 border-t border-neutral-200/80 scroll-mt-6">
-        {/* Error Alert Banner */}
-        {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-start justify-between gap-3 text-rose-800 text-xs font-semibold animate-fadeIn shadow-2xs">
-            <div className="flex items-start gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-rose-600 mt-1.5 shrink-0" />
-              <div>
-                <span className="font-bold">Generation Error: </span>
-                <span>{errorMsg}</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setErrorMsg(null)}
-              className="text-rose-500 hover:text-rose-800 font-bold text-xs p-1 cursor-pointer"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-          {/* Feed Tabs */}
-          <div className="flex items-center gap-1">
-            {[
-              { id: "recent", label: "Recent Generations" },
-              { id: "my-creations", label: "My Creations" },
-              { id: "favorites", label: "Favorites" },
-              { id: "projects", label: "Projects" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveFeedTab(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeFeedTab === tab.id
-                    ? "bg-neutral-950 text-white shadow-2xs"
-                    : "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Feed Filters & Search */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={feedSearchQuery}
-                onChange={(e) => setFeedSearchQuery(e.target.value)}
-                placeholder="Search your generations..."
-                className="pl-8 pr-3 py-1.5 rounded-xl border border-neutral-200 bg-white text-xs text-neutral-800 focus:outline-none focus:border-neutral-400 placeholder-neutral-400 w-48 sm:w-56"
-              />
-            </div>
-
-            <div className="flex items-center rounded-xl border border-neutral-200 bg-white p-0.5">
-              <button
-                type="button"
-                onClick={() => setFeedViewMode("grid")}
-                className={`p-1 rounded-lg transition-colors cursor-pointer ${
-                  feedViewMode === "grid" ? "bg-neutral-900 text-white" : "text-neutral-500 hover:text-neutral-900"
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setFeedViewMode("list")}
-                className={`p-1 rounded-lg transition-colors cursor-pointer ${
-                  feedViewMode === "list" ? "bg-neutral-900 text-white" : "text-neutral-500 hover:text-neutral-900"
-                }`}
-              >
-                <List className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {/* ── Active Live Generation in Progress Card (Live High-Tech Animation) ── */}
-          {isGenerating && (
-            <div className="relative rounded-2xl overflow-hidden border-2 border-blue-500 bg-gradient-to-br from-neutral-950 via-slate-900 to-indigo-950 text-white shadow-xl shadow-blue-500/15 flex flex-col justify-between p-4 col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-2 min-h-[280px] animate-fadeIn">
-              {/* Animated top shimmer lines */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute -top-12 -right-12 w-36 h-36 bg-indigo-500/25 rounded-full blur-2xl pointer-events-none" />
-
-              {/* Header */}
-              <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
-                  <span className="text-xs font-extrabold text-white tracking-wide">
-                    Live Synthesis Active
-                  </span>
-                  <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.2 rounded-full font-bold">
-                    Vertex AI
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-sm border border-white/15">
-                  <Clock className="w-3 h-3 text-cyan-300 animate-spin-slow" />
-                  <span className="text-cyan-300">{elapsedSeconds.toFixed(1)}s</span>
-                </div>
-              </div>
-
-              {/* Center Animation Visualizer */}
-              <div className="relative z-10 my-4 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="relative w-14 h-14 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border-2 border-dashed border-cyan-400/60 animate-spin-slow" />
-                  <div className="absolute inset-1.5 rounded-full border-2 border-indigo-400/60 animate-reverse-spin" />
-                  <Sparkles className="w-6 h-6 text-cyan-300 animate-pulse" />
-                </div>
-
-                <div className="space-y-1 max-w-sm px-2">
-                  <p className="text-xs font-extrabold text-white tracking-wide">
-                    {generationPhase || `Synthesizing with ${currentModel.name}...`}
-                  </p>
-                  <p className="text-[11px] text-neutral-300 line-clamp-2 italic font-sans opacity-90 leading-tight">
-                    "{prompt}"
-                  </p>
-                </div>
-
-                {/* Live Glowing Progress Bar */}
-                <div className="w-full max-w-xs space-y-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono font-semibold text-neutral-300">
-                    <span className="text-blue-300 font-bold">{currentModel.name}</span>
-                    <span className="text-cyan-300 font-bold">{progress}%</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden relative border border-white/10">
-                    <div
-                      className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 rounded-full transition-all duration-300 shadow-sm shadow-cyan-400/50"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Metadata Footer */}
-              <div className="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-400 font-mono">
-                <div className="flex items-center gap-1.5">
-                  <span className="bg-white/10 px-2 py-0.5 rounded text-neutral-200 font-semibold">{selectedRatio}</span>
-                  <span className="bg-white/10 px-2 py-0.5 rounded text-neutral-200 font-semibold">{selectedResolution}</span>
-                </div>
-                <span className="text-amber-300 font-bold">⚡ {estimatedCost} cr</span>
-              </div>
-            </div>
-          )}
-
-          {/* Real Generated Items */}
-          {feedItems
-            .filter((item) =>
-              feedSearchQuery
-                ? item.title.toLowerCase().includes(feedSearchQuery.toLowerCase()) ||
-                  item.prompt.toLowerCase().includes(feedSearchQuery.toLowerCase())
-                : true
-            )
-            .map((item) => {
-              const isNewlyCreated = item.id === newlyGeneratedId;
-              return (
-                <div
-                  key={item.id}
-                  id={`feed-card-${item.id}`}
-                  className={`group relative rounded-2xl overflow-hidden border bg-white flex flex-col transition-all duration-500 ${
-                    isNewlyCreated
-                      ? "ring-2 ring-emerald-500 ring-offset-2 border-emerald-400 shadow-xl shadow-emerald-500/15 animate-spring"
-                      : "border-neutral-200/90 shadow-2xs hover:shadow-card-elevated"
-                  }`}
-                >
-                  {/* Image Preview Container */}
-                  <div className="relative aspect-square overflow-hidden bg-neutral-100">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-
-                    {/* Newly Generated Badge */}
-                    {isNewlyCreated && (
-                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-md animate-pulse z-10">
-                        ✨ New
-                      </span>
-                    )}
-
-                    {/* Hover Action Overlay */}
-                    <div className="absolute inset-0 bg-neutral-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
-                      <button
-                        type="button"
-                        onClick={() => setLightboxImage(item.image)}
-                        className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
-                        title="Fullscreen Lightbox"
-                      >
-                        <Maximize2 className="w-4 h-4" />
-                      </button>
-                      <a
-                        href={item.image}
-                        download={`aistudio-${item.id}.png`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
-                        title="Download Image"
-                      >
-                        <Download className="w-4 h-4" />
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPrompt(item.prompt);
-                          window.scrollTo({ top: 300, behavior: "smooth" });
-                        }}
-                        className="p-2 rounded-xl bg-white/90 hover:bg-white text-neutral-900 shadow-xs cursor-pointer transition-transform hover:scale-110"
-                        title="Use Prompt"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Resolution badge */}
-                    <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-neutral-950/70 text-white text-[9px] font-mono font-bold">
-                      {item.resolution}
-                    </span>
-                  </div>
-
-                  {/* Metadata Footer */}
-                  <div className="p-3 space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-neutral-900 truncate">
-                        {item.modelName}
-                      </span>
-                      <span className="text-amber-600 font-bold font-mono">
-                        ⚡ {item.cost} cr
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-neutral-400 flex items-center justify-between">
-                      <span>{item.timestamp}</span>
-                      <span className="font-mono">{item.aspectRatio}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-
-        {/* Clean Empty State when no generations exist yet */}
-        {feedItems.length === 0 && !isGenerating && (
-          <div className="py-16 px-4 rounded-3xl border border-dashed border-neutral-300 bg-neutral-50/60 text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-white border border-neutral-200/80 shadow-xs flex items-center justify-center mx-auto text-blue-600">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div className="space-y-1 max-w-sm mx-auto">
-              <h4 className="text-sm font-bold text-neutral-800">Your Canvas is Ready</h4>
-              <p className="text-xs text-neutral-500 leading-relaxed">
-                Enter your description above and click <strong>Generate Images</strong> to synthesize real visual art powered by Google Cloud Vertex AI.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleSurpriseMe}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 shadow-2xs transition-all cursor-pointer"
-            >
-              <Dice5 className="w-3.5 h-3.5 text-purple-600" />
-              <span>Try a Creative Sample Prompt</span>
-            </button>
-          </div>
-        )}
       </div>
 
             {/* ══════════════════════════════════════════════════════════════════════
