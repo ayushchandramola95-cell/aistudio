@@ -901,7 +901,6 @@ export default function StudioPage() {
   const [selectedResolution, setSelectedResolution] = useState<"0.5K" | "1K" | "2K" | "4K">("1K");
   const [outputsCount, setOutputsCount] = useState<number>(1);
   const [qualityTier, setQualityTier] = useState<string>("standard");
-  const [inlineMoreOpen, setInlineMoreOpen] = useState<boolean>(false);
 
   // Advanced Settings panel state (Collapsible Split-View)
   const [advancedPanelOpen, setAdvancedPanelOpen] = useState<boolean>(false);
@@ -967,9 +966,10 @@ export default function StudioPage() {
 
   const ratioTrackWidthClass = useMemo(() => {
     if (advancedPanelOpen) {
-      return "w-[226px] sm:w-[286px] max-w-[286px]";
+      // Exactly 4 ratios displayed when Advanced Settings is open
+      return "w-[220px] max-w-[220px]";
     }
-    return "w-[226px] sm:w-[350px] md:w-[420px] lg:w-[490px] xl:w-[540px] max-w-[540px]";
+    return "w-[220px] sm:w-[350px] md:w-[420px] lg:w-[490px] xl:w-[540px] max-w-[540px]";
   }, [advancedPanelOpen]);
 
   const checkRatioScroll = () => {
@@ -2396,8 +2396,8 @@ export default function StudioPage() {
               </button>
             </div>
 
-            {/* ── THE ONE-LINE SETTINGS TOOLBAR (Quick Settings + Toggable More) ── */}
-            <div className="p-2 rounded-2xl bg-neutral-100/75 border border-neutral-200/75 flex flex-wrap items-center justify-between gap-2.5">
+            {/* ── THE ONE-LINE SETTINGS TOOLBAR (Ratio, Res & Outputs) ── */}
+            <div className="p-2 rounded-2xl bg-neutral-100/75 border border-neutral-200/75 flex flex-nowrap items-center gap-2 sm:gap-2.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {/* Quick Setting 1: Aspect Ratio Sliding Box (Responsive Width based on layout) */}
               <div className="flex items-center gap-1.5 shrink-0 min-w-0">
                 <span className="text-xs font-bold text-neutral-700 pl-1 shrink-0">Ratio:</span>
@@ -2406,7 +2406,7 @@ export default function StudioPage() {
                   <button
                     type="button"
                     disabled={!canScrollRatioLeft}
-                    onClick={() => ratioRailRef.current?.scrollBy({ left: -140, behavior: "smooth" })}
+                    onClick={() => ratioRailRef.current?.scrollBy({ left: -110, behavior: "smooth" })}
                     className="w-5 h-7 rounded-lg hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-all cursor-pointer shrink-0"
                     title="Slide ratios left"
                   >
@@ -2446,7 +2446,7 @@ export default function StudioPage() {
                   <button
                     type="button"
                     disabled={!canScrollRatioRight}
-                    onClick={() => ratioRailRef.current?.scrollBy({ left: 140, behavior: "smooth" })}
+                    onClick={() => ratioRailRef.current?.scrollBy({ left: 110, behavior: "smooth" })}
                     className="w-5 h-7 rounded-lg hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-all cursor-pointer shrink-0"
                     title="Slide ratios right"
                   >
@@ -2456,7 +2456,8 @@ export default function StudioPage() {
               </div>
 
               {/* Vertical Divider */}
-              <div className="h-6 w-px bg-neutral-200 hidden md:block shrink-0" />
+              <div className="h-6 w-px bg-neutral-200 shrink-0" />
+
               {/* Quick Setting 2: Resolution */}
               <div className="flex items-center gap-2 shrink-0">
                 <div className="flex flex-col pl-1">
@@ -2501,7 +2502,7 @@ export default function StudioPage() {
               </div>
 
               {/* Vertical Divider */}
-              <div className="h-6 w-px bg-neutral-200 hidden md:block shrink-0" />
+              <div className="h-6 w-px bg-neutral-200 shrink-0" />
 
               {/* Quick Setting 3: Outputs */}
               <div className="flex items-center gap-2 shrink-0">
@@ -2531,198 +2532,7 @@ export default function StudioPage() {
                   })}
                 </div>
               </div>
-
-              {/* Toggable More Settings Button */}
-              <button
-                type="button"
-                onClick={() => setInlineMoreOpen(!inlineMoreOpen)}
-                className={`ml-auto px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs ${
-                  inlineMoreOpen
-                    ? "bg-blue-600 text-white border-blue-600 shadow-xs font-bold"
-                    : "bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 hover:text-neutral-900"
-                }`}
-              >
-                <Sliders className="w-3.5 h-3.5" />
-                <span>More Settings</span>
-                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold capitalize ${
-                  inlineMoreOpen ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-600"
-                }`}>
-                  {qualityTier}
-                </span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${inlineMoreOpen ? "rotate-180" : ""}`} />
-              </button>
             </div>
-
-            {/* ── EXPANDABLE INLINE FINE-TUNING PANEL ── */}
-            {inlineMoreOpen && (
-              <div className="p-4 rounded-2xl bg-neutral-50/90 border border-neutral-200/80 space-y-3.5 animate-fadeIn">
-                <div className="flex items-center justify-between text-xs border-b border-neutral-200/60 pb-2">
-                  <div className="flex items-center gap-2">
-                    <Sliders className="w-3.5 h-3.5 text-blue-600" />
-                    <span className="font-bold text-neutral-900">Fine-Tuning & Quality Controls</span>
-                    <span className="text-[10px] text-neutral-400 font-mono">({currentModel.engine})</span>
-                  </div>
-                  <span className="text-[10px] text-neutral-500">
-                    Changes apply immediately to this generation
-                  </span>
-                </div>
-
-                {/* Quality Tier Selector inside More Settings */}
-                <div className="bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-neutral-800">Quality Mode</span>
-                    <span className="text-[10px] text-neutral-400 capitalize">{qualityTier} render tier</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-neutral-100/70 p-1 rounded-xl border border-neutral-200/60">
-                    {[
-                      { id: "draft", label: "Draft", hint: "Fast & lightweight" },
-                      { id: "standard", label: "Standard", hint: "Optimal balance" },
-                      { id: "high", label: "High", hint: "Ultra high fidelity" },
-                    ].map((q) => {
-                      const isSupported = currentModel.supportedQualityTiers.includes(q.id as any);
-                      const isSelected = qualityTier === q.id;
-                      return (
-                        <button
-                          key={q.id}
-                          type="button"
-                          disabled={!isSupported}
-                          onClick={() => setQualityTier(q.id)}
-                          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border ${
-                            !isSupported
-                              ? "opacity-30 cursor-not-allowed text-neutral-400 border-transparent bg-neutral-50/50"
-                              : isSelected
-                              ? "bg-white text-neutral-950 border-neutral-200/90 shadow-2xs font-bold ring-1 ring-neutral-900/5 cursor-pointer"
-                              : "text-neutral-600 hover:text-neutral-900 hover:bg-white/50 border-transparent cursor-pointer"
-                          }`}
-                        >
-                          <span>{q.label}</span>
-                          <span className={`text-[10px] ${isSelected ? "text-blue-600 font-bold" : "text-neutral-400"}`}>
-                            ({q.hint})
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                  {/* Sampling Steps */}
-                  <div className="space-y-1.5 bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-neutral-700">Sampling Steps</span>
-                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[11px]">{steps}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={15}
-                      max={50}
-                      value={steps}
-                      onChange={(e) => setSteps(Number(e.target.value))}
-                      className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
-                    <div className="flex justify-between text-[9px] text-neutral-400">
-                      <span>15 (Fast)</span>
-                      <span>30 (Standard)</span>
-                      <span>50 (Max)</span>
-                    </div>
-                  </div>
-
-                  {/* CFG Guidance Scale */}
-                  <div className="space-y-1.5 bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-neutral-700">Guidance Scale (CFG)</span>
-                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[11px]">{cfgScale}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={1}
-                      max={15}
-                      step={0.5}
-                      value={cfgScale}
-                      onChange={(e) => setCfgScale(Number(e.target.value))}
-                      className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
-                    <div className="flex justify-between text-[9px] text-neutral-400">
-                      <span>Creative (3.0)</span>
-                      <span>Balanced (7.5)</span>
-                      <span>Strict (12.0)</span>
-                    </div>
-                  </div>
-
-                  {/* Seed Control */}
-                  <div className="space-y-1.5 bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-neutral-700">Generation Seed</span>
-                      <span className="text-[10px] text-neutral-400 font-mono">
-                        {seedMode === "random" ? "Randomized" : `#${seedValue}`}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSeedMode("random")}
-                        className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                          seedMode === "random"
-                            ? "bg-blue-50 text-blue-700 border-blue-200 font-bold"
-                            : "bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100"
-                        }`}
-                      >
-                        🎲 Random
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSeedMode("custom")}
-                        className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                          seedMode === "custom"
-                            ? "bg-blue-50 text-blue-700 border-blue-200 font-bold"
-                            : "bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100"
-                        }`}
-                      >
-                        Fixed
-                      </button>
-                      {seedMode === "custom" && (
-                        <input
-                          type="number"
-                          value={seedValue}
-                          onChange={(e) => setSeedValue(Number(e.target.value))}
-                          className="w-20 px-2 py-0.5 text-xs border border-neutral-200 rounded-lg font-mono"
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Negative Prompt Row (Dynamically adapts if model does not use negative prompts) */}
-                <div className="bg-white p-3 rounded-xl border border-neutral-200/70 shadow-2xs space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-semibold text-neutral-700">
-                      <span>Negative Prompt (Avoid in image):</span>
-                      {!currentModel.supportsNegativePrompt && (
-                        <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                          Not applicable for {currentModel.name}
-                        </span>
-                      )}
-                    </div>
-                    {currentModel.supportsNegativePrompt && (
-                      <span className="text-[10px] text-neutral-400">Optional unwanted elements</span>
-                    )}
-                  </div>
-                  {currentModel.supportsNegativePrompt ? (
-                    <input
-                      type="text"
-                      value={negativePrompt}
-                      onChange={(e) => setNegativePrompt(e.target.value)}
-                      placeholder="e.g. blurry, low quality, bad anatomy, deformed limbs, artifacts..."
-                      className="w-full px-3 py-1.5 text-xs rounded-lg bg-neutral-50 border border-neutral-200 focus:outline-none focus:bg-white focus:border-neutral-400"
-                    />
-                  ) : (
-                    <p className="text-[11px] text-neutral-400 italic">
-                      This flow-matching engine applies guidance directly through the positive prompt without negative conditioning.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Bottom Generation Action Ribbon */}
             <div className="pt-4 border-t border-neutral-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
