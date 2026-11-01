@@ -53,7 +53,11 @@ import {
   FolderKanban,
   Shuffle,
   Edit3,
-  ArrowUpRight
+  ArrowUpRight,
+  Square,
+  FileText,
+  Box,
+  BarChart3
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1123,9 +1127,10 @@ export default function StudioPage() {
   const [feedViewMode, setFeedViewMode] = useState<"grid" | "list">("grid");
   const [feedItems, setFeedItems] = useState<FeedItem[]>(INITIAL_FEED_ITEMS);
   const [selectedShowcaseItem, setSelectedShowcaseItem] = useState<FeedItem | null>(INITIAL_FEED_ITEMS[0]);
-  const [showcaseTab, setShowcaseTab] = useState<"prompt" | "model">("prompt");
+  const [showcaseTab, setShowcaseTab] = useState<"prompt" | "model" | "details">("prompt");
   const [copiedShowcasePrompt, setCopiedShowcasePrompt] = useState<boolean>(false);
   const [copiedShowcaseSettings, setCopiedShowcaseSettings] = useState<boolean>(false);
+  const [copiedSeed, setCopiedSeed] = useState<boolean>(false);
   const [feedModelFilter, setFeedModelFilter] = useState<string>("all");
   const [feedStatusFilter, setFeedStatusFilter] = useState<string>("all");
 
@@ -1559,6 +1564,13 @@ export default function StudioPage() {
     navigator.clipboard.writeText(settingsText);
     setCopiedShowcaseSettings(true);
     setTimeout(() => setCopiedShowcaseSettings(false), 2000);
+  }, []);
+
+  const handleCopySeed = useCallback((seed?: number) => {
+    if (!seed) return;
+    navigator.clipboard.writeText(seed.toString());
+    setCopiedSeed(true);
+    setTimeout(() => setCopiedSeed(false), 2000);
   }, []);
 
   // Load live past generations on mount
@@ -2887,7 +2899,7 @@ export default function StudioPage() {
                   className="px-3 py-1.5 rounded-xl border border-neutral-200/90 bg-white hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
                   title="Upscale to higher resolution"
                 >
-                  <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500" />
+                  <span className="px-1 py-0.2 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">4K</span>
                   <span>Upscale</span>
                 </button>
 
@@ -2924,9 +2936,9 @@ export default function StudioPage() {
                       ? "bg-rose-50 text-rose-600 border-rose-200"
                       : "bg-white text-neutral-600 hover:bg-neutral-50"
                   }`}
-                  title="Save to favorites"
+                  title={selectedShowcaseItem.isFavorite ? "Saved to favorites" : "Save to favorites"}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Heart className={`w-4 h-4 ${selectedShowcaseItem.isFavorite ? "fill-rose-600" : ""}`} />
                 </button>
               </div>
             </div>
@@ -2934,7 +2946,8 @@ export default function StudioPage() {
             {/* Two-Column Split Visualizer */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
               {/* Left: Generated Image Viewer */}
-              <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
+              <div className="lg:col-span-6 xl:col-span-6 flex flex-col space-y-3">
+                {/* Main Image Container */}
                 <div className="relative rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-200/60 shadow-inner group min-h-[260px] sm:min-h-[300px] max-h-[460px] w-full">
                   <img
                     src={selectedShowcaseItem.image}
@@ -2961,40 +2974,84 @@ export default function StudioPage() {
                       <Download className="w-4 h-4" />
                     </button>
                   </div>
+
+                  {/* Bottom-Right Counter Badge (like Image 2 "1/1") */}
+                  <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded-lg bg-neutral-950/75 backdrop-blur-md border border-white/15 text-white text-[11px] font-mono font-semibold tracking-wider shadow-sm z-10">
+                    1/{selectedShowcaseItem.outputCount || 1}
+                  </div>
+                </div>
+
+                {/* Thumbnail Strip with Active Outline & Generate More Button (like Image 2) */}
+                <div className="flex items-center gap-2.5 pt-0.5">
+                  {/* Active Thumbnail */}
+                  <div className="w-16 h-12 rounded-xl overflow-hidden border-2 border-blue-600 ring-2 ring-blue-500/20 shadow-sm shrink-0 cursor-pointer transition-transform hover:scale-102">
+                    <img
+                      src={selectedShowcaseItem.image}
+                      alt="Thumbnail"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {/* + Generate More Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleGenerate()}
+                    className="h-12 px-4 rounded-xl border-2 border-dashed border-neutral-300 hover:border-blue-500 hover:bg-blue-50/50 flex flex-col items-center justify-center text-neutral-500 hover:text-blue-600 transition-all cursor-pointer group shrink-0"
+                    title="Generate another image with current settings"
+                  >
+                    <Plus className="w-3.5 h-3.5 mb-0.5 text-neutral-400 group-hover:text-blue-600 transition-colors" />
+                    <span className="text-[10px] font-bold">Generate More</span>
+                  </button>
                 </div>
               </div>
 
               {/* Right: Prompt & Settings Tabs */}
-              <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-between space-y-4">
-                {/* Tab Nav Buttons */}
-                <div className="flex items-center gap-1 border-b border-neutral-100 pb-2.5">
+              <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-between space-y-3.5">
+                {/* Tab Nav Buttons with Icons (Matching Image 2) */}
+                <div className="flex items-center gap-1.5 border-b border-neutral-100 pb-2.5">
                   <button
                     type="button"
                     onClick={() => setShowcaseTab("prompt")}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                       showcaseTab === "prompt"
-                        ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs"
-                        : "text-neutral-500 hover:text-neutral-900"
+                        ? "bg-indigo-50/80 text-indigo-700 border border-indigo-200/90 shadow-2xs"
+                        : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
                     }`}
                   >
-                    Prompt & Settings
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Prompt & Settings</span>
                   </button>
+
                   <button
                     type="button"
                     onClick={() => setShowcaseTab("model")}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                       showcaseTab === "model"
-                        ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs"
-                        : "text-neutral-500 hover:text-neutral-900"
+                        ? "bg-indigo-50/80 text-indigo-700 border border-indigo-200/90 shadow-2xs"
+                        : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
                     }`}
                   >
-                    Model Info
+                    <Box className="w-3.5 h-3.5" />
+                    <span>Model Info</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowcaseTab("details")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      showcaseTab === "details"
+                        ? "bg-indigo-50/80 text-indigo-700 border border-indigo-200/90 shadow-2xs"
+                        : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
+                    }`}
+                  >
+                    <BarChart3 className="w-3.5 h-3.5" />
+                    <span>Generation Details</span>
                   </button>
                 </div>
 
-                {/* Tab Body */}
-                {showcaseTab === "prompt" ? (
-                  <div className="space-y-3.5 flex-1 flex flex-col justify-between">
+                {/* Tab 1: Prompt & Settings */}
+                {showcaseTab === "prompt" && (
+                  <div className="space-y-3 flex-1 flex flex-col justify-between">
                     {/* Prompt Box */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
@@ -3012,62 +3069,93 @@ export default function StudioPage() {
                           )}
                         </button>
                       </div>
-                      <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-xs text-neutral-800 leading-relaxed font-normal max-h-28 overflow-y-auto scrollbar-thin">
+                      <div className="p-3.5 rounded-xl bg-neutral-50/80 border border-neutral-200/80 text-xs text-neutral-800 leading-relaxed font-normal min-h-[80px] max-h-28 overflow-y-auto scrollbar-thin shadow-2xs">
                         {selectedShowcaseItem.prompt}
                       </div>
                     </div>
 
-                    {/* Parameter Badges Matrix */}
-                    <div className="flex items-center gap-2 flex-wrap pt-1">
-                      {/* Model Badge */}
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-800">
-                        {renderOfficialLogo(selectedShowcaseItem.modelId || "nano-banana", "w-3.5 h-3.5")}
-                        <span>{selectedShowcaseItem.modelName}</span>
+                    {/* Parameter Cards Grid - 5 Labeled Columns (Matching Image 2) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2 pt-1">
+                      {/* 1. Model Card */}
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Model</span>
+                        <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center gap-1.5 shadow-2xs hover:bg-white hover:border-neutral-300 transition-all overflow-hidden">
+                          {/* Official Google 4-Color G Icon */}
+                          <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                          </svg>
+                          <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 whitespace-nowrap overflow-hidden text-ellipsis" title={selectedShowcaseItem.modelName}>
+                            {selectedShowcaseItem.modelName}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Aspect Ratio Badge */}
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
-                        <span>▯</span>
-                        <span>{selectedShowcaseItem.aspectRatio}</span>
+                      {/* 2. Aspect Ratio Card */}
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Aspect Ratio</span>
+                        <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center justify-center gap-1.5 shadow-2xs hover:bg-white hover:border-neutral-300 transition-all">
+                          <Square className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                          <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 font-mono">
+                            {selectedShowcaseItem.aspectRatio}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Resolution Badge */}
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
-                        <span>⊞</span>
-                        <span>
-                          {selectedShowcaseItem.resolution} ({selectedShowcaseItem.dimensions || "1024×576"})
-                        </span>
+                      {/* 3. Resolution Card */}
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Resolution</span>
+                        <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center justify-center shadow-2xs hover:bg-white hover:border-neutral-300 transition-all">
+                          <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 font-mono whitespace-nowrap" title={`${selectedShowcaseItem.resolution} (${selectedShowcaseItem.dimensions || "1024×576"})`}>
+                            {selectedShowcaseItem.resolution} ({selectedShowcaseItem.dimensions || "1024×576"})
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Output Count Badge */}
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
-                        <span>⧉</span>
-                        <span>{selectedShowcaseItem.outputCount || 1} Output</span>
+                      {/* 4. Outputs Card */}
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Outputs</span>
+                        <div className="h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center justify-center gap-1.5 shadow-2xs hover:bg-white hover:border-neutral-300 transition-all">
+                          <Layers className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                          <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 font-mono">
+                            {selectedShowcaseItem.outputCount || 1}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Seed Badge */}
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200/70 text-xs font-semibold text-neutral-700 font-mono">
-                        <span>🎲</span>
-                        <span>Seed: {selectedShowcaseItem.seed || 342781}</span>
+                      {/* 5. Seed Card */}
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-semibold text-neutral-500 pl-0.5 block">Seed</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopySeed(selectedShowcaseItem.seed)}
+                          className="w-full h-10 px-2 rounded-xl bg-neutral-50/90 border border-neutral-200/90 flex items-center justify-between shadow-2xs hover:bg-white hover:border-neutral-300 transition-all cursor-pointer group"
+                          title="Click to copy seed"
+                        >
+                          <div className="flex items-center gap-1.5 truncate">
+                            <Dice5 className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                            <span className="text-[11px] sm:text-xs font-semibold text-neutral-800 font-mono truncate">
+                              {selectedShowcaseItem.seed || 342781}
+                            </span>
+                          </div>
+                          <span className="text-neutral-400 group-hover:text-neutral-700 transition-colors ml-0.5 shrink-0">
+                            {copiedSeed ? (
+                              <Check className="w-3 h-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            )}
+                          </span>
+                        </button>
                       </div>
-
-                      {/* Copy Settings Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleCopyShowcaseSettings(selectedShowcaseItem)}
-                        className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors ml-auto cursor-pointer"
-                        title="Copy Generation Settings"
-                      >
-                        {copiedShowcaseSettings ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
-                      </button>
                     </div>
                   </div>
-                ) : (
-                  <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2 text-xs">
+                )}
+
+                {/* Tab 2: Model Info */}
+                {showcaseTab === "model" && (
+                  <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2 text-xs">
                     <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
                       <span className="text-neutral-500 font-medium">Model Engine:</span>
                       <span className="font-mono font-bold text-neutral-900">
@@ -3090,6 +3178,38 @@ export default function StudioPage() {
                     <div className="flex items-center justify-between py-1">
                       <span className="text-neutral-500 font-medium">Digital Provenance:</span>
                       <span className="font-semibold text-purple-700">SynthID Watermark</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 3: Generation Details (New) */}
+                {showcaseTab === "details" && (
+                  <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2 text-xs">
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Inference Latency:</span>
+                      <span className="font-mono font-bold text-emerald-600">
+                        {selectedShowcaseItem.renderTime || "1.2s"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Credit Cost:</span>
+                      <span className="font-mono font-semibold text-neutral-900">
+                        {selectedShowcaseItem.cost} Credits
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Exact Dimensions:</span>
+                      <span className="font-mono text-neutral-800">
+                        {selectedShowcaseItem.dimensions || "1024×576"} ({selectedShowcaseItem.resolution})
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-neutral-200/50">
+                      <span className="text-neutral-500 font-medium">Seed Mode:</span>
+                      <span className="font-mono text-neutral-800">Deterministic ({selectedShowcaseItem.seed || 342781})</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-neutral-500 font-medium">Hardware Cluster:</span>
+                      <span className="font-semibold text-neutral-700">Google Cloud TPU v5e</span>
                     </div>
                   </div>
                 )}
